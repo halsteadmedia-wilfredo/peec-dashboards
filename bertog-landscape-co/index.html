@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
+
+  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #4a6cf7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;
+  }
+  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
+  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
+  .section-header .period {
+    margin-left: auto; font-size: 13px; color: #718096;
+    background: #f7fafc; padding: 5px 12px; border-radius: 6px;
+  }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card {
+    background: #fff; border-radius: 10px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    position: relative;
+  }
+  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
+  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
+  .kpi-card[data-tip] { cursor: help; }
+  .kpi-card[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400;
+    line-height: 1.5; padding: 10px 14px; border-radius: 8px;
+    width: max-content; max-width: 260px; text-transform: none; letter-spacing: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
+    z-index: 100;
+  }
+  .kpi-card[data-tip]::before {
+    content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: #1a202c;
+    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
+    z-index: 100;
+  }
+  .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
+  .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .card {
+    background: #fff; border-radius: 10px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+  }
+  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
+
+  .bar-row { margin-bottom: 13px; }
+  .bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 13px; }
+  .bar-label .name { font-weight: 500; }
+  .bar-label .meta { color: #718096; font-size: 12px; }
+  .bar-track { background: #edf2f7; border-radius: 4px; height: 10px; }
+  .bar-fill { height: 10px; border-radius: 4px; min-width: 2px; }
+  .bar-chatgpt-scraper          { background: #38a169; }
+  .bar-gpt-4o                   { background: #38a169; }
+  .bar-gpt-4o-search            { background: #38a169; }
+  .bar-gemini-scraper           { background: #4a6cf7; }
+  .bar-google-ai-overview-scraper { background: #ed8936; }
+  .bar-perplexity-scraper       { background: #9f7aea; }
+  .bar-claude-sonnet-4          { background: #f56565; }
+  .bar-claude-3-5-haiku         { background: #f56565; }
+  .bar-default                  { background: #718096; }
+
+  .model-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; margin-right: 3px; }
+  .model-chatgpt-scraper          { background: #f0fdf4; color: #166534; }
+  .model-gpt-4o                   { background: #f0fdf4; color: #166534; }
+  .model-gpt-4o-search            { background: #f0fdf4; color: #166534; }
+  .model-gemini-scraper           { background: #eff6ff; color: #1e40af; }
+  .model-google-ai-overview-scraper { background: #fff7ed; color: #9a3412; }
+  .model-perplexity-scraper       { background: #faf5ff; color: #6b21a8; }
+  .model-claude-sonnet-4          { background: #fef2f2; color: #991b1b; }
+  .model-claude-3-5-haiku         { background: #fef2f2; color: #991b1b; }
+  .model-default                  { background: #f7fafc; color: #4a5568; }
+
+   
+  .daily-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+  .daily-cell {
+    text-align: center; padding: 8px 4px; background: #f7fafc;
+    border-radius: 6px; font-size: 11px;
+  }
+  .daily-cell .day { color: #718096; }
+  .daily-cell .rate { font-weight: 700; font-size: 14px; margin-top: 2px; }
+  .daily-cell .rate.low  { color: #991b1b; }
+  .daily-cell .rate.mid  { color: #744210; }
+  .daily-cell .rate.high { color: #166534; }
+
+   
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cat-table th {
+    text-align: left; padding: 10px 12px; color: #718096; font-weight: 500;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0; background: #fafbfc;
+  }
+  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
+  .cat-table tr:hover { background: #f7fafc; }
+  .rate-high { color: #22543d; font-weight: 700; }
+  .rate-mid  { color: #744210; font-weight: 600; }
+  .rate-zero { color: #a0aec0; font-weight: 500; }
+  .position-badge {
+    display: inline-block; background: #f0f4ff; color: #4a6cf7;
+    padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;
+  }
+  .position-empty { color: #cbd5e0; }
+
+  .chart-container { position: relative; height: 220px; overflow: hidden; }
+  .chart-svg { width: 100%; height: 100%; }
+
+  .comp-list { list-style: none; }
+  .comp-list li {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid #f0f4f8; font-size: 13px;
+  }
+  .comp-list li:last-child { border: none; }
+  .comp-rank { width: 18px; color: #a0aec0; font-size: 11px; font-weight: 600; text-align: right; flex-shrink: 0; }
+  .comp-name { flex: 1; font-weight: 500; }
+  .comp-name.you { color: #38a169; }
+  .you-tag { background: #f0fdf4; color: #166534; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: 600; margin-left: 5px; }
+  .comp-bar-track { width: 70px; background: #edf2f7; border-radius: 3px; height: 6px; flex-shrink: 0; }
+  .comp-bar-fill { height: 6px; background: #cbd5e0; border-radius: 3px; }
+  .comp-bar-fill.you { background: #38a169; }
+  .comp-count { color: #718096; font-size: 12px; flex-shrink: 0; width: 56px; text-align: right; }
+
+  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
+  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
+</style>
+<script>window.__PEEC_DATA__ = {"clientName":"Bertog Landscape Co","summary":{"visibility":7.05,"position":1.5,"sentiment":75.1,"prompts":25,"mentionRate":7,"period":"2026-06-01 ~ 2026-06-15"},"brands":[{"rank":1,"brand":"Bertog Landscape","type":"You","visibility":"7.05%","position":1.5,"sentiment":75.1}],"daily":[{"date":"2026-06-01","mentionRate":"8%","mentions":6,"totalChecks":75,"avgVisibility":"8%","avgPosition":1.7},{"date":"2026-06-02","mentionRate":"8%","mentions":6,"totalChecks":74,"avgVisibility":"8.11%","avgPosition":1.8},{"date":"2026-06-03","mentionRate":"8%","mentions":6,"totalChecks":74,"avgVisibility":"8.11%","avgPosition":1.6},{"date":"2026-06-04","mentionRate":"7%","mentions":5,"totalChecks":75,"avgVisibility":"6.67%","avgPosition":1},{"date":"2026-06-05","mentionRate":"8%","mentions":6,"totalChecks":74,"avgVisibility":"8.11%","avgPosition":1.7},{"date":"2026-06-06","mentionRate":"7%","mentions":5,"totalChecks":75,"avgVisibility":"6.67%","avgPosition":1},{"date":"2026-06-07","mentionRate":"5%","mentions":4,"totalChecks":73,"avgVisibility":"5.48%","avgPosition":1.3},{"date":"2026-06-08","mentionRate":"7%","mentions":5,"totalChecks":74,"avgVisibility":"6.76%","avgPosition":1.4},{"date":"2026-06-09","mentionRate":"7%","mentions":5,"totalChecks":74,"avgVisibility":"6.76%","avgPosition":1.3},{"date":"2026-06-10","mentionRate":"7%","mentions":5,"totalChecks":75,"avgVisibility":"6.67%","avgPosition":1.4},{"date":"2026-06-11","mentionRate":"8%","mentions":6,"totalChecks":74,"avgVisibility":"8.11%","avgPosition":1.5},{"date":"2026-06-12","mentionRate":"7%","mentions":5,"totalChecks":53,"avgVisibility":"9.43%","avgPosition":2},{"date":"2026-06-13","mentionRate":"5%","mentions":4,"totalChecks":74,"avgVisibility":"5.41%","avgPosition":1.7},{"date":"2026-06-14","mentionRate":"5%","mentions":4,"totalChecks":74,"avgVisibility":"5.41%","avgPosition":1.5},{"date":"2026-06-15","mentionRate":"7%","mentions":5,"totalChecks":74,"avgVisibility":"6.76%","avgPosition":1.2}],"prompts":[{"prompt":"Who is the best landscape design company in Wheeling, IL?","visibility":"75%","position":1,"sentiment":74.8,"mentionRate":"75%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"What is the best landscape maintenance company in Wheeling, IL?","visibility":"54.55%","position":1.2,"sentiment":74.9,"mentionRate":"55%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"Who is the best irrigation company in Wheeling, IL?","visibility":"34.88%","position":1.3,"sentiment":73.5,"mentionRate":"35%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"Who is the best paver patio contractor in Wheeling, IL?","visibility":"6.82%","position":3,"sentiment":82.7,"mentionRate":"7%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who is the best full-service landscaping company in Glenview, IL?","visibility":"4.55%","position":1,"sentiment":83,"mentionRate":"5%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"What is the best landscape lighting designer in Lake Forest, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"What is the best property maintenance company in Northbrook, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"ChatGPT, Google AI Overview, Gemini"},{"prompt":"What is the best hardscape company in Northbrook, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"ChatGPT, Google AI Overview, Gemini"},{"prompt":"What is the best outdoor kitchen builder in Lake Forest, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who is the best irrigation system installer in Arlington Heights, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"Who is the best outdoor lighting company in Winnetka, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best year-round lawn care company in Palatine, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who is the best irrigation and lighting company in Glenview, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who is the best garden maintenance company in Deerfield, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"Who is the best snow removal company in Wheeling, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"Who are the top landscape contractors near Arlington Heights, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"Who is the best seasonal cleanup company in Highland Park, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best landscape lighting company in Northbrook, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who is the best lawn maintenance company in Glenview, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"What is the best landscape design and build company in Northbrook, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"Who is the best fire pit installer in Winnetka, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"Who is the best retaining wall builder in Arlington Heights, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"Who is the best outdoor living contractor in Glenview, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"Who is the best landscape design company in Winnetka, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"What is the best landscape design company in Highland Park, IL?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Gemini, ChatGPT, Google AI Overview"}],"models":[{"id":"chatgpt-scraper","name":"ChatGPT","mentionRate":10,"visibility":10.13,"position":1.4,"mentions":38,"totalChecks":375},{"id":"google-ai-overview-scraper","name":"Google AI Overview","mentionRate":8,"visibility":7.58,"position":1.5,"mentions":26,"totalChecks":343},{"id":"gemini-scraper","name":"Gemini","mentionRate":3,"visibility":3.48,"position":1.8,"mentions":13,"totalChecks":374}]};</script>
+</head>
+<body>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <div>Loading AI Visibility data...</div>
+</div>
+
+<div id="dashboard" class="dashboard" style="display:none;">
+  <div class="section-header">
+    <h2>Halstead AI Visibility Tracker</h2>
+    <span class="client-name" id="client-name">—</span>
+    <span class="period" id="period-label"></span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" data-tip="Percentage of AI prompts where the brand was mentioned, averaged across all checks in the period.">
+      <div class="label">Overall Visibility</div>
+      <div class="value" id="kpi-visibility">--</div>
+      <div class="sub">% of prompts mentioning the brand across all AI platforms</div>
+    </div>
+    <div class="kpi-card" data-tip="Average ranking position when the brand IS mentioned. Lower is better — #1 means listed first.">
+      <div class="label">Avg. Position</div>
+      <div class="value" id="kpi-position">--</div>
+      <div class="sub">Average rank when mentioned (lower = better)</div>
+    </div>
+    <div class="kpi-card" data-tip="Aggregate sentiment score (0–100) across all mentions. Higher means AI tools describe the brand more positively.">
+      <div class="label">Sentiment Score</div>
+      <div class="value" id="kpi-sentiment">--</div>
+      <div class="sub">Tone of mentions across all AI platforms</div>
+    </div>
+    <div class="kpi-card" data-tip="The AI platform that mentions the brand most frequently in the current period.">
+      <div class="label">Strongest Platform</div>
+      <div class="value" id="kpi-bestmodel" style="font-size:18px;padding-top:4px;">--</div>
+      <div class="sub">AI platform with the most brand mentions</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>Mention Rate by AI Platform</h3>
+      <div id="model-bars"></div>
+    </div>
+    <div class="card">
+      <h3>Daily Mention Rate</h3>
+      <div class="daily-grid" id="daily-grid"></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="card">
+      <h3>Visibility Trend</h3>
+      <div class="chart-container" id="trend-container"></div>
+    </div>
+    <div class="card">
+      <h3>Top Brands Mentioned</h3>
+      <ul class="comp-list" id="comp-list"></ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 24px;">
+    <h3>Prompt Performance</h3>
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th>Prompt</th>
+          <th>Visibility</th>
+          <th>Position</th>
+          <th>Mention Rate</th>
+          <th>Platforms Mentioning</th>
+        </tr>
+      </thead>
+      <tbody id="prompt-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="powered-by">Data auto-refreshed weekly &nbsp;&middot;&nbsp; Halstead AI Visibility Tracker</div>
+</div>
+
+<script>
+  if (window.__PEEC_DATA__) {
+    renderDashboard(window.__PEEC_DATA__);
+  } else {
+    google.script.run
+      .withSuccessHandler(renderDashboard)
+      .withFailureHandler(showError)
+      .getDashboardData();
+  }
+
+  function showError(err) {
+    document.getElementById('loading').innerHTML =
+      '<div class="error-msg">Failed to load data: ' + (err && err.message ? err.message : err) + '</div>';
+  }
+
+  function renderDashboard(data) {
+    if (!data || data.error) { showError({ message: (data && data.error) || 'No data' }); return; }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    document.getElementById('client-name').textContent = '— ' + (data.clientName || '');
+    if (data.summary) document.getElementById('period-label').textContent = 'Last run: ' + (data.summary.period || '');
+
+    renderKPIs(data);
+    renderModelBars(data.models || []);
+    renderDailyGrid(data.daily || []);
+    renderPrompts(data.prompts || []);
+    renderTrend(data.daily || []);
+    renderTopBrands(data.brands || [], data.clientName || '');
+  }
+
+  function modelClass(id) {
+    var safe = String(id || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return safe || 'default';
+  }
+
+  
+  function renderKPIs(data) {
+    var s = data.summary || {};
+    var models = data.models || [];
+
+    var vis = s.visibility;
+    document.getElementById('kpi-visibility').textContent = (vis === 0 || vis > 0) ? vis + '%' : '--';
+
+    var pos = s.position;
+    document.getElementById('kpi-position').textContent = pos > 0 ? '# ' + pos : '—';
+
+    var sent = s.sentiment;
+    document.getElementById('kpi-sentiment').innerHTML = sent > 0
+      ? sent + '<span style="font-size:14px;color:#a0aec0;font-weight:500;"> /100</span>'
+      : '—';
+
+    
+    var top = models[0];
+    if (top && top.mentionRate > 0) {
+      document.getElementById('kpi-bestmodel').textContent = top.name + ' (' + top.mentionRate + '%)';
+    } else {
+      document.getElementById('kpi-bestmodel').textContent = '—';
+    }
+  }
+
+  
+  function renderModelBars(models) {
+    var container = document.getElementById('model-bars');
+    if (!models.length) {
+      container.innerHTML = '<div class="empty-msg">No platform data yet.</div>';
+      return;
+    }
+    var maxRate = Math.max.apply(null, models.map(function(m) { return m.mentionRate; })) || 1;
+    models.forEach(function(m) {
+      var cls = modelClass(m.id);
+      var width = m.mentionRate > 0 ? Math.max(Math.round(m.mentionRate / maxRate * 100), 2) : 0;
+      var posText = m.position > 0 ? 'avg pos #' + m.position : 'no mentions';
+      var div = document.createElement('div');
+      div.className = 'bar-row';
+      div.innerHTML =
+        '<div class="bar-label">' +
+          '<span class="name"><span class="model-badge model-' + cls + '">' + m.name + '</span></span>' +
+          '<span class="meta">' + m.mentionRate + '% &nbsp;&middot;&nbsp; ' + posText + '</span>' +
+        '</div>' +
+        '<div class="bar-track"><div class="bar-fill bar-' + cls + '" style="width:' + width + '%"></div></div>';
+      container.appendChild(div);
+    });
+  }
+
+  
+  function renderDailyGrid(daily) {
+    var container = document.getElementById('daily-grid');
+    if (!daily.length) {
+      container.innerHTML = '<div class="empty-msg" style="grid-column:1/-1;">No daily data yet.</div>';
+      return;
+    }
+    daily.forEach(function(d) {
+      var rate = parseFloat(String(d.mentionRate).replace('%', ''));
+      var cls = 'low';
+      if (rate >= 30) cls = 'high';
+      else if (rate >= 10) cls = 'mid';
+      var dayLabel = formatDayLabel(d.date);
+      var cell = document.createElement('div');
+      cell.className = 'daily-cell';
+      cell.innerHTML = '<div class="day">' + dayLabel + '</div><div class="rate ' + cls + '">' + d.mentionRate + '</div>';
+      container.appendChild(cell);
+    });
+  }
+
+  
+  function renderPrompts(prompts) {
+    var tbody = document.getElementById('prompt-tbody');
+    if (!prompts.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">No prompt data yet.</td></tr>';
+      return;
+    }
+    prompts.forEach(function(p) {
+      var visNum = parseFloat(String(p.visibility).replace('%', ''));
+      var visCls = visNum > 30 ? 'rate-high' : (visNum > 5 ? 'rate-mid' : 'rate-zero');
+      var posCell = p.position > 0
+        ? '<span class="position-badge"># ' + p.position + '</span>'
+        : '<span class="position-empty">—</span>';
+      var modelHtml = '';
+      if (p.models) {
+        p.models.split(',').forEach(function(m) {
+          var name = m.trim();
+          if (!name) return;
+          var cls = modelClass(name);
+          modelHtml += '<span class="model-badge model-' + cls + '">' + name + '</span> ';
+        });
+      }
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + p.prompt + '</td>' +
+        '<td><span class="' + visCls + '">' + p.visibility + '</span></td>' +
+        '<td>' + posCell + '</td>' +
+        '<td>' + p.mentionRate + '</td>' +
+        '<td>' + modelHtml + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  
+  function renderTrend(daily) {
+    var container = document.getElementById('trend-container');
+    if (!daily.length) {
+      container.innerHTML = '<div class="empty-msg" style="padding-top:80px;">Trend will appear after multiple data pulls.</div>';
+      return;
+    }
+    
+    var values = daily.map(function(d) {
+      return parseFloat(String(d.avgVisibility).replace('%', '')) || 0;
+    });
+    var maxVal = Math.max.apply(null, values);
+    var yMax = Math.max(maxVal * 1.2, 1); 
+
+    var W = 800, H = 220, PAD_L = 40, PAD_R = 20, PAD_T = 20, PAD_B = 30;
+    var innerW = W - PAD_L - PAD_R, innerH = H - PAD_T - PAD_B;
+    var n = daily.length;
+    var stepX = n > 1 ? innerW / (n - 1) : innerW / 2;
+
+    var points = daily.map(function(d, i) {
+      var v = parseFloat(String(d.avgVisibility).replace('%', '')) || 0;
+      var x = PAD_L + i * stepX;
+      var y = PAD_T + innerH - (v / yMax) * innerH;
+      return { x: x, y: y, v: v, date: d.date };
+    });
+    var polyline = points.map(function(p) { return p.x.toFixed(0) + ',' + p.y.toFixed(0); }).join(' ');
+
+    
+    var gridYs = [PAD_T, PAD_T + innerH / 3, PAD_T + 2 * innerH / 3, PAD_T + innerH];
+    var gridLabels = [yMax.toFixed(1) + '%', (yMax * 2 / 3).toFixed(1) + '%', (yMax / 3).toFixed(1) + '%', '0%'];
+
+    
+    var labelEvery = Math.max(1, Math.ceil(n / 7));
+    var xLabels = '';
+    points.forEach(function(p, i) {
+      if (i % labelEvery === 0 || i === n - 1) {
+        xLabels += '<text x="' + p.x.toFixed(0) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="#a0aec0">' + formatDayLabel(p.date) + '</text>';
+      }
+    });
+
+    var gridLines = '';
+    gridYs.forEach(function(y, i) {
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 3 ? '#cbd5e0' : '#edf2f7') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + gridLabels[i] + '</text>';
+    });
+
+    var dots = points.map(function(p) {
+      return '<circle cx="' + p.x.toFixed(0) + '" cy="' + p.y.toFixed(0) + '" r="3" fill="#38a169"><title>' + p.date + ': ' + p.v + '%</title></circle>';
+    }).join('');
+
+    container.innerHTML =
+      '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+        gridLines +
+        '<polyline fill="none" stroke="#38a169" stroke-width="2.5" points="' + polyline + '" />' +
+        dots +
+        xLabels +
+      '</svg>';
+  }
+
+  
+  function renderTopBrands(brands, clientName) {
+    var list = document.getElementById('comp-list');
+    if (!brands.length) {
+      list.innerHTML = '<li class="empty-msg" style="display:block;text-align:center;">No brands data yet.</li>';
+      return;
+    }
+    var maxVis = Math.max.apply(null, brands.map(function(b) {
+      return parseFloat(String(b.visibility).replace('%', '')) || 0;
+    })) || 1;
+    brands.slice(0, 8).forEach(function(b) {
+      var visNum = parseFloat(String(b.visibility).replace('%', '')) || 0;
+      var width = Math.max(Math.round(visNum / maxVis * 100), 2);
+      var isYou = b.type === 'You' || b.brand === clientName;
+      var nameHtml = b.brand + (isYou ? '<span class="you-tag">YOU</span>' : '');
+      var nameCls = isYou ? 'comp-name you' : 'comp-name';
+      var fillCls = isYou ? 'comp-bar-fill you' : 'comp-bar-fill';
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<span class="comp-rank">' + b.rank + '</span>' +
+        '<span class="' + nameCls + '">' + nameHtml + '</span>' +
+        '<span class="comp-bar-track"><span class="' + fillCls + '" style="width:' + width + '%;"></span></span>' +
+        '<span class="comp-count">' + b.visibility + '</span>';
+      list.appendChild(li);
+    });
+  }
+
+  
+  function formatDayLabel(dateStr) {
+    if (!dateStr) return '';
+    var s = String(dateStr);
+    
+    var m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) {
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var monIdx = parseInt(m[2], 10) - 1;
+      var day = parseInt(m[3], 10);
+      return months[monIdx] + ' ' + day;
+    }
+    return s;
+  }
+</script>
+
+</body>
+</html>
