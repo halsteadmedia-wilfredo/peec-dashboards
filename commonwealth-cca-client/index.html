@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
+
+  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #38a169; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; }
+  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
+  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
+  .section-header .period { margin-left: auto; font-size: 13px; color: #718096; background: #f7fafc; padding: 5px 12px; border-radius: 6px; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; position: relative; }
+  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
+  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
+
+  .kpi-card[data-tip] { cursor: help; }
+  .kpi-card[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400; line-height: 1.5; padding: 10px 14px; border-radius: 8px; width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.15); pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
+  .kpi-card[data-tip]::before { content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1a202c; pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
+  .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
+  .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
+
+  .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; }
+  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
+
+  .chart-container { position: relative; height: 320px; overflow: hidden; }
+  .chart-svg { width: 100%; height: 100%; }
+
+  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #4a5568; align-items: center; justify-content: flex-end; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+  .swatch-digital { background: #38a169; }
+  .swatch-offline { background: #4a6cf7; }
+  .swatch-unknown { background: #a0aec0; }
+
+  .goal-progress { background: #fff; border-radius: 10px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; }
+  .goal-progress .goal-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .goal-progress .goal-title { font-size: 14px; font-weight: 600; color: #4a5568; }
+  .goal-progress .goal-stats { margin-left: auto; font-size: 12px; color: #718096; display: flex; gap: 20px; flex-wrap: wrap; }
+  .goal-progress .goal-stat strong { color: #2d3748; font-weight: 700; }
+  .goal-bar-track { position: relative; height: 26px; background: #edf2f7; border-radius: 6px; overflow: visible; }
+  .goal-bar-fill-won { position: absolute; top: 0; bottom: 0; left: 0; background: #38a169; border-radius: 6px 0 0 6px; transition: width 0.4s ease; }
+  .goal-bar-fill-pending { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 6px, #d69e2e 6px, #d69e2e 12px); transition: left 0.4s ease, width 0.4s ease; }
+  .goal-bar-fill-pending.at-end { border-radius: 0 6px 6px 0; }
+  .goal-marker { position: absolute; top: -6px; bottom: -6px; width: 2px; background: #1a202c; z-index: 3; }
+  .goal-marker::after { content: 'GOAL'; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: #1a202c; letter-spacing: 0.5px; white-space: nowrap; }
+  .goal-legend { display: flex; gap: 20px; margin-top: 14px; font-size: 11px; color: #4a5568; }
+  .goal-legend-item { display: flex; align-items: center; gap: 6px; }
+  .goal-legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  .goal-legend-swatch.won { background: #38a169; }
+  .goal-legend-swatch.pending { background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 4px, #d69e2e 4px, #d69e2e 8px); }
+  .goal-empty { padding: 14px 18px; background: #f7fafc; border-radius: 6px; color: #718096; font-size: 12px; text-align: center; border: 1px dashed #cbd5e0; }
+
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cat-table th { text-align: right; padding: 10px 12px; color: #718096; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; background: #fafbfc; }
+  .cat-table th:first-child { text-align: left; }
+  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; text-align: right; }
+  .cat-table td:first-child { text-align: left; font-weight: 500; }
+  .cat-table tr:hover { background: #f7fafc; }
+  .cat-table .total-row { background: #f7fafc; font-weight: 600; }
+  .cat-table .total-row td { border-top: 2px solid #e2e8f0; border-bottom: none; }
+
+  .caption { font-size: 12px; color: #718096; line-height: 1.6; padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 24px; border-left: 3px solid #38a169; }
+  .caption strong { color: #2d3748; }
+
+  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
+  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
+</style>
+<script>window.__DASH_DATA__ = {"clientName":"Commonwealth Curb Appeal (Client View)","lastUpdated":"2026-07-15","notes":[{"label":"","text":"**Approved** = client accepted the estimate → won revenue. **Sent** = estimate delivered, awaiting client decision (in-pipeline). **Draft** = estimate created but not yet sent. **Denied** = client declined. **Void** = cancelled.","accent":""},{"label":"Data note:","text":"Attribution comes from CallRail form captures (source populated by our Zapier integration going live). Historical leads without source show as **Unknown**. The Unknown % on the dashboard reflects data completeness — decreases as new leads flow through the tagged pipeline.","accent":"warn"},{"label":"Refresh cadence","text":"Dashboard data refreshes daily at 6 AM ET from JobNimbus. Manual refresh available on request.","accent":"muted"}],"summary":{"wonRevenueYtd":1749651,"pendingRevenueYtd":3345238,"revenueGoal":2500000,"estimatesYtd":406,"leadsYtd":285,"digitalSharePct":25.3},"estMonthly12":[{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-08"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-09"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-10"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-11"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-12"},{"digital_estimates":10,"digital_won":0,"digital_pending":18647.1,"offline_estimates":13,"offline_won":4878.72,"offline_pending":294530.64,"unknown_estimates":83,"unknown_won":23138.91,"unknown_pending":174795.97,"month":"2026-01"},{"digital_estimates":18,"digital_won":11753.92,"digital_pending":156911.35,"offline_estimates":13,"offline_won":13584.27,"offline_pending":161260.69999999998,"unknown_estimates":15,"unknown_won":3526.45,"unknown_pending":45871.12,"month":"2026-02"},{"digital_estimates":36,"digital_won":146896.5,"digital_pending":256717.15,"offline_estimates":15,"offline_won":95406.51,"offline_pending":21461.38,"unknown_estimates":16,"unknown_won":5000,"unknown_pending":23053.489999999998,"month":"2026-03"},{"digital_estimates":29,"digital_won":11276.5,"digital_pending":603397.98,"offline_estimates":32,"offline_won":26450.23,"offline_pending":355430.68,"unknown_estimates":9,"unknown_won":300912.05999999994,"unknown_pending":104610.66,"month":"2026-04"},{"digital_estimates":18,"digital_won":63126.98,"digital_pending":175693.55,"offline_estimates":21,"offline_won":424697.49,"offline_pending":64020.259999999995,"unknown_estimates":5,"unknown_won":22500,"unknown_pending":35784.49,"month":"2026-05"},{"digital_estimates":13,"digital_won":113298.06,"digital_pending":291234.36,"offline_estimates":25,"offline_won":475435.99999999994,"offline_pending":325860.49,"unknown_estimates":8,"unknown_won":2474.4,"unknown_pending":100886.79,"month":"2026-06"},{"digital_estimates":19,"digital_won":5293.96,"digital_pending":92594.40000000001,"offline_estimates":6,"offline_won":0,"offline_pending":42475.92,"unknown_estimates":2,"unknown_won":0,"unknown_pending":0,"month":"2026-07"}],"estTable":[{"digital_estimates":19,"digital_won":5293.96,"digital_pending":92594.40000000001,"offline_estimates":6,"offline_won":0,"offline_pending":42475.92,"unknown_estimates":2,"unknown_won":0,"unknown_pending":0,"month":"2026-07"},{"digital_estimates":13,"digital_won":113298.06,"digital_pending":291234.36,"offline_estimates":25,"offline_won":475435.99999999994,"offline_pending":325860.49,"unknown_estimates":8,"unknown_won":2474.4,"unknown_pending":100886.79,"month":"2026-06"},{"digital_estimates":18,"digital_won":63126.98,"digital_pending":175693.55,"offline_estimates":21,"offline_won":424697.49,"offline_pending":64020.259999999995,"unknown_estimates":5,"unknown_won":22500,"unknown_pending":35784.49,"month":"2026-05"},{"digital_estimates":29,"digital_won":11276.5,"digital_pending":603397.98,"offline_estimates":32,"offline_won":26450.23,"offline_pending":355430.68,"unknown_estimates":9,"unknown_won":300912.05999999994,"unknown_pending":104610.66,"month":"2026-04"},{"digital_estimates":36,"digital_won":146896.5,"digital_pending":256717.15,"offline_estimates":15,"offline_won":95406.51,"offline_pending":21461.38,"unknown_estimates":16,"unknown_won":5000,"unknown_pending":23053.489999999998,"month":"2026-03"},{"digital_estimates":18,"digital_won":11753.92,"digital_pending":156911.35,"offline_estimates":13,"offline_won":13584.27,"offline_pending":161260.69999999998,"unknown_estimates":15,"unknown_won":3526.45,"unknown_pending":45871.12,"month":"2026-02"},{"digital_estimates":10,"digital_won":0,"digital_pending":18647.1,"offline_estimates":13,"offline_won":4878.72,"offline_pending":294530.64,"unknown_estimates":83,"unknown_won":23138.91,"unknown_pending":174795.97,"month":"2026-01"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-12"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-11"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-10"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-09"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-08"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-07"}],"leadsTable":[{"digital_leads":8,"offline_leads":2,"unknown_leads":8,"month":"2026-07"},{"digital_leads":18,"offline_leads":8,"unknown_leads":20,"month":"2026-06"},{"digital_leads":19,"offline_leads":7,"unknown_leads":20,"month":"2026-05"},{"digital_leads":21,"offline_leads":16,"unknown_leads":14,"month":"2026-04"},{"digital_leads":32,"offline_leads":15,"unknown_leads":16,"month":"2026-03"},{"digital_leads":12,"offline_leads":4,"unknown_leads":15,"month":"2026-02"},{"digital_leads":8,"offline_leads":6,"unknown_leads":16,"month":"2026-01"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-12"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-11"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-10"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-09"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-08"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-07"}]};</script>
+</head>
+<body>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <div>Loading marketing performance data...</div>
+</div>
+
+<div id="dashboard" class="dashboard" style="display:none;">
+  <div class="section-header">
+    <h2>Marketing Performance Tracker</h2>
+    <span class="client-name" id="client-name">—</span>
+    <span class="period" id="period-label"></span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" data-tip="Total $ value of estimates marked won year-to-date, across all sources.">
+      <div class="label">Won Revenue YTD</div>
+      <div class="value" id="kpi-won">--</div>
+      <div class="sub">Sold estimate value this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Total $ value of estimates still pending / sent, awaiting client decision.">
+      <div class="label">Pending Revenue YTD</div>
+      <div class="value" id="kpi-pending">--</div>
+      <div class="sub">Open estimate value this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of estimates created year-to-date, all statuses.">
+      <div class="label">Estimates YTD</div>
+      <div class="value" id="kpi-estimates">--</div>
+      <div class="sub">Estimates created this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of new leads/contacts created year-to-date.">
+      <div class="label">Leads YTD</div>
+      <div class="value" id="kpi-leads">--</div>
+      <div class="sub">New contacts this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Share of attributed won revenue from digital sources. Measured against digital&#43;offline only; Unknown-source revenue is excluded.">
+      <div class="label">Digital Share</div>
+      <div class="value" id="kpi-digital">--</div>
+      <div class="sub">Digital % of attributed won $</div>
+    </div>
+  </div>
+
+  <div id="goal-container"></div>
+  <div id="notes-container"></div>
+
+  <div class="card">
+    <h3>Won Revenue by Marketing Bucket — Last 12 Months</h3>
+    <div class="chart-container" id="chart-container"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch swatch-digital"></span> Digital</div>
+      <div class="legend-item"><span class="legend-swatch swatch-offline"></span> Offline</div>
+      <div class="legend-item"><span class="legend-swatch swatch-unknown"></span> Unknown</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Monthly Estimates Breakdown</h3>
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th>Month</th><th>Digital Won</th><th>Offline Won</th><th>Unknown Won</th>
+          <th>Pending $</th><th>Estimates</th><th>Total Won</th>
+        </tr>
+      </thead>
+      <tbody id="est-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Leads by Source — Monthly</h3>
+    <table class="cat-table">
+      <thead>
+        <tr><th>Month</th><th>Digital</th><th>Offline</th><th>Unknown</th><th>Total Leads</th></tr>
+      </thead>
+      <tbody id="leads-body"></tbody>
+    </table>
+  </div>
+
+  <div class="powered-by">Halstead Marketing Performance Tracker</div>
+</div>
+
+<script>
+  var PENDING_WEIGHT = 0.75;
+
+  
+  
+  
+  if (window.__DASH_DATA__) {
+    renderDashboard(window.__DASH_DATA__);
+  } else {
+    document.getElementById('loading').innerHTML =
+      '<div class="error-msg">Dashboard data missing — publisher inject failed.</div>';
+  }
+
+  function renderDashboard(data) {
+    if (!data || data.error) {
+      document.getElementById('loading').innerHTML =
+        '<div class="error-msg">Failed to load: ' + ((data && data.error) || 'no data') + '</div>';
+      return;
+    }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    document.getElementById('client-name').textContent = '— ' + (data.clientName || '');
+    document.getElementById('period-label').textContent = 'Last updated: ' + (data.lastUpdated || '');
+
+    renderKPIs(data.summary || {});
+    renderGoalBar(data.summary || {});
+    renderNotes(data.notes || []);
+    renderChart(data.estMonthly12 || []);
+    renderEstTable(data.estTable || []);
+    renderLeadsTable(data.leadsTable || []);
+  }
+
+  function renderNotes(notes) {
+    var c = document.getElementById('notes-container');
+    if (!notes || !notes.length) { c.innerHTML = ''; return; }
+    c.innerHTML = notes.map(function (n) {
+      var accent = n.accent === 'warn' ? 'border-left-color:#ed8936;background:#fffaf0;'
+                 : n.accent === 'muted' ? 'border-left-color:#a0aec0;' : '';
+      var label = n.label ? '<strong>' + escHtml(n.label) + '</strong> ' : '';
+      return '<div class="caption" style="' + accent + '">' + label + mdBold(escHtml(n.text)) + '</div>';
+    }).join('');
+  }
+  function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function mdBold(s) { return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); }
+
+  function fmtCurrency(n, compact) {
+    if (n == null) return '$0';
+    if (compact && n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+    if (compact && n >= 1000) return '$' + (n / 1000).toFixed(0) + 'k';
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function fmtInt(n) { return (n == null ? 0 : Math.round(n)).toLocaleString(); }
+  function fmtPct(n) { return (n == null ? 0 : n) + '%'; }
+  function fmtMonthShort(m) {
+    if (!m) return '';
+    var parts = String(m).split('-');
+    if (parts.length < 2) return m;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[parseInt(parts[1], 10) - 1] + " '" + parts[0].slice(2);
+  }
+
+  function renderKPIs(s) {
+    document.getElementById('kpi-won').textContent       = fmtCurrency(s.wonRevenueYtd, true);
+    document.getElementById('kpi-pending').textContent   = fmtCurrency(s.pendingRevenueYtd, true);
+    document.getElementById('kpi-estimates').textContent = fmtInt(s.estimatesYtd);
+    document.getElementById('kpi-leads').textContent     = fmtInt(s.leadsYtd);
+    document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
+  }
+
+  function renderGoalBar(s) {
+    var container = document.getElementById('goal-container');
+    var goal = s.revenueGoal;
+    var won = s.wonRevenueYtd || 0;
+    var pending = (s.pendingRevenueYtd || 0) * PENDING_WEIGHT;
+    var year = new Date().getFullYear();
+
+    if (!goal || goal <= 0) {
+      container.innerHTML =
+        '<div class="goal-progress">' +
+          '<div class="goal-header"><div class="goal-title">Revenue Goal Progress — ' + year + '</div></div>' +
+          '<div class="goal-empty">Revenue goal not yet set for ' + year + '.</div>' +
+        '</div>';
+      return;
+    }
+
+    var denom = Math.max(goal, won + pending);
+    var wonPct = denom > 0 ? (won / denom) * 100 : 0;
+    var pendingPct = denom > 0 ? (pending / denom) * 100 : 0;
+    var goalPct = denom > 0 ? (goal / denom) * 100 : 100;
+    var wonOfGoal = (won / goal) * 100;
+    var wpOfGoal = ((won + pending) / goal) * 100;
+    var pendingAtEnd = (wonPct + pendingPct) >= 99.5 ? ' at-end' : '';
+
+    container.innerHTML =
+      '<div class="goal-progress">' +
+        '<div class="goal-header">' +
+          '<div class="goal-title">Revenue Goal Progress — ' + year + '</div>' +
+          '<div class="goal-stats">' +
+            '<div class="goal-stat"><strong>' + wonOfGoal.toFixed(1) + '%</strong> of goal closed</div>' +
+            '<div class="goal-stat"><strong>' + wpOfGoal.toFixed(1) + '%</strong> incl. weighted pipeline</div>' +
+            '<div class="goal-stat">Goal <strong>' + fmtCurrency(goal, true) + '</strong></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="goal-bar-track">' +
+          '<div class="goal-bar-fill-won" style="width:' + wonPct + '%"></div>' +
+          '<div class="goal-bar-fill-pending' + pendingAtEnd + '" style="left:' + wonPct + '%;width:' + pendingPct + '%"></div>' +
+          '<div class="goal-marker" style="left:' + goalPct + '%"></div>' +
+        '</div>' +
+        '<div class="goal-legend">' +
+          '<div class="goal-legend-item"><span class="goal-legend-swatch won"></span> Won ' + fmtCurrency(won, true) + '</div>' +
+          '<div class="goal-legend-item"><span class="goal-legend-swatch pending"></span> Pending (75% weighted) ' + fmtCurrency(pending, true) + '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderChart(monthly) {
+    var container = document.getElementById('chart-container');
+    if (!monthly.length) { container.innerHTML = '<div class="empty-msg">No monthly data yet.</div>'; return; }
+
+    var W = 1100, H = 320, PAD_L = 60, PAD_R = 24, PAD_T = 16, PAD_B = 50;
+    var innerW = W - PAD_L - PAD_R, innerH = H - PAD_T - PAD_B;
+    var n = monthly.length;
+    var groupW = innerW / n;
+    var barW = Math.max(5, Math.min(20, (groupW - 10) / 3));
+
+    var maxVal = 0;
+    monthly.forEach(function(m) {
+      maxVal = Math.max(maxVal, m.digital_won || 0, m.offline_won || 0, m.unknown_won || 0);
+    });
+    var yMax = Math.max(maxVal * 1.15, 1000);
+    var magnitude = Math.pow(10, Math.floor(Math.log(yMax) / Math.LN10));
+    yMax = Math.ceil(yMax / magnitude) * magnitude;
+
+    var gridLines = '';
+    for (var i = 0; i <= 4; i++) {
+      var v = yMax * (i / 4);
+      var y = PAD_T + innerH - (v / yMax) * innerH;
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 0 ? '#cbd5e0' : '#edf2f7') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + fmtCurrency(v, true) + '</text>';
+    }
+
+    var bars = '', xLabels = '';
+    var series = [['digital_won', '#38a169'], ['offline_won', '#4a6cf7'], ['unknown_won', '#a0aec0']];
+    monthly.forEach(function(m, i) {
+      var groupX = PAD_L + i * groupW + groupW / 2;
+      var startX = groupX - (barW * 3 + 4) / 2;
+      series.forEach(function(s, k) {
+        var val = m[s[0]] || 0;
+        var h = (val / yMax) * innerH;
+        var x = startX + k * (barW + 2);
+        var y = PAD_T + innerH - h;
+        if (val > 0) {
+          bars += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + h + '" fill="' + s[1] + '" rx="2"><title>' + m.month + ' ' + s[0].replace('_won','') + ': ' + fmtCurrency(val, false) + '</title></rect>';
+        }
+      });
+      xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="#4a5568">' + fmtMonthShort(m.month) + '</text>';
+    });
+
+    container.innerHTML = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' + gridLines + bars + xLabels + '</svg>';
+  }
+
+  function renderEstTable(rows) {
+    var tbody = document.getElementById('est-body');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-msg">No estimate data yet.</td></tr>'; return; }
+    var tDW = 0, tOW = 0, tUW = 0, tP = 0, tE = 0;
+    rows.forEach(function(r) {
+      var dW = r.digital_won || 0, oW = r.offline_won || 0, uW = r.unknown_won || 0;
+      var pend = (r.digital_pending || 0) + (r.offline_pending || 0) + (r.unknown_pending || 0);
+      var est = (r.digital_estimates || 0) + (r.offline_estimates || 0) + (r.unknown_estimates || 0);
+      var totWon = dW + oW + uW;
+      tDW += dW; tOW += oW; tUW += uW; tP += pend; tE += est;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + fmtMonthShort(r.month) + '</td>' +
+        '<td>' + fmtCurrency(dW, false) + '</td>' +
+        '<td>' + fmtCurrency(oW, false) + '</td>' +
+        '<td>' + fmtCurrency(uW, false) + '</td>' +
+        '<td>' + fmtCurrency(pend, false) + '</td>' +
+        '<td>' + fmtInt(est) + '</td>' +
+        '<td>' + fmtCurrency(totWon, false) + '</td>';
+      tbody.appendChild(tr);
+    });
+    var tr = document.createElement('tr');
+    tr.className = 'total-row';
+    tr.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtCurrency(tDW, false) + '</td>' +
+      '<td>' + fmtCurrency(tOW, false) + '</td>' +
+      '<td>' + fmtCurrency(tUW, false) + '</td>' +
+      '<td>' + fmtCurrency(tP, false) + '</td>' +
+      '<td>' + fmtInt(tE) + '</td>' +
+      '<td>' + fmtCurrency(tDW + tOW + tUW, false) + '</td>';
+    tbody.appendChild(tr);
+  }
+
+  function renderLeadsTable(rows) {
+    var tbody = document.getElementById('leads-body');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">No leads data yet.</td></tr>'; return; }
+    var tD = 0, tO = 0, tU = 0;
+    rows.forEach(function(r) {
+      var d = r.digital_leads || 0, o = r.offline_leads || 0, u = r.unknown_leads || 0;
+      tD += d; tO += o; tU += u;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + fmtMonthShort(r.month) + '</td>' +
+        '<td>' + fmtInt(d) + '</td>' +
+        '<td>' + fmtInt(o) + '</td>' +
+        '<td>' + fmtInt(u) + '</td>' +
+        '<td>' + fmtInt(d + o + u) + '</td>';
+      tbody.appendChild(tr);
+    });
+    var tr = document.createElement('tr');
+    tr.className = 'total-row';
+    tr.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtInt(tD) + '</td>' +
+      '<td>' + fmtInt(tO) + '</td>' +
+      '<td>' + fmtInt(tU) + '</td>' +
+      '<td>' + fmtInt(tD + tO + tU) + '</td>';
+    tbody.appendChild(tr);
+  }
+</script>
+
+</body>
+</html>
