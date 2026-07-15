@@ -1,21 +1,389 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-<meta name="chromevox" content-script="no">
-<title>Red Rock — Marketing Performance</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" nonce="psk5rBoSrvWQRatc97c6bw"><link rel="stylesheet" href="/static/macros/client/css/2208734863-mae_html_css_ltr.css">
-<script type="text/javascript" src="/static/macros/client/js/169603682-warden_bin_i18n_warden.js"></script>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
+
+  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #38a169; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; }
+  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
+  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
+  .section-header .period { margin-left: auto; font-size: 13px; color: #718096; background: #f7fafc; padding: 5px 12px; border-radius: 6px; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; position: relative; }
+  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
+  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
+
+  .kpi-card[data-tip] { cursor: help; }
+  .kpi-card[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400; line-height: 1.5; padding: 10px 14px; border-radius: 8px; width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.15); pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
+  .kpi-card[data-tip]::before { content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1a202c; pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
+  .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
+  .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
+
+  .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; }
+  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
+
+  .chart-container { position: relative; height: 320px; overflow: hidden; }
+  .chart-svg { width: 100%; height: 100%; }
+
+  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #4a5568; align-items: center; justify-content: flex-end; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+  .swatch-digital { background: #38a169; }
+  .swatch-offline { background: #4a6cf7; }
+  .swatch-unknown { background: #a0aec0; }
+
+  .goal-progress { background: #fff; border-radius: 10px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; }
+  .goal-progress .goal-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .goal-progress .goal-title { font-size: 14px; font-weight: 600; color: #4a5568; }
+  .goal-progress .goal-stats { margin-left: auto; font-size: 12px; color: #718096; display: flex; gap: 20px; flex-wrap: wrap; }
+  .goal-progress .goal-stat strong { color: #2d3748; font-weight: 700; }
+  .goal-bar-track { position: relative; height: 26px; background: #edf2f7; border-radius: 6px; overflow: visible; }
+  .goal-bar-fill-won { position: absolute; top: 0; bottom: 0; left: 0; background: #38a169; border-radius: 6px 0 0 6px; transition: width 0.4s ease; }
+  .goal-bar-fill-pending { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 6px, #d69e2e 6px, #d69e2e 12px); transition: left 0.4s ease, width 0.4s ease; }
+  .goal-bar-fill-pending.at-end { border-radius: 0 6px 6px 0; }
+  .goal-marker { position: absolute; top: -6px; bottom: -6px; width: 2px; background: #1a202c; z-index: 3; }
+  .goal-marker::after { content: 'GOAL'; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: #1a202c; letter-spacing: 0.5px; white-space: nowrap; }
+  .goal-legend { display: flex; gap: 20px; margin-top: 14px; font-size: 11px; color: #4a5568; }
+  .goal-legend-item { display: flex; align-items: center; gap: 6px; }
+  .goal-legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  .goal-legend-swatch.won { background: #38a169; }
+  .goal-legend-swatch.pending { background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 4px, #d69e2e 4px, #d69e2e 8px); }
+  .goal-empty { padding: 14px 18px; background: #f7fafc; border-radius: 6px; color: #718096; font-size: 12px; text-align: center; border: 1px dashed #cbd5e0; }
+
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cat-table th { text-align: right; padding: 10px 12px; color: #718096; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; background: #fafbfc; }
+  .cat-table th:first-child { text-align: left; }
+  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; text-align: right; }
+  .cat-table td:first-child { text-align: left; font-weight: 500; }
+  .cat-table tr:hover { background: #f7fafc; }
+  .cat-table .total-row { background: #f7fafc; font-weight: 600; }
+  .cat-table .total-row td { border-top: 2px solid #e2e8f0; border-bottom: none; }
+
+  .caption { font-size: 12px; color: #718096; line-height: 1.6; padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 24px; border-left: 3px solid #38a169; }
+  .caption strong { color: #2d3748; }
+
+  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
+  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
+</style>
+<script>window.__DASH_DATA__ = {"clientName":"Red Rock Landscape Inc (Marketing)","lastUpdated":"2026-07-15","notes":[{"label":"","text":"**Digital** = Google Ads, Meta/Facebook Ads, organic web, or any online channel. **Offline** = referral, repeat client, postcard, truck/sign, or any manually entered non-digital source. **Unknown** = leads entered without a source — the goal is to drive this to zero.","accent":""},{"label":"Data note:","text":"Lead source attribution connected June 2026 — leads before then show as \"Unknown\" source. Lead totals reflect all contacts in LMN.","accent":"warn"},{"label":"Pending Revenue","text":"reflects all currently open estimates, regardless of original submission date.","accent":"muted"},{"label":"Estimates","text":"can be considered Qualified Leads","accent":""}],"summary":{"wonRevenueYtd":0,"pendingRevenueYtd":0,"revenueGoal":1400000,"estimatesYtd":0,"leadsYtd":0,"digitalSharePct":0},"estMonthly12":[{"month":"2016-09","bucket":0,"estimates":26,"pending_amount":111901.42,"won_amount":10194.55,"lost_amount":0},{"month":"2016-08","bucket":0,"estimates":13,"pending_amount":85775.22000000002,"won_amount":9105.169999999998,"lost_amount":0},{"month":"2016-07","bucket":0,"estimates":25,"pending_amount":152814.00999999998,"won_amount":37667.780000000006,"lost_amount":0},{"month":"2016-06","bucket":0,"estimates":1,"pending_amount":0,"won_amount":1009,"lost_amount":0},{"month":"2016-06","bucket":0,"estimates":31,"pending_amount":98473.63,"won_amount":56086.81,"lost_amount":0},{"month":"2016-05","bucket":0,"estimates":25,"pending_amount":53222.51000000001,"won_amount":54009.6,"lost_amount":1191.48},{"month":"2016-04","bucket":0,"estimates":1,"pending_amount":0,"won_amount":1879.98,"lost_amount":0},{"month":"2016-04","bucket":0,"estimates":36,"pending_amount":97638.57999999999,"won_amount":64719.520000000004,"lost_amount":73611.78},{"month":"2016-03","bucket":0,"estimates":14,"pending_amount":9214.77,"won_amount":52214.50000000001,"lost_amount":10313.869999999999},{"month":"2016-02","bucket":0,"estimates":5,"pending_amount":164384.66999999998,"won_amount":7385.11,"lost_amount":14896.51},{"month":"2016-01","bucket":0,"estimates":7,"pending_amount":46321.33,"won_amount":27460.83,"lost_amount":0},{"month":"2015-12","bucket":0,"estimates":1,"pending_amount":29523.68,"won_amount":0,"lost_amount":0}],"estTable":[{"month":"2015-12","bucket":0,"estimates":1,"pending_amount":29523.68,"won_amount":0,"lost_amount":0},{"month":"2016-01","bucket":0,"estimates":7,"pending_amount":46321.33,"won_amount":27460.83,"lost_amount":0},{"month":"2016-02","bucket":0,"estimates":5,"pending_amount":164384.66999999998,"won_amount":7385.11,"lost_amount":14896.51},{"month":"2016-03","bucket":0,"estimates":14,"pending_amount":9214.77,"won_amount":52214.50000000001,"lost_amount":10313.869999999999},{"month":"2016-04","bucket":0,"estimates":36,"pending_amount":97638.57999999999,"won_amount":64719.520000000004,"lost_amount":73611.78},{"month":"2016-04","bucket":0,"estimates":1,"pending_amount":0,"won_amount":1879.98,"lost_amount":0},{"month":"2016-05","bucket":0,"estimates":25,"pending_amount":53222.51000000001,"won_amount":54009.6,"lost_amount":1191.48},{"month":"2016-06","bucket":0,"estimates":31,"pending_amount":98473.63,"won_amount":56086.81,"lost_amount":0},{"month":"2016-06","bucket":0,"estimates":1,"pending_amount":0,"won_amount":1009,"lost_amount":0},{"month":"2016-07","bucket":0,"estimates":25,"pending_amount":152814.00999999998,"won_amount":37667.780000000006,"lost_amount":0},{"month":"2016-08","bucket":0,"estimates":13,"pending_amount":85775.22000000002,"won_amount":9105.169999999998,"lost_amount":0},{"month":"2016-09","bucket":0,"estimates":26,"pending_amount":111901.42,"won_amount":10194.55,"lost_amount":0},{"month":"2016-09","bucket":0,"estimates":3,"pending_amount":20107.64,"won_amount":27470.780000000002,"lost_amount":0}],"leadsTable":[{"month":"2015-12","bucket":0,"leads":1},{"month":"2016-01","bucket":0,"leads":6},{"month":"2016-02","bucket":0,"leads":5},{"month":"2016-03","bucket":0,"leads":14},{"month":"2016-04","bucket":0,"leads":35},{"month":"2016-04","bucket":0,"leads":1},{"month":"2016-04","bucket":0,"leads":1},{"month":"2016-05","bucket":0,"leads":24},{"month":"2016-06","bucket":0,"leads":25},{"month":"2016-06","bucket":0,"leads":2},{"month":"2016-07","bucket":0,"leads":19},{"month":"2016-08","bucket":0,"leads":5},{"month":"2016-08","bucket":0,"leads":1}]};</script>
 </head>
 <body>
-<table id="warning-bar-table" class="full_size" cellspacing="0" cellpadding="0"><tr><td><div id="warning" class="warning-bar"></div></td></tr><tr><td style="height: 100%"><iframe id="sandboxFrame" title="Red Rock — Marketing Performance" allow="accelerometer *; autoplay *; clipboard-read *; clipboard-write *; encrypted-media *; fullscreen *; geolocation *; gyroscope *; local-network-access *; magnetometer *; midi *; payment *; picture-in-picture *; screen-wake-lock *; sync-xhr *; web-share *" sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-storage-access-by-user-activation">
-</iframe>
-</td></tr></table><script nonce="le_StOOJ7VBAw0btkFaR8Q">
-(function() {
-var el = document.getElementById('sandboxFrame');
-el.onload = function() {
-goog.script.init("\x7b\x22functionNames\x22:\x5b\x22setupClientSheet\x22,\x22ensureRawSheet\x22,\x22formatEstimatesRaw\x22,\x22formatLeadsRaw\x22,\x22ensureSummarySheet\x22,\x22formatEstimatesSummary\x22,\x22formatLeadsSummary\x22,\x22ensureClassifierRulesSheet\x22,\x22removeDefaultSheetIfEmpty\x22,\x22checkBridgeHealth\x22,\x22doGet\x22,\x22getDashboardData\x22,\x22readEstimatesSummary\x22,\x22blankEstMonth\x22,\x22readLeadsSummary\x22,\x22readNotes\x22,\x22readClientConfig\x22,\x22setupNotesTab\x22,\x22setupClientConfigTab\x22,\x22sumBy\x22,\x22clearRedRockDashboardCache\x22,\x22onEdit\x22,\x22buildStandalone\x22,\x22bucketOf\x22,\x22splitEvenly\x22,\x22runBackfill\x22,\x22clearSeed\x22,\x22reclassifyRedRockBuckets\x22,\x22importHistoricalContacts\x22,\x22dedupeEstimatesRaw\x22\x5d,\x22sandboxMode\x22:\x22IFRAME_SANDBOX\x22,\x22callbackTimeout\x22:390000,\x22deploymentId\x22:\x22AKfycbz4tSn8FKAes1zKOBRv5NUBopYpa3pVq3lvAr-r7iGwBFKEnlLV_PsjPDNrMPWhn3SN\x22,\x22eei\x22:\x22\x22,\x22sandboxHost\x22:\x22https:\/\/n-mclkfjtr27ydasq2z6voyyzptvtdnlglwvhehwa-0lu-script.googleusercontent.com\x22,\x22clientSideProperties\x22:\x7b\x22google.script.sandbox.mode\x22:\x22IFRAME_SANDBOX\x22,\x22google.script.host.origin\x22:\x22https:\/\/docs.google.com\x22\x7d,\x22actionPrefix\x22:\x22\/macros\/s\/AKfycbz4tSn8FKAes1zKOBRv5NUBopYpa3pVq3lvAr-r7iGwBFKEnlLV_PsjPDNrMPWhn3SN\x22,\x22userHtml\x22:\x22\x3c!DOCTYPE html\x3e\\n\x3chtml\x3e\\n\x3chead\x3e\\n\x3cbase target\x3d\\\x22_top\\\x22\x3e\\n\x3cmeta charset\x3d\\\x22UTF-8\\\x22\x3e\\n\x3cmeta name\x3d\\\x22viewport\\\x22 content\x3d\\\x22width\x3ddevice-width, initial-scale\x3d1.0\\\x22\x3e\\n\x3cstyle\x3e\\n  * \x7b margin: 0; padding: 0; box-sizing: border-box; \x7d\\n  body \x7b font-family: -apple-system, BlinkMacSystemFont, \x27Segoe UI\x27, Roboto, sans-serif; background: #f5f6f8; color: #2d3748; \x7d\\n\\n  .loading \x7b text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; \x7d\\n  .loading .spinner \x7b display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #4a6cf7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; \x7d\\n  @keyframes spin \x7b to \x7b transform: rotate(360deg); \x7d \x7d\\n\\n  .dashboard \x7b max-width: 1200px; margin: 0 auto; padding: 24px; \x7d\\n\\n  .section-header \x7b display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; \x7d\\n  .section-header h2 \x7b font-size: 18px; font-weight: 600; color: #1a202c; \x7d\\n  .section-header .client-name \x7b font-size: 14px; color: #718096; font-weight: 400; \x7d\\n  .section-header .period \x7b margin-left: auto; font-size: 13px; color: #718096; background: #f7fafc; padding: 5px 12px; border-radius: 6px; \x7d\\n\\n  .kpi-row \x7b display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; \x7d\\n  .kpi-card \x7b background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; position: relative; \x7d\\n  .kpi-card .label \x7b font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; \x7d\\n  .kpi-card .value \x7b font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; \x7d\\n  .kpi-card .sub \x7b font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; \x7d\\n\\n  .kpi-card\x5bdata-tip\x5d \x7b cursor: help; \x7d\\n  .kpi-card\x5bdata-tip\x5d::after \x7b content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400; line-height: 1.5; padding: 10px 14px; border-radius: 8px; width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.15); pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; \x7d\\n  .kpi-card\x5bdata-tip\x5d::before \x7b content: \x27\x27; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1a202c; pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; \x7d\\n  .kpi-card\x5bdata-tip\x5d:hover::after \x7b opacity: 1; bottom: calc(100% + 12px); \x7d\\n  .kpi-card\x5bdata-tip\x5d:hover::before \x7b opacity: 1; bottom: calc(100% + 0px); \x7d\\n\\n  .card \x7b background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; \x7d\\n  .card h3 \x7b font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; \x7d\\n\\n  .chart-container \x7b position: relative; height: 320px; overflow: hidden; \x7d\\n  .chart-svg \x7b width: 100%; height: 100%; \x7d\\n\\n  .legend \x7b display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #4a5568; align-items: center; justify-content: flex-end; \x7d\\n  .legend-item \x7b display: flex; align-items: center; gap: 6px; \x7d\\n  .legend-swatch \x7b width: 12px; height: 12px; border-radius: 2px; \x7d\\n  .swatch-digital \x7b background: #38a169; \x7d\\n  .swatch-offline \x7b background: #4a6cf7; \x7d\\n  .swatch-unknown \x7b background: #a0aec0; \x7d\\n\\n   \\n  .goal-progress \x7b background: #fff; border-radius: 10px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; \x7d\\n  .goal-progress .goal-header \x7b display: flex; align-items: baseline; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; \x7d\\n  .goal-progress .goal-title \x7b font-size: 14px; font-weight: 600; color: #4a5568; \x7d\\n  .goal-progress .goal-stats \x7b margin-left: auto; font-size: 12px; color: #718096; display: flex; gap: 20px; flex-wrap: wrap; \x7d\\n  .goal-progress .goal-stat strong \x7b color: #2d3748; font-weight: 700; \x7d\\n  .goal-bar-track \x7b position: relative; height: 26px; background: #edf2f7; border-radius: 6px; overflow: visible; \x7d\\n  .goal-bar-fill-won \x7b position: absolute; top: 0; bottom: 0; left: 0; background: #38a169; border-radius: 6px 0 0 6px; transition: width 0.4s ease; \x7d\\n  .goal-bar-fill-pending \x7b position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 6px, #d69e2e 6px, #d69e2e 12px); transition: left 0.4s ease, width 0.4s ease; \x7d\\n  .goal-bar-fill-pending.at-end \x7b border-radius: 0 6px 6px 0; \x7d\\n  .goal-marker \x7b position: absolute; top: -6px; bottom: -6px; width: 2px; background: #1a202c; z-index: 3; \x7d\\n  .goal-marker::after \x7b content: \x27GOAL\x27; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: #1a202c; letter-spacing: 0.5px; white-space: nowrap; \x7d\\n  .goal-legend \x7b display: flex; gap: 20px; margin-top: 14px; font-size: 11px; color: #4a5568; \x7d\\n  .goal-legend-item \x7b display: flex; align-items: center; gap: 6px; \x7d\\n  .goal-legend-swatch \x7b width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; \x7d\\n  .goal-legend-swatch.won \x7b background: #38a169; \x7d\\n  .goal-legend-swatch.pending \x7b background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 4px, #d69e2e 4px, #d69e2e 8px); \x7d\\n  .goal-empty \x7b padding: 14px 18px; background: #f7fafc; border-radius: 6px; color: #718096; font-size: 12px; text-align: center; border: 1px dashed #cbd5e0; \x7d\\n\\n  .cat-table \x7b width: 100%; border-collapse: collapse; font-size: 13px; \x7d\\n  .cat-table th \x7b text-align: right; padding: 10px 12px; color: #718096; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; background: #fafbfc; \x7d\\n  .cat-table th:first-child \x7b text-align: left; \x7d\\n  .cat-table td \x7b padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; text-align: right; \x7d\\n  .cat-table td:first-child \x7b text-align: left; font-weight: 500; \x7d\\n  .cat-table tr:hover \x7b background: #f7fafc; \x7d\\n  .cat-table .total-row \x7b background: #f7fafc; font-weight: 600; \x7d\\n  .cat-table .total-row td \x7b border-top: 2px solid #e2e8f0; border-bottom: none; \x7d\\n\\n  .caption \x7b font-size: 12px; color: #718096; line-height: 1.6; padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 24px; border-left: 3px solid #4a6cf7; \x7d\\n  .caption strong \x7b color: #2d3748; \x7d\\n\\n  .powered-by \x7b text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; \x7d\\n  .error-msg \x7b text-align: center; padding: 40px; color: #e53e3e; \x7d\\n  .empty-msg \x7b text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; \x7d\\n\x3c\\\/style\x3e\\n\x3cscript\x3ewindow.__RR_DATA__ \x3d \x7b\\\x22clientName\\\x22:\\\x22Red Rock Landscape Inc\\\x22,\\\x22lastUpdated\\\x22:\\\x222026-07-15\\\x22,\\\x22notes\\\x22:\x5b\x7b\\\x22label\\\x22:\\\x22\\\x22,\\\x22text\\\x22:\\\x22**Digital** \x3d Google Ads, Meta\/Facebook Ads, organic web, or any online channel. **Offline** \x3d referral, repeat client, postcard, truck\/sign, or any manually entered non-digital source. **Unknown** \x3d leads entered without a source \\u2014 the goal is to drive this to zero.\\\x22,\\\x22accent\\\x22:\\\x22\\\x22\x7d,\x7b\\\x22label\\\x22:\\\x22Data note:\\\x22,\\\x22text\\\x22:\\\x22Lead source attribution connected June 2026 \\u2014 leads before then show as \\\\\\\x22Unknown\\\\\\\x22 source. Lead totals reflect all contacts in LMN.\\\x22,\\\x22accent\\\x22:\\\x22warn\\\x22\x7d,\x7b\\\x22label\\\x22:\\\x22Pending Revenue\\\x22,\\\x22text\\\x22:\\\x22reflects all currently open estimates, regardless of original submission date.\\\x22,\\\x22accent\\\x22:\\\x22muted\\\x22\x7d,\x7b\\\x22label\\\x22:\\\x22Estimates\\\x22,\\\x22text\\\x22:\\\x22can be considered Qualified Leads\\\x22,\\\x22accent\\\x22:\\\x22\\\x22\x7d\x5d,\\\x22summary\\\x22:\x7b\\\x22wonRevenueYtd\\\x22:556698,\\\x22pendingRevenueYtd\\\x22:574223,\\\x22revenueGoal\\\x22:1400000,\\\x22estimatesYtd\\\x22:237,\\\x22leadsYtd\\\x22:383,\\\x22digitalSharePct\\\x22:27.1\x7d,\\\x22estMonthly12\\\x22:\x5b\x7b\\\x22month\\\x22:\\\x222025-08\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:1,\\\x22unknown_estimates\\\x22:39,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:323625.74,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:1567.15,\\\x22unknown_won\\\x22:43701.24999999999\x7d,\x7b\\\x22month\\\x22:\\\x222025-09\\\x22,\\\x22digital_estimates\\\x22:1,\\\x22offline_estimates\\\x22:0,\\\x22unknown_estimates\\\x22:40,\\\x22digital_pending\\\x22:72289.32,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:211915.81999999998,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:0,\\\x22unknown_won\\\x22:54677.16999999999\x7d,\x7b\\\x22month\\\x22:\\\x222025-10\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:2,\\\x22unknown_estimates\\\x22:37,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:349060.37000000005,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:2670.2799999999997,\\\x22unknown_won\\\x22:87582.36000000002\x7d,\x7b\\\x22month\\\x22:\\\x222025-11\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:0,\\\x22unknown_estimates\\\x22:26,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:78310.34999999999,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:0,\\\x22unknown_won\\\x22:21033.339999999997\x7d,\x7b\\\x22month\\\x22:\\\x222025-12\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:0,\\\x22unknown_estimates\\\x22:5,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:0,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:0,\\\x22unknown_won\\\x22:11189.45\x7d,\x7b\\\x22month\\\x22:\\\x222026-01\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:1,\\\x22unknown_estimates\\\x22:17,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:27089.25,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:2170.68,\\\x22unknown_won\\\x22:34082.119999999995\x7d,\x7b\\\x22month\\\x22:\\\x222026-02\\\x22,\\\x22digital_estimates\\\x22:1,\\\x22offline_estimates\\\x22:0,\\\x22unknown_estimates\\\x22:27,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:21498.95,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:0,\\\x22unknown_won\\\x22:167775.53999999998\x7d,\x7b\\\x22month\\\x22:\\\x222026-03\\\x22,\\\x22digital_estimates\\\x22:15,\\\x22offline_estimates\\\x22:30,\\\x22unknown_estimates\\\x22:0,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:36977.02,\\\x22unknown_pending\\\x22:0,\\\x22digital_won\\\x22:14518.38,\\\x22offline_won\\\x22:54365.280000000006,\\\x22unknown_won\\\x22:0\x7d,\x7b\\\x22month\\\x22:\\\x222026-04\\\x22,\\\x22digital_estimates\\\x22:28,\\\x22offline_estimates\\\x22:29,\\\x22unknown_estimates\\\x22:0,\\\x22digital_pending\\\x22:29111.94,\\\x22offline_pending\\\x22:17061.48,\\\x22unknown_pending\\\x22:0,\\\x22digital_won\\\x22:33309.02,\\\x22offline_won\\\x22:49787.719999999994,\\\x22unknown_won\\\x22:0\x7d,\x7b\\\x22month\\\x22:\\\x222026-05\\\x22,\\\x22digital_estimates\\\x22:9,\\\x22offline_estimates\\\x22:25,\\\x22unknown_estimates\\\x22:0,\\\x22digital_pending\\\x22:86734.34,\\\x22offline_pending\\\x22:71998.89,\\\x22unknown_pending\\\x22:0,\\\x22digital_won\\\x22:5513.45,\\\x22offline_won\\\x22:140083.82,\\\x22unknown_won\\\x22:0\x7d,\x7b\\\x22month\\\x22:\\\x222026-06\\\x22,\\\x22digital_estimates\\\x22:17,\\\x22offline_estimates\\\x22:22,\\\x22unknown_estimates\\\x22:1,\\\x22digital_pending\\\x22:149784.78000000003,\\\x22offline_pending\\\x22:81149.63999999998,\\\x22unknown_pending\\\x22:6373.5,\\\x22digital_won\\\x22:37795.37,\\\x22offline_won\\\x22:8854.869999999999,\\\x22unknown_won\\\x22:0\x7d,\x7b\\\x22month\\\x22:\\\x222026-07\\\x22,\\\x22digital_estimates\\\x22:6,\\\x22offline_estimates\\\x22:5,\\\x22unknown_estimates\\\x22:4,\\\x22digital_pending\\\x22:24962.030000000002,\\\x22offline_pending\\\x22:19257.559999999998,\\\x22unknown_pending\\\x22:2223.39,\\\x22digital_won\\\x22:4706.030000000001,\\\x22offline_won\\\x22:3120.4,\\\x22unknown_won\\\x22:615\x7d\x5d,\\\x22estTable\\\x22:\x5b\x7b\\\x22month\\\x22:\\\x222026-07\\\x22,\\\x22digital_estimates\\\x22:6,\\\x22offline_estimates\\\x22:5,\\\x22unknown_estimates\\\x22:4,\\\x22digital_pending\\\x22:24962.030000000002,\\\x22offline_pending\\\x22:19257.559999999998,\\\x22unknown_pending\\\x22:2223.39,\\\x22digital_won\\\x22:4706.030000000001,\\\x22offline_won\\\x22:3120.4,\\\x22unknown_won\\\x22:615\x7d,\x7b\\\x22month\\\x22:\\\x222026-06\\\x22,\\\x22digital_estimates\\\x22:17,\\\x22offline_estimates\\\x22:22,\\\x22unknown_estimates\\\x22:1,\\\x22digital_pending\\\x22:149784.78000000003,\\\x22offline_pending\\\x22:81149.63999999998,\\\x22unknown_pending\\\x22:6373.5,\\\x22digital_won\\\x22:37795.37,\\\x22offline_won\\\x22:8854.869999999999,\\\x22unknown_won\\\x22:0\x7d,\x7b\\\x22month\\\x22:\\\x222026-05\\\x22,\\\x22digital_estimates\\\x22:9,\\\x22offline_estimates\\\x22:25,\\\x22unknown_estimates\\\x22:0,\\\x22digital_pending\\\x22:86734.34,\\\x22offline_pending\\\x22:71998.89,\\\x22unknown_pending\\\x22:0,\\\x22digital_won\\\x22:5513.45,\\\x22offline_won\\\x22:140083.82,\\\x22unknown_won\\\x22:0\x7d,\x7b\\\x22month\\\x22:\\\x222026-04\\\x22,\\\x22digital_estimates\\\x22:28,\\\x22offline_estimates\\\x22:29,\\\x22unknown_estimates\\\x22:0,\\\x22digital_pending\\\x22:29111.94,\\\x22offline_pending\\\x22:17061.48,\\\x22unknown_pending\\\x22:0,\\\x22digital_won\\\x22:33309.02,\\\x22offline_won\\\x22:49787.719999999994,\\\x22unknown_won\\\x22:0\x7d,\x7b\\\x22month\\\x22:\\\x222026-03\\\x22,\\\x22digital_estimates\\\x22:15,\\\x22offline_estimates\\\x22:30,\\\x22unknown_estimates\\\x22:0,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:36977.02,\\\x22unknown_pending\\\x22:0,\\\x22digital_won\\\x22:14518.38,\\\x22offline_won\\\x22:54365.280000000006,\\\x22unknown_won\\\x22:0\x7d,\x7b\\\x22month\\\x22:\\\x222026-02\\\x22,\\\x22digital_estimates\\\x22:1,\\\x22offline_estimates\\\x22:0,\\\x22unknown_estimates\\\x22:27,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:21498.95,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:0,\\\x22unknown_won\\\x22:167775.53999999998\x7d,\x7b\\\x22month\\\x22:\\\x222026-01\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:1,\\\x22unknown_estimates\\\x22:17,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:27089.25,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:2170.68,\\\x22unknown_won\\\x22:34082.119999999995\x7d,\x7b\\\x22month\\\x22:\\\x222025-12\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:0,\\\x22unknown_estimates\\\x22:5,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:0,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:0,\\\x22unknown_won\\\x22:11189.45\x7d,\x7b\\\x22month\\\x22:\\\x222025-11\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:0,\\\x22unknown_estimates\\\x22:26,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:78310.34999999999,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:0,\\\x22unknown_won\\\x22:21033.339999999997\x7d,\x7b\\\x22month\\\x22:\\\x222025-10\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:2,\\\x22unknown_estimates\\\x22:37,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:349060.37000000005,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:2670.2799999999997,\\\x22unknown_won\\\x22:87582.36000000002\x7d,\x7b\\\x22month\\\x22:\\\x222025-09\\\x22,\\\x22digital_estimates\\\x22:1,\\\x22offline_estimates\\\x22:0,\\\x22unknown_estimates\\\x22:40,\\\x22digital_pending\\\x22:72289.32,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:211915.81999999998,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:0,\\\x22unknown_won\\\x22:54677.16999999999\x7d,\x7b\\\x22month\\\x22:\\\x222025-08\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:1,\\\x22unknown_estimates\\\x22:39,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:323625.74,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:1567.15,\\\x22unknown_won\\\x22:43701.24999999999\x7d,\x7b\\\x22month\\\x22:\\\x222025-07\\\x22,\\\x22digital_estimates\\\x22:0,\\\x22offline_estimates\\\x22:0,\\\x22unknown_estimates\\\x22:38,\\\x22digital_pending\\\x22:0,\\\x22offline_pending\\\x22:0,\\\x22unknown_pending\\\x22:146118.52000000002,\\\x22digital_won\\\x22:0,\\\x22offline_won\\\x22:0,\\\x22unknown_won\\\x22:130332.23999999999\x7d\x5d,\\\x22leadsTable\\\x22:\x5b\x7b\\\x22month\\\x22:\\\x222026-07\\\x22,\\\x22digital_leads\\\x22:23,\\\x22offline_leads\\\x22:4,\\\x22unknown_leads\\\x22:18\x7d,\x7b\\\x22month\\\x22:\\\x222026-06\\\x22,\\\x22digital_leads\\\x22:52,\\\x22offline_leads\\\x22:25,\\\x22unknown_leads\\\x22:24\x7d,\x7b\\\x22month\\\x22:\\\x222026-05\\\x22,\\\x22digital_leads\\\x22:22,\\\x22offline_leads\\\x22:14,\\\x22unknown_leads\\\x22:17\x7d,\x7b\\\x22month\\\x22:\\\x222026-04\\\x22,\\\x22digital_leads\\\x22:35,\\\x22offline_leads\\\x22:21,\\\x22unknown_leads\\\x22:17\x7d,\x7b\\\x22month\\\x22:\\\x222026-03\\\x22,\\\x22digital_leads\\\x22:31,\\\x22offline_leads\\\x22:18,\\\x22unknown_leads\\\x22:26\x7d,\x7b\\\x22month\\\x22:\\\x222026-02\\\x22,\\\x22digital_leads\\\x22:6,\\\x22offline_leads\\\x22:2,\\\x22unknown_leads\\\x22:12\x7d,\x7b\\\x22month\\\x22:\\\x222026-01\\\x22,\\\x22digital_leads\\\x22:0,\\\x22offline_leads\\\x22:0,\\\x22unknown_leads\\\x22:16\x7d,\x7b\\\x22month\\\x22:\\\x222025-12\\\x22,\\\x22digital_leads\\\x22:0,\\\x22offline_leads\\\x22:0,\\\x22unknown_leads\\\x22:16\x7d,\x7b\\\x22month\\\x22:\\\x222025-11\\\x22,\\\x22digital_leads\\\x22:1,\\\x22offline_leads\\\x22:0,\\\x22unknown_leads\\\x22:29\x7d,\x7b\\\x22month\\\x22:\\\x222025-10\\\x22,\\\x22digital_leads\\\x22:3,\\\x22offline_leads\\\x22:1,\\\x22unknown_leads\\\x22:44\x7d,\x7b\\\x22month\\\x22:\\\x222025-09\\\x22,\\\x22digital_leads\\\x22:3,\\\x22offline_leads\\\x22:2,\\\x22unknown_leads\\\x22:36\x7d,\x7b\\\x22month\\\x22:\\\x222025-08\\\x22,\\\x22digital_leads\\\x22:2,\\\x22offline_leads\\\x22:0,\\\x22unknown_leads\\\x22:42\x7d,\x7b\\\x22month\\\x22:\\\x222025-07\\\x22,\\\x22digital_leads\\\x22:1,\\\x22offline_leads\\\x22:0,\\\x22unknown_leads\\\x22:37\x7d\x5d\x7d;\x3c\\\/script\x3e\\n\x3c\\\/head\x3e\\n\x3cbody\x3e\\n\\n\x3cdiv id\x3d\\\x22loading\\\x22 class\x3d\\\x22loading\\\x22\x3e\\n  \x3cdiv class\x3d\\\x22spinner\\\x22\x3e\x3c\\\/div\x3e\\n  \x3cdiv\x3eLoading marketing performance data...\x3c\\\/div\x3e\\n\x3c\\\/div\x3e\\n\\n\x3cdiv id\x3d\\\x22dashboard\\\x22 class\x3d\\\x22dashboard\\\x22 style\x3d\\\x22display:none;\\\x22\x3e\\n  \x3cdiv class\x3d\\\x22section-header\\\x22\x3e\\n    \x3ch2\x3eMarketing Performance Tracker\x3c\\\/h2\x3e\\n    \x3cspan class\x3d\\\x22client-name\\\x22 id\x3d\\\x22client-name\\\x22\x3e\\u2014\x3c\\\/span\x3e\\n    \x3cspan class\x3d\\\x22period\\\x22 id\x3d\\\x22period-label\\\x22\x3e\x3c\\\/span\x3e\\n  \x3c\\\/div\x3e\\n\\n  \x3cdiv class\x3d\\\x22kpi-row\\\x22\x3e\\n    \x3cdiv class\x3d\\\x22kpi-card\\\x22 data-tip\x3d\\\x22Total $ value of estimates marked Sold (won) year-to-date, across all sources.\\\x22\x3e\\n      \x3cdiv class\x3d\\\x22label\\\x22\x3eWon Revenue YTD\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22value\\\x22 id\x3d\\\x22kpi-won\\\x22\x3e--\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22sub\\\x22\x3eSold estimate value this year\x3c\\\/div\x3e\\n    \x3c\\\/div\x3e\\n    \x3cdiv class\x3d\\\x22kpi-card\\\x22 data-tip\x3d\\\x22Total $ value of estimates still Pending (open, not yet won or lost) year-to-date.\\\x22\x3e\\n      \x3cdiv class\x3d\\\x22label\\\x22\x3ePending Revenue YTD\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22value\\\x22 id\x3d\\\x22kpi-pending\\\x22\x3e--\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22sub\\\x22\x3eOpen estimate value this year\x3c\\\/div\x3e\\n    \x3c\\\/div\x3e\\n    \x3cdiv class\x3d\\\x22kpi-card\\\x22 data-tip\x3d\\\x22Count of estimates created year-to-date, all statuses.\\\x22\x3e\\n      \x3cdiv class\x3d\\\x22label\\\x22\x3eEstimates YTD\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22value\\\x22 id\x3d\\\x22kpi-estimates\\\x22\x3e--\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22sub\\\x22\x3eEstimates created this year\x3c\\\/div\x3e\\n    \x3c\\\/div\x3e\\n    \x3cdiv class\x3d\\\x22kpi-card\\\x22 data-tip\x3d\\\x22Count of new leads\/contacts created year-to-date.\\\x22\x3e\\n      \x3cdiv class\x3d\\\x22label\\\x22\x3eLeads YTD\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22value\\\x22 id\x3d\\\x22kpi-leads\\\x22\x3e--\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22sub\\\x22\x3eNew contacts this year\x3c\\\/div\x3e\\n    \x3c\\\/div\x3e\\n    \x3cdiv class\x3d\\\x22kpi-card\\\x22 data-tip\x3d\\\x22Share of attributed won revenue from digital sources (Online, Website, Facebook). Measured against digital\x26#43;offline only; Unknown-source revenue is excluded from this ratio.\\\x22\x3e\\n      \x3cdiv class\x3d\\\x22label\\\x22\x3eDigital Share\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22value\\\x22 id\x3d\\\x22kpi-digital\\\x22\x3e--\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22sub\\\x22\x3eDigital % of attributed won $\x3c\\\/div\x3e\\n    \x3c\\\/div\x3e\\n  \x3c\\\/div\x3e\\n\\n  \\n  \x3cdiv id\x3d\\\x22goal-container\\\x22\x3e\x3c\\\/div\x3e\\n\\n  \\n  \x3cdiv id\x3d\\\x22notes-container\\\x22\x3e\x3c\\\/div\x3e\\n\\n  \x3cdiv class\x3d\\\x22card\\\x22\x3e\\n    \x3ch3\x3eWon Revenue by Marketing Bucket \\u2014 Last 12 Months\x3c\\\/h3\x3e\\n    \x3cdiv class\x3d\\\x22chart-container\\\x22 id\x3d\\\x22chart-container\\\x22\x3e\x3c\\\/div\x3e\\n    \x3cdiv class\x3d\\\x22legend\\\x22\x3e\\n      \x3cdiv class\x3d\\\x22legend-item\\\x22\x3e\x3cspan class\x3d\\\x22legend-swatch swatch-digital\\\x22\x3e\x3c\\\/span\x3e Digital\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22legend-item\\\x22\x3e\x3cspan class\x3d\\\x22legend-swatch swatch-offline\\\x22\x3e\x3c\\\/span\x3e Offline\x3c\\\/div\x3e\\n      \x3cdiv class\x3d\\\x22legend-item\\\x22\x3e\x3cspan class\x3d\\\x22legend-swatch swatch-unknown\\\x22\x3e\x3c\\\/span\x3e Unknown\x3c\\\/div\x3e\\n    \x3c\\\/div\x3e\\n  \x3c\\\/div\x3e\\n\\n  \x3cdiv class\x3d\\\x22card\\\x22\x3e\\n    \x3ch3\x3eMonthly Estimates Breakdown\x3c\\\/h3\x3e\\n    \x3ctable class\x3d\\\x22cat-table\\\x22\x3e\\n      \x3cthead\x3e\\n        \x3ctr\x3e\\n          \x3cth\x3eMonth\x3c\\\/th\x3e\\n          \x3cth\x3eDigital Won\x3c\\\/th\x3e\\n          \x3cth\x3eOffline Won\x3c\\\/th\x3e\\n          \x3cth\x3eUnknown Won\x3c\\\/th\x3e\\n          \x3cth\x3ePending $\x3c\\\/th\x3e\\n          \x3cth\x3eEstimates\x3c\\\/th\x3e\\n          \x3cth\x3eTotal Won\x3c\\\/th\x3e\\n        \x3c\\\/tr\x3e\\n      \x3c\\\/thead\x3e\\n      \x3ctbody id\x3d\\\x22est-body\\\x22\x3e\x3c\\\/tbody\x3e\\n    \x3c\\\/table\x3e\\n  \x3c\\\/div\x3e\\n\\n  \x3cdiv class\x3d\\\x22card\\\x22\x3e\\n    \x3ch3\x3eLeads by Source \\u2014 Monthly\x3c\\\/h3\x3e\\n    \x3ctable class\x3d\\\x22cat-table\\\x22\x3e\\n      \x3cthead\x3e\\n        \x3ctr\x3e\\n          \x3cth\x3eMonth\x3c\\\/th\x3e\\n          \x3cth\x3eDigital\x3c\\\/th\x3e\\n          \x3cth\x3eOffline\x3c\\\/th\x3e\\n          \x3cth\x3eUnknown\x3c\\\/th\x3e\\n          \x3cth\x3eTotal Leads\x3c\\\/th\x3e\\n        \x3c\\\/tr\x3e\\n      \x3c\\\/thead\x3e\\n      \x3ctbody id\x3d\\\x22leads-body\\\x22\x3e\x3c\\\/tbody\x3e\\n    \x3c\\\/table\x3e\\n  \x3c\\\/div\x3e\\n\\n  \x3cdiv class\x3d\\\x22powered-by\\\x22\x3eData from LMN via Zapier \x26nbsp;\x26middot;\x26nbsp; Halstead Marketing Performance Tracker\x3c\\\/div\x3e\\n\x3c\\\/div\x3e\\n\\n\x3cscript\x3e\\n  \\n  \\n  var PENDING_WEIGHT \x3d 0.75;\\n\\n  \\n  \\n  if (window.__RR_DATA__) \x7b\\n    renderDashboard(window.__RR_DATA__);\\n  \x7d else \x7b\\n    google.script.run\\n      .withSuccessHandler(renderDashboard)\\n      .withFailureHandler(showError)\\n      .getDashboardData();\\n  \x7d\\n\\n  function showError(err) \x7b\\n    document.getElementById(\x27loading\x27).innerHTML \x3d\\n      \x27\x3cdiv class\x3d\\\x22error-msg\\\x22\x3eFailed to load data: \x27 + (err \x26\x26 err.message ? err.message : err) + \x27\x3c\\\/div\x3e\x27;\\n  \x7d\\n\\n  function renderDashboard(data) \x7b\\n    if (!data || data.error) \x7b showError(\x7b message: (data \x26\x26 data.error) || \x27No data\x27 \x7d); return; \x7d\\n    document.getElementById(\x27loading\x27).style.display \x3d \x27none\x27;\\n    document.getElementById(\x27dashboard\x27).style.display \x3d \x27block\x27;\\n\\n    document.getElementById(\x27client-name\x27).textContent \x3d \x27\\u2014 \x27 + (data.clientName || \x27\x27);\\n    document.getElementById(\x27period-label\x27).textContent \x3d \x27Last updated: \x27 + (data.lastUpdated || \x27\x27);\\n\\n    renderKPIs(data.summary || \x7b\x7d);\\n    renderGoalBar(data.summary || \x7b\x7d);\\n    renderNotes(data.notes || \x5b\x5d);\\n    renderChart(data.estMonthly12 || \x5b\x5d);\\n    renderEstTable(data.estTable || \x5b\x5d);\\n    renderLeadsTable(data.leadsTable || \x5b\x5d);\\n  \x7d\\n\\n  \\n  \\n  function renderNotes(notes) \x7b\\n    var c \x3d document.getElementById(\x27notes-container\x27);\\n    if (!notes || !notes.length) \x7b c.innerHTML \x3d \x27\x27; return; \x7d\\n    c.innerHTML \x3d notes.map(function (n) \x7b\\n      var accent \x3d n.accent \x3d\x3d\x3d \x27warn\x27 ? \x27border-left-color:#ed8936;background:#fffaf0;\x27\\n                 : n.accent \x3d\x3d\x3d \x27muted\x27 ? \x27border-left-color:#a0aec0;\x27 : \x27\x27;\\n      var label \x3d n.label ? \x27\x3cstrong\x3e\x27 + escHtml(n.label) + \x27\x3c\\\/strong\x3e \x27 : \x27\x27;\\n      return \x27\x3cdiv class\x3d\\\x22caption\\\x22 style\x3d\\\x22\x27 + accent + \x27\\\x22\x3e\x27 + label + mdBold(escHtml(n.text)) + \x27\x3c\\\/div\x3e\x27;\\n    \x7d).join(\x27\x27);\\n  \x7d\\n  function escHtml(s) \x7b return String(s \x3d\x3d null ? \x27\x27 : s).replace(\/\x26\/g, \x27\x26amp;\x27).replace(\/\x3c\\\/g, \x27\x26lt;\x27).replace(\/\x3e\/g, \x27\x26gt;\x27); \x7d\\n  function mdBold(s) \x7b return s.replace(\/\\\\*\\\\*(.+?)\\\\*\\\\*\/g, \x27\x3cstrong\x3e$1\x3c\\\/strong\x3e\x27); \x7d\\n\\n  function fmtCurrency(n, compact) \x7b\\n    if (n \x3d\x3d null) return \x27$0\x27;\\n    if (compact \x26\x26 n \x3e\x3d 1000000) return \x27$\x27 + (n \/ 1000000).toFixed(1) + \x27M\x27;\\n    if (compact \x26\x26 n \x3e\x3d 1000) return \x27$\x27 + (n \/ 1000).toFixed(0) + \x27k\x27;\\n    return \x27$\x27 + Math.round(n).toLocaleString();\\n  \x7d\\n  function fmtInt(n) \x7b return (n \x3d\x3d null ? 0 : Math.round(n)).toLocaleString(); \x7d\\n  function fmtPct(n) \x7b return (n \x3d\x3d null ? 0 : n) + \x27%\x27; \x7d\\n  function fmtMonthShort(m) \x7b\\n    if (!m) return \x27\x27;\\n    var parts \x3d String(m).split(\x27-\x27);\\n    if (parts.length \x3c 2) return m;\\n    var months \x3d \x5b\x27Jan\x27,\x27Feb\x27,\x27Mar\x27,\x27Apr\x27,\x27May\x27,\x27Jun\x27,\x27Jul\x27,\x27Aug\x27,\x27Sep\x27,\x27Oct\x27,\x27Nov\x27,\x27Dec\x27\x5d;\\n    return months\x5bparseInt(parts\x5b1\x5d, 10) - 1\x5d + \\\x22 \x27\\\x22 + parts\x5b0\x5d.slice(2);\\n  \x7d\\n\\n  function renderKPIs(s) \x7b\\n    document.getElementById(\x27kpi-won\x27).textContent       \x3d fmtCurrency(s.wonRevenueYtd, true);\\n    document.getElementById(\x27kpi-pending\x27).textContent   \x3d fmtCurrency(s.pendingRevenueYtd, true);\\n    document.getElementById(\x27kpi-estimates\x27).textContent \x3d fmtInt(s.estimatesYtd);\\n    document.getElementById(\x27kpi-leads\x27).textContent     \x3d fmtInt(s.leadsYtd);\\n    document.getElementById(\x27kpi-digital\x27).textContent   \x3d fmtPct(s.digitalSharePct);\\n  \x7d\\n\\n  \\n  \\n  function renderGoalBar(s) \x7b\\n    var container \x3d document.getElementById(\x27goal-container\x27);\\n    var goal \x3d s.revenueGoal;\\n    var won \x3d s.wonRevenueYtd || 0;\\n    var pending \x3d (s.pendingRevenueYtd || 0) * PENDING_WEIGHT;\\n    var year \x3d new Date().getFullYear();\\n\\n    if (!goal || goal \x3c\x3d 0) \x7b\\n      container.innerHTML \x3d\\n        \x27\x3cdiv class\x3d\\\x22goal-progress\\\x22\x3e\x27 +\\n          \x27\x3cdiv class\x3d\\\x22goal-header\\\x22\x3e\x3cdiv class\x3d\\\x22goal-title\\\x22\x3eRevenue Goal Progress \\u2014 \x27 + year + \x27\x3c\\\/div\x3e\x3c\\\/div\x3e\x27 +\\n          \x27\x3cdiv class\x3d\\\x22goal-empty\\\x22\x3eRevenue goal not yet set for \x27 + year + \x27.\x3c\\\/div\x3e\x27 +\\n        \x27\x3c\\\/div\x3e\x27;\\n      return;\\n    \x7d\\n\\n    var denom \x3d Math.max(goal, won + pending);\\n    var wonPct \x3d denom \x3e 0 ? (won \/ denom) * 100 : 0;\\n    var pendingPct \x3d denom \x3e 0 ? (pending \/ denom) * 100 : 0;\\n    var goalPct \x3d denom \x3e 0 ? (goal \/ denom) * 100 : 100;\\n    var wonOfGoal \x3d (won \/ goal) * 100;\\n    var wpOfGoal \x3d ((won + pending) \/ goal) * 100;\\n    var pendingAtEnd \x3d (wonPct + pendingPct) \x3e\x3d 99.5 ? \x27 at-end\x27 : \x27\x27;\\n\\n    container.innerHTML \x3d\\n      \x27\x3cdiv class\x3d\\\x22goal-progress\\\x22\x3e\x27 +\\n        \x27\x3cdiv class\x3d\\\x22goal-header\\\x22\x3e\x27 +\\n          \x27\x3cdiv class\x3d\\\x22goal-title\\\x22\x3eRevenue Goal Progress \\u2014 \x27 + year + \x27\x3c\\\/div\x3e\x27 +\\n          \x27\x3cdiv class\x3d\\\x22goal-stats\\\x22\x3e\x27 +\\n            \x27\x3cdiv class\x3d\\\x22goal-stat\\\x22\x3e\x3cstrong\x3e\x27 + wonOfGoal.toFixed(1) + \x27%\x3c\\\/strong\x3e of goal closed\x3c\\\/div\x3e\x27 +\\n            \x27\x3cdiv class\x3d\\\x22goal-stat\\\x22\x3e\x3cstrong\x3e\x27 + wpOfGoal.toFixed(1) + \x27%\x3c\\\/strong\x3e incl. weighted pipeline\x3c\\\/div\x3e\x27 +\\n            \x27\x3cdiv class\x3d\\\x22goal-stat\\\x22\x3eGoal \x3cstrong\x3e\x27 + fmtCurrency(goal, true) + \x27\x3c\\\/strong\x3e\x3c\\\/div\x3e\x27 +\\n          \x27\x3c\\\/div\x3e\x27 +\\n        \x27\x3c\\\/div\x3e\x27 +\\n        \x27\x3cdiv class\x3d\\\x22goal-bar-track\\\x22\x3e\x27 +\\n          \x27\x3cdiv class\x3d\\\x22goal-bar-fill-won\\\x22 style\x3d\\\x22width:\x27 + wonPct + \x27%\\\x22\x3e\x3c\\\/div\x3e\x27 +\\n          \x27\x3cdiv class\x3d\\\x22goal-bar-fill-pending\x27 + pendingAtEnd + \x27\\\x22 style\x3d\\\x22left:\x27 + wonPct + \x27%;width:\x27 + pendingPct + \x27%\\\x22\x3e\x3c\\\/div\x3e\x27 +\\n          \x27\x3cdiv class\x3d\\\x22goal-marker\\\x22 style\x3d\\\x22left:\x27 + goalPct + \x27%\\\x22\x3e\x3c\\\/div\x3e\x27 +\\n        \x27\x3c\\\/div\x3e\x27 +\\n        \x27\x3cdiv class\x3d\\\x22goal-legend\\\x22\x3e\x27 +\\n          \x27\x3cdiv class\x3d\\\x22goal-legend-item\\\x22\x3e\x3cspan class\x3d\\\x22goal-legend-swatch won\\\x22\x3e\x3c\\\/span\x3e Won \x27 + fmtCurrency(won, true) + \x27\x3c\\\/div\x3e\x27 +\\n          \x27\x3cdiv class\x3d\\\x22goal-legend-item\\\x22\x3e\x3cspan class\x3d\\\x22goal-legend-swatch pending\\\x22\x3e\x3c\\\/span\x3e Pending (75% weighted) \x27 + fmtCurrency(pending, true) + \x27\x3c\\\/div\x3e\x27 +\\n        \x27\x3c\\\/div\x3e\x27 +\\n      \x27\x3c\\\/div\x3e\x27;\\n  \x7d\\n\\n  \\n  function renderChart(monthly) \x7b\\n    var container \x3d document.getElementById(\x27chart-container\x27);\\n    if (!monthly.length) \x7b container.innerHTML \x3d \x27\x3cdiv class\x3d\\\x22empty-msg\\\x22\x3eNo monthly data yet.\x3c\\\/div\x3e\x27; return; \x7d\\n\\n    var W \x3d 1100, H \x3d 320, PAD_L \x3d 60, PAD_R \x3d 24, PAD_T \x3d 16, PAD_B \x3d 50;\\n    var innerW \x3d W - PAD_L - PAD_R, innerH \x3d H - PAD_T - PAD_B;\\n    var n \x3d monthly.length;\\n    var groupW \x3d innerW \/ n;\\n    var barW \x3d Math.max(5, Math.min(20, (groupW - 10) \/ 3));\\n\\n    var maxVal \x3d 0;\\n    monthly.forEach(function(m) \x7b\\n      maxVal \x3d Math.max(maxVal, m.digital_won || 0, m.offline_won || 0, m.unknown_won || 0);\\n    \x7d);\\n    var yMax \x3d Math.max(maxVal * 1.15, 1000);\\n    var magnitude \x3d Math.pow(10, Math.floor(Math.log(yMax) \/ Math.LN10));\\n    yMax \x3d Math.ceil(yMax \/ magnitude) * magnitude;\\n\\n    var gridLines \x3d \x27\x27;\\n    for (var i \x3d 0; i \x3c\x3d 4; i++) \x7b\\n      var v \x3d yMax * (i \/ 4);\\n      var y \x3d PAD_T + innerH - (v \/ yMax) * innerH;\\n      gridLines +\x3d \x27\x3cline x1\x3d\\\x22\x27 + PAD_L + \x27\\\x22 y1\x3d\\\x22\x27 + y + \x27\\\x22 x2\x3d\\\x22\x27 + (W - PAD_R) + \x27\\\x22 y2\x3d\\\x22\x27 + y + \x27\\\x22 stroke\x3d\\\x22\x27 + (i \x3d\x3d\x3d 0 ? \x27#cbd5e0\x27 : \x27#edf2f7\x27) + \x27\\\x22 stroke-width\x3d\\\x221\\\x22\/\x3e\x27;\\n      gridLines +\x3d \x27\x3ctext x\x3d\\\x22\x27 + (PAD_L - 8) + \x27\\\x22 y\x3d\\\x22\x27 + (y + 4) + \x27\\\x22 text-anchor\x3d\\\x22end\\\x22 font-size\x3d\\\x2210\\\x22 fill\x3d\\\x22#a0aec0\\\x22\x3e\x27 + fmtCurrency(v, true) + \x27\x3c\\\/text\x3e\x27;\\n    \x7d\\n\\n    var bars \x3d \x27\x27, xLabels \x3d \x27\x27;\\n    var series \x3d \x5b\x5b\x27digital_won\x27, \x27#38a169\x27\x5d, \x5b\x27offline_won\x27, \x27#4a6cf7\x27\x5d, \x5b\x27unknown_won\x27, \x27#a0aec0\x27\x5d\x5d;\\n    monthly.forEach(function(m, i) \x7b\\n      var groupX \x3d PAD_L + i * groupW + groupW \/ 2;\\n      var startX \x3d groupX - (barW * 3 + 4) \/ 2;\\n      series.forEach(function(s, k) \x7b\\n        var val \x3d m\x5bs\x5b0\x5d\x5d || 0;\\n        var h \x3d (val \/ yMax) * innerH;\\n        var x \x3d startX + k * (barW + 2);\\n        var y \x3d PAD_T + innerH - h;\\n        if (val \x3e 0) \x7b\\n          bars +\x3d \x27\x3crect x\x3d\\\x22\x27 + x + \x27\\\x22 y\x3d\\\x22\x27 + y + \x27\\\x22 width\x3d\\\x22\x27 + barW + \x27\\\x22 height\x3d\\\x22\x27 + h + \x27\\\x22 fill\x3d\\\x22\x27 + s\x5b1\x5d + \x27\\\x22 rx\x3d\\\x222\\\x22\x3e\x3ctitle\x3e\x27 + m.month + \x27 \x27 + s\x5b0\x5d.replace(\x27_won\x27,\x27\x27) + \x27: \x27 + fmtCurrency(val, false) + \x27\x3c\\\/title\x3e\x3c\\\/rect\x3e\x27;\\n        \x7d\\n      \x7d);\\n      xLabels +\x3d \x27\x3ctext x\x3d\\\x22\x27 + groupX + \x27\\\x22 y\x3d\\\x22\x27 + (H - 28) + \x27\\\x22 text-anchor\x3d\\\x22middle\\\x22 font-size\x3d\\\x2210\\\x22 fill\x3d\\\x22#4a5568\\\x22\x3e\x27 + fmtMonthShort(m.month) + \x27\x3c\\\/text\x3e\x27;\\n    \x7d);\\n\\n    container.innerHTML \x3d \x27\x3csvg class\x3d\\\x22chart-svg\\\x22 viewBox\x3d\\\x220 0 \x27 + W + \x27 \x27 + H + \x27\\\x22 preserveAspectRatio\x3d\\\x22xMidYMid meet\\\x22\x3e\x27 + gridLines + bars + xLabels + \x27\x3c\\\/svg\x3e\x27;\\n  \x7d\\n\\n  function renderEstTable(rows) \x7b\\n    var tbody \x3d document.getElementById(\x27est-body\x27);\\n    if (!rows.length) \x7b tbody.innerHTML \x3d \x27\x3ctr\x3e\x3ctd colspan\x3d\\\x227\\\x22 class\x3d\\\x22empty-msg\\\x22\x3eNo estimate data yet.\x3c\\\/td\x3e\x3c\\\/tr\x3e\x27; return; \x7d\\n\\n    var tDW \x3d 0, tOW \x3d 0, tUW \x3d 0, tP \x3d 0, tE \x3d 0;\\n    rows.forEach(function(r) \x7b\\n      var dW \x3d r.digital_won || 0, oW \x3d r.offline_won || 0, uW \x3d r.unknown_won || 0;\\n      var pend \x3d (r.digital_pending || 0) + (r.offline_pending || 0) + (r.unknown_pending || 0);\\n      var est \x3d (r.digital_estimates || 0) + (r.offline_estimates || 0) + (r.unknown_estimates || 0);\\n      var totWon \x3d dW + oW + uW;\\n      tDW +\x3d dW; tOW +\x3d oW; tUW +\x3d uW; tP +\x3d pend; tE +\x3d est;\\n      var tr \x3d document.createElement(\x27tr\x27);\\n      tr.innerHTML \x3d\\n        \x27\x3ctd\x3e\x27 + fmtMonthShort(r.month) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtCurrency(dW, false) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtCurrency(oW, false) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtCurrency(uW, false) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtCurrency(pend, false) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtInt(est) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtCurrency(totWon, false) + \x27\x3c\\\/td\x3e\x27;\\n      tbody.appendChild(tr);\\n    \x7d);\\n\\n    var tr \x3d document.createElement(\x27tr\x27);\\n    tr.className \x3d \x27total-row\x27;\\n    tr.innerHTML \x3d\\n      \x27\x3ctd\x3eTotal\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtCurrency(tDW, false) + \x27\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtCurrency(tOW, false) + \x27\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtCurrency(tUW, false) + \x27\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtCurrency(tP, false) + \x27\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtInt(tE) + \x27\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtCurrency(tDW + tOW + tUW, false) + \x27\x3c\\\/td\x3e\x27;\\n    tbody.appendChild(tr);\\n  \x7d\\n\\n  function renderLeadsTable(rows) \x7b\\n    var tbody \x3d document.getElementById(\x27leads-body\x27);\\n    if (!rows.length) \x7b tbody.innerHTML \x3d \x27\x3ctr\x3e\x3ctd colspan\x3d\\\x225\\\x22 class\x3d\\\x22empty-msg\\\x22\x3eNo leads data yet.\x3c\\\/td\x3e\x3c\\\/tr\x3e\x27; return; \x7d\\n\\n    var tD \x3d 0, tO \x3d 0, tU \x3d 0;\\n    rows.forEach(function(r) \x7b\\n      var d \x3d r.digital_leads || 0, o \x3d r.offline_leads || 0, u \x3d r.unknown_leads || 0;\\n      tD +\x3d d; tO +\x3d o; tU +\x3d u;\\n      var tr \x3d document.createElement(\x27tr\x27);\\n      tr.innerHTML \x3d\\n        \x27\x3ctd\x3e\x27 + fmtMonthShort(r.month) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtInt(d) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtInt(o) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtInt(u) + \x27\x3c\\\/td\x3e\x27 +\\n        \x27\x3ctd\x3e\x27 + fmtInt(d + o + u) + \x27\x3c\\\/td\x3e\x27;\\n      tbody.appendChild(tr);\\n    \x7d);\\n\\n    var tr \x3d document.createElement(\x27tr\x27);\\n    tr.className \x3d \x27total-row\x27;\\n    tr.innerHTML \x3d\\n      \x27\x3ctd\x3eTotal\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtInt(tD) + \x27\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtInt(tO) + \x27\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtInt(tU) + \x27\x3c\\\/td\x3e\x27 +\\n      \x27\x3ctd\x3e\x27 + fmtInt(tD + tO + tU) + \x27\x3c\\\/td\x3e\x27;\\n    tbody.appendChild(tr);\\n  \x7d\\n\x3c\\\/script\x3e\\n\\n\x3c\\\/body\x3e\\n\x3c\\\/html\x3e\\n\x22,\x22ncc\x22:\x22\x7b\\\x22awhs\\\x22:true\x7d\x22\x7d", "", undefined, true , false  , "false", "https:\/\/n-mclkfjtr27ydasq2z6voyyzptvtdnlglwvhehwa-0lu-script.googleusercontent.com", "https:\/\/drive.google.com\/abuse?id\x3dAKkXjoxftu4M951UQsODWQFjfFI08GYZyN7VlGd6QBlGQZmV5q2dOVg9wDi4_16NEwHTC5CwjmAnTvEFTp9CdWBQgh99xukBRmyuIz6M%3A0\x26docurl\x3dhttps%3A%2F%2Fscript.google.com%2Fmacros%2Fs%2FAKfycbz4tSn8FKAes1zKOBRv5NUBopYpa3pVq3lvAr-r7iGwBFKEnlLV_PsjPDNrMPWhn3SN%2Fexec%3Fstatic%3D1");}
-el.src = 'https:\/\/n-mclkfjtr27ydasq2z6voyyzptvtdnlglwvhehwa-0lu-script.googleusercontent.com\/userCodeAppPanel';
-}());
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <div>Loading marketing performance data...</div>
+</div>
+
+<div id="dashboard" class="dashboard" style="display:none;">
+  <div class="section-header">
+    <h2>Marketing Performance Tracker</h2>
+    <span class="client-name" id="client-name">—</span>
+    <span class="period" id="period-label"></span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" data-tip="Total $ value of estimates marked won year-to-date, across all sources.">
+      <div class="label">Won Revenue YTD</div>
+      <div class="value" id="kpi-won">--</div>
+      <div class="sub">Sold estimate value this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Total $ value of estimates still pending / sent, awaiting client decision.">
+      <div class="label">Pending Revenue YTD</div>
+      <div class="value" id="kpi-pending">--</div>
+      <div class="sub">Open estimate value this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of estimates created year-to-date, all statuses.">
+      <div class="label">Estimates YTD</div>
+      <div class="value" id="kpi-estimates">--</div>
+      <div class="sub">Estimates created this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of new leads/contacts created year-to-date.">
+      <div class="label">Leads YTD</div>
+      <div class="value" id="kpi-leads">--</div>
+      <div class="sub">New contacts this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Share of attributed won revenue from digital sources. Measured against digital&#43;offline only; Unknown-source revenue is excluded.">
+      <div class="label">Digital Share</div>
+      <div class="value" id="kpi-digital">--</div>
+      <div class="sub">Digital % of attributed won $</div>
+    </div>
+  </div>
+
+  <div id="goal-container"></div>
+  <div id="notes-container"></div>
+
+  <div class="card">
+    <h3>Won Revenue by Marketing Bucket — Last 12 Months</h3>
+    <div class="chart-container" id="chart-container"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch swatch-digital"></span> Digital</div>
+      <div class="legend-item"><span class="legend-swatch swatch-offline"></span> Offline</div>
+      <div class="legend-item"><span class="legend-swatch swatch-unknown"></span> Unknown</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Monthly Estimates Breakdown</h3>
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th>Month</th><th>Digital Won</th><th>Offline Won</th><th>Unknown Won</th>
+          <th>Pending $</th><th>Estimates</th><th>Total Won</th>
+        </tr>
+      </thead>
+      <tbody id="est-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Leads by Source — Monthly</h3>
+    <table class="cat-table">
+      <thead>
+        <tr><th>Month</th><th>Digital</th><th>Offline</th><th>Unknown</th><th>Total Leads</th></tr>
+      </thead>
+      <tbody id="leads-body"></tbody>
+    </table>
+  </div>
+
+  <div class="powered-by">Halstead Marketing Performance Tracker</div>
+</div>
+
+<script>
+  var PENDING_WEIGHT = 0.75;
+
+  
+  
+  
+  if (window.__DASH_DATA__) {
+    renderDashboard(window.__DASH_DATA__);
+  } else {
+    document.getElementById('loading').innerHTML =
+      '<div class="error-msg">Dashboard data missing — publisher inject failed.</div>';
+  }
+
+  function renderDashboard(data) {
+    if (!data || data.error) {
+      document.getElementById('loading').innerHTML =
+        '<div class="error-msg">Failed to load: ' + ((data && data.error) || 'no data') + '</div>';
+      return;
+    }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    document.getElementById('client-name').textContent = '— ' + (data.clientName || '');
+    document.getElementById('period-label').textContent = 'Last updated: ' + (data.lastUpdated || '');
+
+    renderKPIs(data.summary || {});
+    renderGoalBar(data.summary || {});
+    renderNotes(data.notes || []);
+    renderChart(data.estMonthly12 || []);
+    renderEstTable(data.estTable || []);
+    renderLeadsTable(data.leadsTable || []);
+  }
+
+  function renderNotes(notes) {
+    var c = document.getElementById('notes-container');
+    if (!notes || !notes.length) { c.innerHTML = ''; return; }
+    c.innerHTML = notes.map(function (n) {
+      var accent = n.accent === 'warn' ? 'border-left-color:#ed8936;background:#fffaf0;'
+                 : n.accent === 'muted' ? 'border-left-color:#a0aec0;' : '';
+      var label = n.label ? '<strong>' + escHtml(n.label) + '</strong> ' : '';
+      return '<div class="caption" style="' + accent + '">' + label + mdBold(escHtml(n.text)) + '</div>';
+    }).join('');
+  }
+  function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function mdBold(s) { return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); }
+
+  function fmtCurrency(n, compact) {
+    if (n == null) return '$0';
+    if (compact && n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+    if (compact && n >= 1000) return '$' + (n / 1000).toFixed(0) + 'k';
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function fmtInt(n) { return (n == null ? 0 : Math.round(n)).toLocaleString(); }
+  function fmtPct(n) { return (n == null ? 0 : n) + '%'; }
+  function fmtMonthShort(m) {
+    if (!m) return '';
+    var parts = String(m).split('-');
+    if (parts.length < 2) return m;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[parseInt(parts[1], 10) - 1] + " '" + parts[0].slice(2);
+  }
+
+  function renderKPIs(s) {
+    document.getElementById('kpi-won').textContent       = fmtCurrency(s.wonRevenueYtd, true);
+    document.getElementById('kpi-pending').textContent   = fmtCurrency(s.pendingRevenueYtd, true);
+    document.getElementById('kpi-estimates').textContent = fmtInt(s.estimatesYtd);
+    document.getElementById('kpi-leads').textContent     = fmtInt(s.leadsYtd);
+    document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
+  }
+
+  function renderGoalBar(s) {
+    var container = document.getElementById('goal-container');
+    var goal = s.revenueGoal;
+    var won = s.wonRevenueYtd || 0;
+    var pending = (s.pendingRevenueYtd || 0) * PENDING_WEIGHT;
+    var year = new Date().getFullYear();
+
+    if (!goal || goal <= 0) {
+      container.innerHTML =
+        '<div class="goal-progress">' +
+          '<div class="goal-header"><div class="goal-title">Revenue Goal Progress — ' + year + '</div></div>' +
+          '<div class="goal-empty">Revenue goal not yet set for ' + year + '.</div>' +
+        '</div>';
+      return;
+    }
+
+    var denom = Math.max(goal, won + pending);
+    var wonPct = denom > 0 ? (won / denom) * 100 : 0;
+    var pendingPct = denom > 0 ? (pending / denom) * 100 : 0;
+    var goalPct = denom > 0 ? (goal / denom) * 100 : 100;
+    var wonOfGoal = (won / goal) * 100;
+    var wpOfGoal = ((won + pending) / goal) * 100;
+    var pendingAtEnd = (wonPct + pendingPct) >= 99.5 ? ' at-end' : '';
+
+    container.innerHTML =
+      '<div class="goal-progress">' +
+        '<div class="goal-header">' +
+          '<div class="goal-title">Revenue Goal Progress — ' + year + '</div>' +
+          '<div class="goal-stats">' +
+            '<div class="goal-stat"><strong>' + wonOfGoal.toFixed(1) + '%</strong> of goal closed</div>' +
+            '<div class="goal-stat"><strong>' + wpOfGoal.toFixed(1) + '%</strong> incl. weighted pipeline</div>' +
+            '<div class="goal-stat">Goal <strong>' + fmtCurrency(goal, true) + '</strong></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="goal-bar-track">' +
+          '<div class="goal-bar-fill-won" style="width:' + wonPct + '%"></div>' +
+          '<div class="goal-bar-fill-pending' + pendingAtEnd + '" style="left:' + wonPct + '%;width:' + pendingPct + '%"></div>' +
+          '<div class="goal-marker" style="left:' + goalPct + '%"></div>' +
+        '</div>' +
+        '<div class="goal-legend">' +
+          '<div class="goal-legend-item"><span class="goal-legend-swatch won"></span> Won ' + fmtCurrency(won, true) + '</div>' +
+          '<div class="goal-legend-item"><span class="goal-legend-swatch pending"></span> Pending (75% weighted) ' + fmtCurrency(pending, true) + '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderChart(monthly) {
+    var container = document.getElementById('chart-container');
+    if (!monthly.length) { container.innerHTML = '<div class="empty-msg">No monthly data yet.</div>'; return; }
+
+    var W = 1100, H = 320, PAD_L = 60, PAD_R = 24, PAD_T = 16, PAD_B = 50;
+    var innerW = W - PAD_L - PAD_R, innerH = H - PAD_T - PAD_B;
+    var n = monthly.length;
+    var groupW = innerW / n;
+    var barW = Math.max(5, Math.min(20, (groupW - 10) / 3));
+
+    var maxVal = 0;
+    monthly.forEach(function(m) {
+      maxVal = Math.max(maxVal, m.digital_won || 0, m.offline_won || 0, m.unknown_won || 0);
+    });
+    var yMax = Math.max(maxVal * 1.15, 1000);
+    var magnitude = Math.pow(10, Math.floor(Math.log(yMax) / Math.LN10));
+    yMax = Math.ceil(yMax / magnitude) * magnitude;
+
+    var gridLines = '';
+    for (var i = 0; i <= 4; i++) {
+      var v = yMax * (i / 4);
+      var y = PAD_T + innerH - (v / yMax) * innerH;
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 0 ? '#cbd5e0' : '#edf2f7') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + fmtCurrency(v, true) + '</text>';
+    }
+
+    var bars = '', xLabels = '';
+    var series = [['digital_won', '#38a169'], ['offline_won', '#4a6cf7'], ['unknown_won', '#a0aec0']];
+    monthly.forEach(function(m, i) {
+      var groupX = PAD_L + i * groupW + groupW / 2;
+      var startX = groupX - (barW * 3 + 4) / 2;
+      series.forEach(function(s, k) {
+        var val = m[s[0]] || 0;
+        var h = (val / yMax) * innerH;
+        var x = startX + k * (barW + 2);
+        var y = PAD_T + innerH - h;
+        if (val > 0) {
+          bars += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + h + '" fill="' + s[1] + '" rx="2"><title>' + m.month + ' ' + s[0].replace('_won','') + ': ' + fmtCurrency(val, false) + '</title></rect>';
+        }
+      });
+      xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="#4a5568">' + fmtMonthShort(m.month) + '</text>';
+    });
+
+    container.innerHTML = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' + gridLines + bars + xLabels + '</svg>';
+  }
+
+  function renderEstTable(rows) {
+    var tbody = document.getElementById('est-body');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-msg">No estimate data yet.</td></tr>'; return; }
+    var tDW = 0, tOW = 0, tUW = 0, tP = 0, tE = 0;
+    rows.forEach(function(r) {
+      var dW = r.digital_won || 0, oW = r.offline_won || 0, uW = r.unknown_won || 0;
+      var pend = (r.digital_pending || 0) + (r.offline_pending || 0) + (r.unknown_pending || 0);
+      var est = (r.digital_estimates || 0) + (r.offline_estimates || 0) + (r.unknown_estimates || 0);
+      var totWon = dW + oW + uW;
+      tDW += dW; tOW += oW; tUW += uW; tP += pend; tE += est;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + fmtMonthShort(r.month) + '</td>' +
+        '<td>' + fmtCurrency(dW, false) + '</td>' +
+        '<td>' + fmtCurrency(oW, false) + '</td>' +
+        '<td>' + fmtCurrency(uW, false) + '</td>' +
+        '<td>' + fmtCurrency(pend, false) + '</td>' +
+        '<td>' + fmtInt(est) + '</td>' +
+        '<td>' + fmtCurrency(totWon, false) + '</td>';
+      tbody.appendChild(tr);
+    });
+    var tr = document.createElement('tr');
+    tr.className = 'total-row';
+    tr.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtCurrency(tDW, false) + '</td>' +
+      '<td>' + fmtCurrency(tOW, false) + '</td>' +
+      '<td>' + fmtCurrency(tUW, false) + '</td>' +
+      '<td>' + fmtCurrency(tP, false) + '</td>' +
+      '<td>' + fmtInt(tE) + '</td>' +
+      '<td>' + fmtCurrency(tDW + tOW + tUW, false) + '</td>';
+    tbody.appendChild(tr);
+  }
+
+  function renderLeadsTable(rows) {
+    var tbody = document.getElementById('leads-body');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">No leads data yet.</td></tr>'; return; }
+    var tD = 0, tO = 0, tU = 0;
+    rows.forEach(function(r) {
+      var d = r.digital_leads || 0, o = r.offline_leads || 0, u = r.unknown_leads || 0;
+      tD += d; tO += o; tU += u;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + fmtMonthShort(r.month) + '</td>' +
+        '<td>' + fmtInt(d) + '</td>' +
+        '<td>' + fmtInt(o) + '</td>' +
+        '<td>' + fmtInt(u) + '</td>' +
+        '<td>' + fmtInt(d + o + u) + '</td>';
+      tbody.appendChild(tr);
+    });
+    var tr = document.createElement('tr');
+    tr.className = 'total-row';
+    tr.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtInt(tD) + '</td>' +
+      '<td>' + fmtInt(tO) + '</td>' +
+      '<td>' + fmtInt(tU) + '</td>' +
+      '<td>' + fmtInt(tD + tO + tU) + '</td>';
+    tbody.appendChild(tr);
+  }
 </script>
+
 </body>
 </html>
