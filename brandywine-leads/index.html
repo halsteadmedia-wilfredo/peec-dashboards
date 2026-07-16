@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
+
+  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #4a6cf7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;
+  }
+  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
+  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
+  .section-header .period {
+    margin-left: auto; font-size: 13px; color: #718096;
+    background: #f7fafc; padding: 5px 12px; border-radius: 6px;
+  }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card {
+    background: #fff; border-radius: 10px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    position: relative;
+  }
+  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
+  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
+
+  .kpi-card[data-tip] { cursor: help; }
+  .kpi-card[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400;
+    line-height: 1.5; padding: 10px 14px; border-radius: 8px;
+    width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
+    z-index: 100;
+  }
+  .kpi-card[data-tip]::before {
+    content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: #1a202c;
+    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
+    z-index: 100;
+  }
+  .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
+  .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
+
+  .card {
+    background: #fff; border-radius: 10px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    margin-bottom: 24px;
+  }
+  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
+
+  .chart-container { position: relative; height: 320px; overflow: hidden; }
+  .chart-svg { width: 100%; height: 100%; }
+
+  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #4a5568; align-items: center; justify-content: flex-end; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+  .swatch-digital { background: #38a169; }
+  .swatch-offline { background: #4a6cf7; }
+  .swatch-qualified { background: #ed8936; }
+
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cat-table th {
+    text-align: right; padding: 10px 12px; color: #718096; font-weight: 500;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0; background: #fafbfc;
+  }
+  .cat-table th:first-child { text-align: left; }
+  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; text-align: right; }
+  .cat-table td:first-child { text-align: left; font-weight: 500; }
+  .cat-table tr:hover { background: #f7fafc; }
+  .cat-table .total-row { background: #f7fafc; font-weight: 600; }
+  .cat-table .total-row td { border-top: 2px solid #e2e8f0; border-bottom: none; }
+
+  .caption {
+    font-size: 12px; color: #718096; line-height: 1.6;
+    padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 24px;
+    border-left: 3px solid #4a6cf7;
+  }
+  .caption strong { color: #2d3748; }
+
+  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
+  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
+</style>
+<script>window.__DASH_DATA__ = {"clientName":"Brandywine Designs (Leads)","lastUpdated":"2026-07-16","summary":{"totalLeadsYtd":106,"qualifiedLeadsYtd":0,"qualifiedRatePct":0,"digitalSharePct":98.1},"monthly12":[{"month":"2026-02","digital_total":0,"offline_total":2,"digital_qualified":0,"offline_qualified":0},{"month":"2026-03","digital_total":43,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-04","digital_total":29,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-05","digital_total":32,"offline_total":0,"digital_qualified":0,"offline_qualified":0}],"monthlyTable":[{"month":"2026-05","digital_total":32,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-04","digital_total":29,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-03","digital_total":43,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-02","digital_total":0,"offline_total":2,"digital_qualified":0,"offline_qualified":0}]};</script>
+</head>
+<body>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <div>Loading lead performance data...</div>
+</div>
+
+<div id="dashboard" class="dashboard" style="display:none;">
+  <div class="section-header">
+    <h2>Lead Performance Tracker</h2>
+    <span class="client-name" id="client-name">—</span>
+    <span class="period" id="period-label"></span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" data-tip="Count of all form submissions year-to-date, regardless of qualification or source.">
+      <div class="label">Total Leads YTD</div>
+      <div class="value" id="kpi-total">--</div>
+      <div class="sub">All form submissions this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of leads marked Qualified by the sales team year-to-date.">
+      <div class="label">Qualified Leads YTD</div>
+      <div class="value" id="kpi-qualified">--</div>
+      <div class="sub">Vetted as real opportunities</div>
+    </div>
+    <div class="kpi-card" data-tip="Percentage of YTD leads marked Qualified. Calculated as Qualified ÷ Total.">
+      <div class="label">Qualified Rate</div>
+      <div class="value" id="kpi-rate">--</div>
+      <div class="sub">Qualified ÷ Total leads</div>
+    </div>
+    <div class="kpi-card" data-tip="Share of YTD leads from digital marketing channels (Google Ads, organic search, paid social, website forms, CallRail-tracked calls). The rest comes from offline sources.">
+      <div class="label">Digital Share</div>
+      <div class="value" id="kpi-digital">--</div>
+      <div class="sub">% of leads from digital marketing</div>
+    </div>
+  </div>
+
+  <div class="caption">
+    <strong>Digital</strong> includes Google Ads, organic search, paid social, website forms, and CallRail-tracked calls.
+    <strong>Offline</strong> includes referrals, home shows, existing clients, and other non-digital sources.
+  </div>
+
+  <div class="card">
+    <h3>Leads by Marketing Bucket — Last 12 Months</h3>
+    <div class="chart-container" id="chart-container"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch swatch-digital"></span> Digital</div>
+      <div class="legend-item"><span class="legend-swatch swatch-offline"></span> Offline</div>
+      <div class="legend-item"><span class="legend-swatch swatch-qualified"></span> Qualified (total)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Monthly Breakdown</h3>
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Digital Leads</th>
+          <th>Offline Leads</th>
+          <th>Total Leads</th>
+          <th>Qualified</th>
+          <th>Qualified %</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <div class="powered-by">Data auto-refreshed on every Monday update &nbsp;&middot;&nbsp; Halstead Lead Performance Tracker</div>
+</div>
+
+<script>
+  google.script.run
+    .withSuccessHandler(renderDashboard)
+    .withFailureHandler(showError)
+    .getDashboardData();
+
+  function showError(err) {
+    document.getElementById('loading').innerHTML =
+      '<div class="error-msg">Failed to load data: ' + (err && err.message ? err.message : err) + '</div>';
+  }
+
+  function renderDashboard(data) {
+    if (!data || data.error) { showError({ message: (data && data.error) || 'No data' }); return; }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    document.getElementById('client-name').textContent = '— ' + (data.clientName || '');
+    document.getElementById('period-label').textContent = 'Last updated: ' + (data.lastUpdated || '');
+
+    renderKPIs(data.summary || {});
+    renderChart(data.monthly12 || []);
+    renderTable(data.monthlyTable || []);
+  }
+
+  function fmtInt(n) { return (n == null ? 0 : Math.round(n)).toLocaleString(); }
+  function fmtPct(n) { return (n == null ? 0 : n) + '%'; }
+  function fmtMonthShort(m) {
+    if (!m) return '';
+    var parts = String(m).split('-');
+    if (parts.length < 2) return m;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var idx = parseInt(parts[1], 10) - 1;
+    return months[idx] + " '" + parts[0].slice(2);
+  }
+
+  function renderKPIs(s) {
+    document.getElementById('kpi-total').textContent     = fmtInt(s.totalLeadsYtd);
+    document.getElementById('kpi-qualified').textContent = fmtInt(s.qualifiedLeadsYtd);
+    document.getElementById('kpi-rate').textContent      = fmtPct(s.qualifiedRatePct);
+    document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
+  }
+
+  function renderChart(monthly) {
+    var container = document.getElementById('chart-container');
+    if (!monthly.length) {
+      container.innerHTML = '<div class="empty-msg">No monthly data yet.</div>';
+      return;
+    }
+
+    var W = 1100, H = 320, PAD_L = 50, PAD_R = 24, PAD_T = 16, PAD_B = 50;
+    var innerW = W - PAD_L - PAD_R, innerH = H - PAD_T - PAD_B;
+    var n = monthly.length;
+    var groupW = innerW / n;
+    var barW = Math.max(8, Math.min(22, (groupW - 12) / 3));
+
+    var maxVal = 0;
+    monthly.forEach(function(m) {
+      var total = (m.digital_total || 0) + (m.offline_total || 0);
+      if (total > maxVal) maxVal = total;
+    });
+    var yMax = Math.max(maxVal * 1.15, 5);
+
+    var magnitude = Math.pow(10, Math.floor(Math.log(yMax) / Math.LN10));
+    yMax = Math.ceil(yMax / magnitude) * magnitude;
+
+    var gridLines = '';
+    for (var i = 0; i <= 4; i++) {
+      var v = yMax * (i / 4);
+      var y = PAD_T + innerH - (v / yMax) * innerH;
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 0 ? '#cbd5e0' : '#edf2f7') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + fmtInt(v) + '</text>';
+    }
+
+    var bars = '';
+    var xLabels = '';
+    monthly.forEach(function(m, i) {
+      var groupX = PAD_L + i * groupW + groupW / 2;
+      var d = m.digital_total || 0;
+      var o = m.offline_total || 0;
+      var q = (m.digital_qualified || 0) + (m.offline_qualified || 0);
+      var dH = (d / yMax) * innerH;
+      var oH = (o / yMax) * innerH;
+      var qH = (q / yMax) * innerH;
+
+      var dX = groupX - barW * 1.5 - 2;
+      var oX = groupX - barW * 0.5;
+      var qX = groupX + barW * 0.5 + 2;
+      var dY = PAD_T + innerH - dH;
+      var oY = PAD_T + innerH - oH;
+      var qY = PAD_T + innerH - qH;
+
+      if (d > 0) bars += '<rect x="' + dX + '" y="' + dY + '" width="' + barW + '" height="' + dH + '" fill="#38a169" rx="2"><title>' + m.month + ' Digital: ' + d + '</title></rect>';
+      if (o > 0) bars += '<rect x="' + oX + '" y="' + oY + '" width="' + barW + '" height="' + oH + '" fill="#4a6cf7" rx="2"><title>' + m.month + ' Offline: ' + o + '</title></rect>';
+      if (q > 0) bars += '<rect x="' + qX + '" y="' + qY + '" width="' + barW + '" height="' + qH + '" fill="#ed8936" rx="2"><title>' + m.month + ' Qualified: ' + q + '</title></rect>';
+
+      xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="#4a5568">' + fmtMonthShort(m.month) + '</text>';
+      var total = d + o;
+      if (total > 0) {
+        var topY = Math.min(dY, oY, qY) - 6;
+        xLabels += '<text x="' + groupX + '" y="' + topY + '" text-anchor="middle" font-size="9" fill="#718096">' + total + '</text>';
+      }
+    });
+
+    container.innerHTML =
+      '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' +
+        gridLines + bars + xLabels +
+      '</svg>';
+  }
+
+  function renderTable(rows) {
+    var tbody = document.getElementById('table-body');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No monthly data yet.</td></tr>';
+      return;
+    }
+
+    var tD = 0, tO = 0, tQ = 0;
+    rows.forEach(function(r) {
+      var d = r.digital_total || 0, o = r.offline_total || 0;
+      var q = (r.digital_qualified || 0) + (r.offline_qualified || 0);
+      var t = d + o;
+      tD += d; tO += o; tQ += q;
+      var pct = t > 0 ? Math.round(q / t * 100) : 0;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + fmtMonthShort(r.month) + '</td>' +
+        '<td>' + fmtInt(d) + '</td>' +
+        '<td>' + fmtInt(o) + '</td>' +
+        '<td>' + fmtInt(t) + '</td>' +
+        '<td>' + fmtInt(q) + '</td>' +
+        '<td>' + pct + '%</td>';
+      tbody.appendChild(tr);
+    });
+
+    var tT = tD + tO;
+    var tPct = tT > 0 ? Math.round(tQ / tT * 100) : 0;
+    var totalTr = document.createElement('tr');
+    totalTr.className = 'total-row';
+    totalTr.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtInt(tD) + '</td>' +
+      '<td>' + fmtInt(tO) + '</td>' +
+      '<td>' + fmtInt(tT) + '</td>' +
+      '<td>' + fmtInt(tQ) + '</td>' +
+      '<td>' + tPct + '%</td>';
+    tbody.appendChild(totalTr);
+  }
+</script>
+
+</body>
+</html>
