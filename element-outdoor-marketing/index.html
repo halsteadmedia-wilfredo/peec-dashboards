@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
+
+  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #4a6cf7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;
+  }
+  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
+  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
+  .section-header .period {
+    margin-left: auto; font-size: 13px; color: #718096;
+    background: #f7fafc; padding: 5px 12px; border-radius: 6px;
+  }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi-card {
+    background: #fff; border-radius: 10px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    position: relative;
+  }
+  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
+  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
+
+  .kpi-card[data-tip] { cursor: help; }
+  .kpi-card[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400;
+    line-height: 1.5; padding: 10px 14px; border-radius: 8px;
+    width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
+    z-index: 100;
+  }
+  .kpi-card[data-tip]::before {
+    content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: #1a202c;
+    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
+    z-index: 100;
+  }
+  .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
+  .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
+
+  .card {
+    background: #fff; border-radius: 10px; padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    margin-bottom: 24px;
+  }
+  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
+
+  .chart-container { position: relative; height: 320px; overflow: hidden; }
+  .chart-svg { width: 100%; height: 100%; }
+
+  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #4a5568; align-items: center; justify-content: flex-end; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+  .swatch-digital { background: #38a169; }
+  .swatch-offline { background: #4a6cf7; }
+
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cat-table th {
+    text-align: right; padding: 10px 12px; color: #718096; font-weight: 500;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0; background: #fafbfc;
+  }
+  .cat-table th:first-child { text-align: left; }
+  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; text-align: right; }
+  .cat-table td:first-child { text-align: left; font-weight: 500; }
+  .cat-table tr:hover { background: #f7fafc; }
+  .cat-table .total-row { background: #f7fafc; font-weight: 600; }
+  .cat-table .total-row td { border-top: 2px solid #e2e8f0; border-bottom: none; }
+
+  .caption {
+    font-size: 12px; color: #718096; line-height: 1.6;
+    padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 24px;
+    border-left: 3px solid #4a6cf7;
+  }
+  .caption strong { color: #2d3748; }
+
+  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
+  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
+</style>
+<script>window.__DASH_DATA__ = {"clientName":"Element Outdoor Living (Marketing)","lastUpdated":"2026-07-16","summary":{"totalRevenueYtd":1582960,"wonJobsYtd":364,"avgDealSize":4349,"digitalSharePct":29,"qualifiedLeadsYtd":33},"monthly12":[{"month":"2025-06","digital_revenue":0,"offline_revenue":129454.43000000001,"digital_won":0,"offline_won":10,"digital_leads":0,"offline_leads":12},{"month":"2025-07","digital_revenue":0,"offline_revenue":46952.76,"digital_won":0,"offline_won":4,"digital_leads":0,"offline_leads":4},{"month":"2025-08","digital_revenue":0,"offline_revenue":73782.3,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":3},{"month":"2025-09","digital_revenue":0,"offline_revenue":32407.64,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":4},{"month":"2025-10","digital_revenue":0,"offline_revenue":71524.68,"digital_won":0,"offline_won":7,"digital_leads":0,"offline_leads":7},{"month":"2025-11","digital_revenue":0,"offline_revenue":66689.93,"digital_won":0,"offline_won":12,"digital_leads":0,"offline_leads":14},{"month":"2025-12","digital_revenue":0,"offline_revenue":655430.3300000001,"digital_won":0,"offline_won":5,"digital_leads":0,"offline_leads":5},{"month":"2026-01","digital_revenue":0,"offline_revenue":39304.58,"digital_won":0,"offline_won":6,"digital_leads":0,"offline_leads":174},{"month":"2026-02","digital_revenue":134332.41,"offline_revenue":379814.08999999997,"digital_won":13,"offline_won":102,"digital_leads":13,"offline_leads":102},{"month":"2026-03","digital_revenue":186265.25,"offline_revenue":186585.18,"digital_won":13,"offline_won":71,"digital_leads":13,"offline_leads":71},{"month":"2026-04","digital_revenue":138377.63999999998,"offline_revenue":309290.87999999995,"digital_won":24,"offline_won":63,"digital_leads":24,"offline_leads":63},{"month":"2026-05","digital_revenue":0,"offline_revenue":208990.25999999992,"digital_won":0,"offline_won":72,"digital_leads":0,"offline_leads":72}],"monthlyTable":[{"month":"2026-05","digital_revenue":0,"offline_revenue":208990.25999999992,"digital_won":0,"offline_won":72,"digital_leads":0,"offline_leads":72},{"month":"2026-04","digital_revenue":138377.63999999998,"offline_revenue":309290.87999999995,"digital_won":24,"offline_won":63,"digital_leads":24,"offline_leads":63},{"month":"2026-03","digital_revenue":186265.25,"offline_revenue":186585.18,"digital_won":13,"offline_won":71,"digital_leads":13,"offline_leads":71},{"month":"2026-02","digital_revenue":134332.41,"offline_revenue":379814.08999999997,"digital_won":13,"offline_won":102,"digital_leads":13,"offline_leads":102},{"month":"2026-01","digital_revenue":0,"offline_revenue":39304.58,"digital_won":0,"offline_won":6,"digital_leads":0,"offline_leads":174},{"month":"2025-12","digital_revenue":0,"offline_revenue":655430.3300000001,"digital_won":0,"offline_won":5,"digital_leads":0,"offline_leads":5},{"month":"2025-11","digital_revenue":0,"offline_revenue":66689.93,"digital_won":0,"offline_won":12,"digital_leads":0,"offline_leads":14},{"month":"2025-10","digital_revenue":0,"offline_revenue":71524.68,"digital_won":0,"offline_won":7,"digital_leads":0,"offline_leads":7},{"month":"2025-09","digital_revenue":0,"offline_revenue":32407.64,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":4},{"month":"2025-08","digital_revenue":0,"offline_revenue":73782.3,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":3},{"month":"2025-07","digital_revenue":0,"offline_revenue":46952.76,"digital_won":0,"offline_won":4,"digital_leads":0,"offline_leads":4},{"month":"2025-06","digital_revenue":0,"offline_revenue":129454.43000000001,"digital_won":0,"offline_won":10,"digital_leads":0,"offline_leads":12},{"month":"2025-05","digital_revenue":0,"offline_revenue":189053.72000000003,"digital_won":0,"offline_won":17,"digital_leads":0,"offline_leads":18}],"qualified12":[{"month":"2025-02","digital_total":25,"offline_total":1,"digital_qualified":10,"offline_qualified":0},{"month":"2025-03","digital_total":27,"offline_total":11,"digital_qualified":12,"offline_qualified":9},{"month":"2025-04","digital_total":31,"offline_total":7,"digital_qualified":18,"offline_qualified":7},{"month":"2025-05","digital_total":34,"offline_total":13,"digital_qualified":10,"offline_qualified":9},{"month":"2025-06","digital_total":36,"offline_total":6,"digital_qualified":15,"offline_qualified":5},{"month":"2025-07","digital_total":25,"offline_total":13,"digital_qualified":8,"offline_qualified":11},{"month":"2025-08","digital_total":13,"offline_total":10,"digital_qualified":5,"offline_qualified":6},{"month":"2025-09","digital_total":14,"offline_total":14,"digital_qualified":10,"offline_qualified":8},{"month":"2025-10","digital_total":13,"offline_total":7,"digital_qualified":12,"offline_qualified":7},{"month":"2025-11","digital_total":16,"offline_total":9,"digital_qualified":12,"offline_qualified":7},{"month":"2025-12","digital_total":16,"offline_total":10,"digital_qualified":12,"offline_qualified":9},{"month":"2026-01","digital_total":24,"offline_total":17,"digital_qualified":18,"offline_qualified":15}],"qualifiedTable":[{"month":"2026-01","digital_total":24,"offline_total":17,"digital_qualified":18,"offline_qualified":15},{"month":"2025-12","digital_total":16,"offline_total":10,"digital_qualified":12,"offline_qualified":9},{"month":"2025-11","digital_total":16,"offline_total":9,"digital_qualified":12,"offline_qualified":7},{"month":"2025-10","digital_total":13,"offline_total":7,"digital_qualified":12,"offline_qualified":7},{"month":"2025-09","digital_total":14,"offline_total":14,"digital_qualified":10,"offline_qualified":8},{"month":"2025-08","digital_total":13,"offline_total":10,"digital_qualified":5,"offline_qualified":6},{"month":"2025-07","digital_total":25,"offline_total":13,"digital_qualified":8,"offline_qualified":11},{"month":"2025-06","digital_total":36,"offline_total":6,"digital_qualified":15,"offline_qualified":5},{"month":"2025-05","digital_total":34,"offline_total":13,"digital_qualified":10,"offline_qualified":9},{"month":"2025-04","digital_total":31,"offline_total":7,"digital_qualified":18,"offline_qualified":7},{"month":"2025-03","digital_total":27,"offline_total":11,"digital_qualified":12,"offline_qualified":9},{"month":"2025-02","digital_total":25,"offline_total":1,"digital_qualified":10,"offline_qualified":0},{"month":"2025-01","digital_total":29,"offline_total":12,"digital_qualified":8,"offline_qualified":6}]};</script>
+</head>
+<body>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <div>Loading marketing performance data...</div>
+</div>
+
+<div id="dashboard" class="dashboard" style="display:none;">
+  <div class="section-header">
+    <h2>Marketing Performance Tracker</h2>
+    <span class="client-name" id="client-name">—</span>
+    <span class="period" id="period-label"></span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" data-tip="Total revenue from all closed/sold jobs year-to-date, attributed across both digital and offline marketing channels.">
+      <div class="label">Total Revenue YTD</div>
+      <div class="value" id="kpi-revenue">--</div>
+      <div class="sub">Sum of all closed-job revenue this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of jobs that closed/sold this year-to-date.">
+      <div class="label">Won Jobs YTD</div>
+      <div class="value" id="kpi-jobs">--</div>
+      <div class="sub">Total closed jobs in the current year</div>
+    </div>
+    <div class="kpi-card" data-tip="Average revenue per closed job year-to-date. Calculated as total revenue ÷ won jobs.">
+      <div class="label">Avg. Deal Size</div>
+      <div class="value" id="kpi-avg">--</div>
+      <div class="sub">Total revenue ÷ won jobs</div>
+    </div>
+    <div class="kpi-card" data-tip="Share of YTD revenue attributed to digital marketing channels (Google Ads, organic search, paid social, website forms, CallRail-tracked calls). The rest comes from offline sources.">
+      <div class="label">Digital Share</div>
+      <div class="value" id="kpi-digital">--</div>
+      <div class="sub">% of revenue from digital marketing</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of leads marked Qualified in the CRM year-to-date, across all sources. A qualified lead is one the sales team has vetted as a real opportunity.">
+      <div class="label">Qualified Leads YTD</div>
+      <div class="value" id="kpi-qualified">--</div>
+      <div class="sub">Vetted leads in the current year</div>
+    </div>
+  </div>
+
+  <div class="caption">
+    <strong>Digital</strong> includes Google Ads, organic search, paid social, website forms, and CallRail-tracked calls.
+    <strong>Offline</strong> includes referrals, home shows, existing clients, and other non-digital sources.
+  </div>
+
+  <div class="card">
+    <h3>Revenue by Marketing Bucket — Last 12 Months</h3>
+    <div class="chart-container" id="chart-container"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch swatch-digital"></span> Digital</div>
+      <div class="legend-item"><span class="legend-swatch swatch-offline"></span> Offline</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Monthly Revenue Breakdown</h3>
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Digital Revenue</th>
+          <th>Digital Won</th>
+          <th>Offline Revenue</th>
+          <th>Offline Won</th>
+          <th>Total Revenue</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Qualified Leads by Source — Monthly</h3>
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Digital Qualified</th>
+          <th>Offline Qualified</th>
+          <th>Total Qualified</th>
+          <th>Total Leads</th>
+          <th>Qualified %</th>
+        </tr>
+      </thead>
+      <tbody id="qualified-body"></tbody>
+    </table>
+  </div>
+
+  <div class="powered-by">Data auto-refreshed on every Monday status change &nbsp;&middot;&nbsp; Halstead Marketing Performance Tracker</div>
+</div>
+
+<script>
+  google.script.run
+    .withSuccessHandler(renderDashboard)
+    .withFailureHandler(showError)
+    .getDashboardData();
+
+  function showError(err) {
+    document.getElementById('loading').innerHTML =
+      '<div class="error-msg">Failed to load data: ' + (err && err.message ? err.message : err) + '</div>';
+  }
+
+  function renderDashboard(data) {
+    if (!data || data.error) { showError({ message: (data && data.error) || 'No data' }); return; }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    document.getElementById('client-name').textContent = '— ' + (data.clientName || '');
+    document.getElementById('period-label').textContent = 'Last updated: ' + (data.lastUpdated || '');
+
+    renderKPIs(data.summary || {});
+    renderChart(data.monthly12 || []);
+    renderTable(data.monthlyTable || []);
+    renderQualifiedTable(data.qualifiedTable || []);
+  }
+
+  function fmtCurrency(n, compact) {
+    if (n == null) return '$0';
+    if (compact && n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+    if (compact && n >= 1000) return '$' + (n / 1000).toFixed(0) + 'k';
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function fmtInt(n) { return (n == null ? 0 : Math.round(n)).toLocaleString(); }
+  function fmtPct(n) { return (n == null ? 0 : n) + '%'; }
+  function fmtMonthShort(m) {
+    if (!m) return '';
+    var parts = String(m).split('-');
+    if (parts.length < 2) return m;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var idx = parseInt(parts[1], 10) - 1;
+    return months[idx] + " '" + parts[0].slice(2);
+  }
+
+  function renderKPIs(s) {
+    document.getElementById('kpi-revenue').textContent   = fmtCurrency(s.totalRevenueYtd, true);
+    document.getElementById('kpi-jobs').textContent      = fmtInt(s.wonJobsYtd);
+    document.getElementById('kpi-avg').textContent       = fmtCurrency(s.avgDealSize, false);
+    document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
+    document.getElementById('kpi-qualified').textContent = (s.qualifiedLeadsYtd != null) ? fmtInt(s.qualifiedLeadsYtd) : '--';
+  }
+
+  function renderChart(monthly) {
+    var container = document.getElementById('chart-container');
+    if (!monthly.length) {
+      container.innerHTML = '<div class="empty-msg">No monthly data yet.</div>';
+      return;
+    }
+
+    var W = 1100, H = 320, PAD_L = 60, PAD_R = 24, PAD_T = 16, PAD_B = 50;
+    var innerW = W - PAD_L - PAD_R, innerH = H - PAD_T - PAD_B;
+    var n = monthly.length;
+    var groupW = innerW / n;
+    var barW = Math.max(8, Math.min(28, (groupW - 8) / 2));
+
+    var maxVal = 0;
+    monthly.forEach(function(m) {
+      var total = (m.digital_revenue || 0) + (m.offline_revenue || 0);
+      if (total > maxVal) maxVal = total;
+    });
+    var yMax = Math.max(maxVal * 1.15, 1000);
+
+    
+    var magnitude = Math.pow(10, Math.floor(Math.log(yMax) / Math.LN10));
+    yMax = Math.ceil(yMax / magnitude) * magnitude;
+
+    
+    var gridLines = '';
+    for (var i = 0; i <= 4; i++) {
+      var v = yMax * (i / 4);
+      var y = PAD_T + innerH - (v / yMax) * innerH;
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 0 ? '#cbd5e0' : '#edf2f7') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + fmtCurrency(v, true) + '</text>';
+    }
+
+    var bars = '';
+    var xLabels = '';
+    monthly.forEach(function(m, i) {
+      var groupX = PAD_L + i * groupW + groupW / 2;
+      var dRev = m.digital_revenue || 0;
+      var oRev = m.offline_revenue || 0;
+      var dH = (dRev / yMax) * innerH;
+      var oH = (oRev / yMax) * innerH;
+
+      var dX = groupX - barW - 2;
+      var oX = groupX + 2;
+      var dY = PAD_T + innerH - dH;
+      var oY = PAD_T + innerH - oH;
+
+      if (dRev > 0) {
+        bars += '<rect x="' + dX + '" y="' + dY + '" width="' + barW + '" height="' + dH + '" fill="#38a169" rx="2"><title>' + m.month + ' Digital: ' + fmtCurrency(dRev, false) + '</title></rect>';
+      }
+      if (oRev > 0) {
+        bars += '<rect x="' + oX + '" y="' + oY + '" width="' + barW + '" height="' + oH + '" fill="#4a6cf7" rx="2"><title>' + m.month + ' Offline: ' + fmtCurrency(oRev, false) + '</title></rect>';
+      }
+
+      xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="#4a5568">' + fmtMonthShort(m.month) + '</text>';
+      
+      var total = dRev + oRev;
+      if (total > 0) {
+        var topY = Math.min(dY, oY) - 6;
+        xLabels += '<text x="' + groupX + '" y="' + topY + '" text-anchor="middle" font-size="9" fill="#718096">' + fmtCurrency(total, true) + '</text>';
+      }
+    });
+
+    container.innerHTML =
+      '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' +
+        gridLines + bars + xLabels +
+      '</svg>';
+  }
+
+  function renderTable(rows) {
+    var tbody = document.getElementById('table-body');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No monthly data yet.</td></tr>';
+      return;
+    }
+
+    var totalDR = 0, totalDW = 0, totalOR = 0, totalOW = 0, totalRev = 0;
+    rows.forEach(function(r) {
+      var dR = r.digital_revenue || 0, dW = r.digital_won || 0;
+      var oR = r.offline_revenue || 0, oW = r.offline_won || 0;
+      var t  = dR + oR;
+      totalDR += dR; totalDW += dW; totalOR += oR; totalOW += oW; totalRev += t;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + fmtMonthShort(r.month) + '</td>' +
+        '<td>' + fmtCurrency(dR, false) + '</td>' +
+        '<td>' + fmtInt(dW) + '</td>' +
+        '<td>' + fmtCurrency(oR, false) + '</td>' +
+        '<td>' + fmtInt(oW) + '</td>' +
+        '<td>' + fmtCurrency(t, false) + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    var totalTr = document.createElement('tr');
+    totalTr.className = 'total-row';
+    totalTr.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtCurrency(totalDR, false) + '</td>' +
+      '<td>' + fmtInt(totalDW) + '</td>' +
+      '<td>' + fmtCurrency(totalOR, false) + '</td>' +
+      '<td>' + fmtInt(totalOW) + '</td>' +
+      '<td>' + fmtCurrency(totalRev, false) + '</td>';
+    tbody.appendChild(totalTr);
+  }
+
+  function renderQualifiedTable(rows) {
+    var tbody = document.getElementById('qualified-body');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No qualified-leads data yet. Run setupAndBackfillLeads().</td></tr>';
+      return;
+    }
+
+    var tDQ = 0, tOQ = 0, tQ = 0, tL = 0;
+    rows.forEach(function(r) {
+      var dQ = r.digital_qualified || 0, oQ = r.offline_qualified || 0;
+      var total = (r.digital_total || 0) + (r.offline_total || 0);
+      var qual = dQ + oQ;
+      tDQ += dQ; tOQ += oQ; tQ += qual; tL += total;
+      var pct = total > 0 ? Math.round(qual / total * 100) : 0;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + fmtMonthShort(r.month) + '</td>' +
+        '<td>' + fmtInt(dQ) + '</td>' +
+        '<td>' + fmtInt(oQ) + '</td>' +
+        '<td>' + fmtInt(qual) + '</td>' +
+        '<td>' + fmtInt(total) + '</td>' +
+        '<td>' + pct + '%</td>';
+      tbody.appendChild(tr);
+    });
+
+    var pctTotal = tL > 0 ? Math.round(tQ / tL * 100) : 0;
+    var totalTr = document.createElement('tr');
+    totalTr.className = 'total-row';
+    totalTr.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtInt(tDQ) + '</td>' +
+      '<td>' + fmtInt(tOQ) + '</td>' +
+      '<td>' + fmtInt(tQ) + '</td>' +
+      '<td>' + fmtInt(tL) + '</td>' +
+      '<td>' + pctTotal + '%</td>';
+    tbody.appendChild(totalTr);
+  }
+</script>
+
+</body>
+</html>
