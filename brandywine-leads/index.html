@@ -171,10 +171,18 @@
 </div>
 
 <script>
-  google.script.run
-    .withSuccessHandler(renderDashboard)
-    .withFailureHandler(showError)
-    .getDashboardData();
+  
+  if (window.__DASH_DATA__) {
+    renderDashboard(window.__DASH_DATA__);
+  } else if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(renderDashboard)
+      .withFailureHandler(showError)
+      .getDashboardData();
+  } else {
+    document.getElementById('loading').innerHTML =
+      '<div class="error-msg">Dashboard data missing — publisher inject failed.</div>';
+  }
 
   function showError(err) {
     document.getElementById('loading').innerHTML =
