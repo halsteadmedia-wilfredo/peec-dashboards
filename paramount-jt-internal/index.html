@@ -62,11 +62,16 @@
   </div>
 </div>
 <script>
-  if (window.__JT_DATA__) { render(window.__JT_DATA__); }
-  else {
+  
+  
+  if (window.__DASH_DATA__) { render(window.__DASH_DATA__); }
+  else if (window.__JT_DATA__) { render(window.__JT_DATA__); }
+  else if (typeof google !== 'undefined' && google.script && google.script.run) {
     google.script.run.withSuccessHandler(render).withFailureHandler(function (e) {
       document.getElementById('loading').innerHTML = '<span class="err">Failed to load: ' + (e && e.message ? e.message : e) + '</span>';
     }).getDashboardData();
+  } else {
+    document.getElementById('loading').innerHTML = '<span class="err">Dashboard data missing — publisher inject failed.</span>';
   }
 
   function renderNotes(notes) {
