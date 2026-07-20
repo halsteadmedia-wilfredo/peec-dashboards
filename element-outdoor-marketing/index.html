@@ -62,6 +62,24 @@
   }
   .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
 
+  .goal-progress { background: #fff; border-radius: 10px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; }
+  .goal-progress .goal-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .goal-progress .goal-title { font-size: 14px; font-weight: 600; color: #4a5568; }
+  .goal-progress .goal-stats { margin-left: auto; font-size: 12px; color: #718096; display: flex; gap: 20px; flex-wrap: wrap; }
+  .goal-progress .goal-stat strong { color: #2d3748; font-weight: 700; }
+  .goal-bar-track { position: relative; height: 26px; background: #edf2f7; border-radius: 6px; overflow: visible; }
+  .goal-bar-fill-won { position: absolute; top: 0; bottom: 0; left: 0; background: #38a169; border-radius: 6px 0 0 6px; transition: width 0.4s ease; }
+  .goal-bar-fill-pending { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 6px, #d69e2e 6px, #d69e2e 12px); transition: left 0.4s ease, width 0.4s ease; }
+  .goal-bar-fill-pending.at-end { border-radius: 0 6px 6px 0; }
+  .goal-marker { position: absolute; top: -6px; bottom: -6px; width: 2px; background: #1a202c; z-index: 3; }
+  .goal-marker::after { content: 'GOAL'; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: #1a202c; letter-spacing: 0.5px; white-space: nowrap; }
+  .goal-legend { display: flex; gap: 20px; margin-top: 14px; font-size: 11px; color: #4a5568; }
+  .goal-legend-item { display: flex; align-items: center; gap: 6px; }
+  .goal-legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  .goal-legend-swatch.won { background: #38a169; }
+  .goal-legend-swatch.pending { background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 4px, #d69e2e 4px, #d69e2e 8px); }
+  .goal-empty { padding: 14px 18px; background: #f7fafc; border-radius: 6px; color: #718096; font-size: 12px; text-align: center; border: 1px dashed #cbd5e0; }
+
   .chart-container { position: relative; height: 320px; overflow: hidden; }
   .chart-svg { width: 100%; height: 100%; }
 
@@ -95,7 +113,7 @@
   .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
   .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
 </style>
-<script>window.__DASH_DATA__ = {"clientName":"Element Outdoor Living (Marketing)","lastUpdated":"2026-07-20","summary":{"totalRevenueYtd":1582960,"wonJobsYtd":364,"avgDealSize":4349,"digitalSharePct":29,"qualifiedLeadsYtd":33},"monthly12":[{"month":"2025-06","digital_revenue":0,"offline_revenue":129454.43000000001,"digital_won":0,"offline_won":10,"digital_leads":0,"offline_leads":12},{"month":"2025-07","digital_revenue":0,"offline_revenue":46952.76,"digital_won":0,"offline_won":4,"digital_leads":0,"offline_leads":4},{"month":"2025-08","digital_revenue":0,"offline_revenue":73782.3,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":3},{"month":"2025-09","digital_revenue":0,"offline_revenue":32407.64,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":4},{"month":"2025-10","digital_revenue":0,"offline_revenue":71524.68,"digital_won":0,"offline_won":7,"digital_leads":0,"offline_leads":7},{"month":"2025-11","digital_revenue":0,"offline_revenue":66689.93,"digital_won":0,"offline_won":12,"digital_leads":0,"offline_leads":14},{"month":"2025-12","digital_revenue":0,"offline_revenue":655430.3300000001,"digital_won":0,"offline_won":5,"digital_leads":0,"offline_leads":5},{"month":"2026-01","digital_revenue":0,"offline_revenue":39304.58,"digital_won":0,"offline_won":6,"digital_leads":0,"offline_leads":174},{"month":"2026-02","digital_revenue":134332.41,"offline_revenue":379814.08999999997,"digital_won":13,"offline_won":102,"digital_leads":13,"offline_leads":102},{"month":"2026-03","digital_revenue":186265.25,"offline_revenue":186585.18,"digital_won":13,"offline_won":71,"digital_leads":13,"offline_leads":71},{"month":"2026-04","digital_revenue":138377.63999999998,"offline_revenue":309290.87999999995,"digital_won":24,"offline_won":63,"digital_leads":24,"offline_leads":63},{"month":"2026-05","digital_revenue":0,"offline_revenue":208990.25999999992,"digital_won":0,"offline_won":72,"digital_leads":0,"offline_leads":72}],"monthlyTable":[{"month":"2026-05","digital_revenue":0,"offline_revenue":208990.25999999992,"digital_won":0,"offline_won":72,"digital_leads":0,"offline_leads":72},{"month":"2026-04","digital_revenue":138377.63999999998,"offline_revenue":309290.87999999995,"digital_won":24,"offline_won":63,"digital_leads":24,"offline_leads":63},{"month":"2026-03","digital_revenue":186265.25,"offline_revenue":186585.18,"digital_won":13,"offline_won":71,"digital_leads":13,"offline_leads":71},{"month":"2026-02","digital_revenue":134332.41,"offline_revenue":379814.08999999997,"digital_won":13,"offline_won":102,"digital_leads":13,"offline_leads":102},{"month":"2026-01","digital_revenue":0,"offline_revenue":39304.58,"digital_won":0,"offline_won":6,"digital_leads":0,"offline_leads":174},{"month":"2025-12","digital_revenue":0,"offline_revenue":655430.3300000001,"digital_won":0,"offline_won":5,"digital_leads":0,"offline_leads":5},{"month":"2025-11","digital_revenue":0,"offline_revenue":66689.93,"digital_won":0,"offline_won":12,"digital_leads":0,"offline_leads":14},{"month":"2025-10","digital_revenue":0,"offline_revenue":71524.68,"digital_won":0,"offline_won":7,"digital_leads":0,"offline_leads":7},{"month":"2025-09","digital_revenue":0,"offline_revenue":32407.64,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":4},{"month":"2025-08","digital_revenue":0,"offline_revenue":73782.3,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":3},{"month":"2025-07","digital_revenue":0,"offline_revenue":46952.76,"digital_won":0,"offline_won":4,"digital_leads":0,"offline_leads":4},{"month":"2025-06","digital_revenue":0,"offline_revenue":129454.43000000001,"digital_won":0,"offline_won":10,"digital_leads":0,"offline_leads":12},{"month":"2025-05","digital_revenue":0,"offline_revenue":189053.72000000003,"digital_won":0,"offline_won":17,"digital_leads":0,"offline_leads":18}],"qualified12":[{"month":"2025-02","digital_total":25,"offline_total":1,"digital_qualified":10,"offline_qualified":0},{"month":"2025-03","digital_total":27,"offline_total":11,"digital_qualified":12,"offline_qualified":9},{"month":"2025-04","digital_total":31,"offline_total":7,"digital_qualified":18,"offline_qualified":7},{"month":"2025-05","digital_total":34,"offline_total":13,"digital_qualified":10,"offline_qualified":9},{"month":"2025-06","digital_total":36,"offline_total":6,"digital_qualified":15,"offline_qualified":5},{"month":"2025-07","digital_total":25,"offline_total":13,"digital_qualified":8,"offline_qualified":11},{"month":"2025-08","digital_total":13,"offline_total":10,"digital_qualified":5,"offline_qualified":6},{"month":"2025-09","digital_total":14,"offline_total":14,"digital_qualified":10,"offline_qualified":8},{"month":"2025-10","digital_total":13,"offline_total":7,"digital_qualified":12,"offline_qualified":7},{"month":"2025-11","digital_total":16,"offline_total":9,"digital_qualified":12,"offline_qualified":7},{"month":"2025-12","digital_total":16,"offline_total":10,"digital_qualified":12,"offline_qualified":9},{"month":"2026-01","digital_total":24,"offline_total":17,"digital_qualified":18,"offline_qualified":15}],"qualifiedTable":[{"month":"2026-01","digital_total":24,"offline_total":17,"digital_qualified":18,"offline_qualified":15},{"month":"2025-12","digital_total":16,"offline_total":10,"digital_qualified":12,"offline_qualified":9},{"month":"2025-11","digital_total":16,"offline_total":9,"digital_qualified":12,"offline_qualified":7},{"month":"2025-10","digital_total":13,"offline_total":7,"digital_qualified":12,"offline_qualified":7},{"month":"2025-09","digital_total":14,"offline_total":14,"digital_qualified":10,"offline_qualified":8},{"month":"2025-08","digital_total":13,"offline_total":10,"digital_qualified":5,"offline_qualified":6},{"month":"2025-07","digital_total":25,"offline_total":13,"digital_qualified":8,"offline_qualified":11},{"month":"2025-06","digital_total":36,"offline_total":6,"digital_qualified":15,"offline_qualified":5},{"month":"2025-05","digital_total":34,"offline_total":13,"digital_qualified":10,"offline_qualified":9},{"month":"2025-04","digital_total":31,"offline_total":7,"digital_qualified":18,"offline_qualified":7},{"month":"2025-03","digital_total":27,"offline_total":11,"digital_qualified":12,"offline_qualified":9},{"month":"2025-02","digital_total":25,"offline_total":1,"digital_qualified":10,"offline_qualified":0},{"month":"2025-01","digital_total":29,"offline_total":12,"digital_qualified":8,"offline_qualified":6}]};</script>
+<script>window.__DASH_DATA__ = {"clientName":"Element Outdoor Living (Marketing)","lastUpdated":"2026-07-20","summary":{"totalRevenueYtd":1582960,"wonRevenueYtd":1582960,"pendingRevenueYtd":0,"revenueGoal":7300000,"wonJobsYtd":364,"avgDealSize":4349,"digitalSharePct":29,"qualifiedLeadsYtd":33},"monthly12":[{"month":"2025-06","digital_revenue":0,"offline_revenue":129454.43000000001,"digital_won":0,"offline_won":10,"digital_leads":0,"offline_leads":12},{"month":"2025-07","digital_revenue":0,"offline_revenue":46952.76,"digital_won":0,"offline_won":4,"digital_leads":0,"offline_leads":4},{"month":"2025-08","digital_revenue":0,"offline_revenue":73782.3,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":3},{"month":"2025-09","digital_revenue":0,"offline_revenue":32407.64,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":4},{"month":"2025-10","digital_revenue":0,"offline_revenue":71524.68,"digital_won":0,"offline_won":7,"digital_leads":0,"offline_leads":7},{"month":"2025-11","digital_revenue":0,"offline_revenue":66689.93,"digital_won":0,"offline_won":12,"digital_leads":0,"offline_leads":14},{"month":"2025-12","digital_revenue":0,"offline_revenue":655430.3300000001,"digital_won":0,"offline_won":5,"digital_leads":0,"offline_leads":5},{"month":"2026-01","digital_revenue":0,"offline_revenue":39304.58,"digital_won":0,"offline_won":6,"digital_leads":0,"offline_leads":174},{"month":"2026-02","digital_revenue":134332.41,"offline_revenue":379814.08999999997,"digital_won":13,"offline_won":102,"digital_leads":13,"offline_leads":102},{"month":"2026-03","digital_revenue":186265.25,"offline_revenue":186585.18,"digital_won":13,"offline_won":71,"digital_leads":13,"offline_leads":71},{"month":"2026-04","digital_revenue":138377.63999999998,"offline_revenue":309290.87999999995,"digital_won":24,"offline_won":63,"digital_leads":24,"offline_leads":63},{"month":"2026-05","digital_revenue":0,"offline_revenue":208990.25999999992,"digital_won":0,"offline_won":72,"digital_leads":0,"offline_leads":72}],"monthlyTable":[{"month":"2026-05","digital_revenue":0,"offline_revenue":208990.25999999992,"digital_won":0,"offline_won":72,"digital_leads":0,"offline_leads":72},{"month":"2026-04","digital_revenue":138377.63999999998,"offline_revenue":309290.87999999995,"digital_won":24,"offline_won":63,"digital_leads":24,"offline_leads":63},{"month":"2026-03","digital_revenue":186265.25,"offline_revenue":186585.18,"digital_won":13,"offline_won":71,"digital_leads":13,"offline_leads":71},{"month":"2026-02","digital_revenue":134332.41,"offline_revenue":379814.08999999997,"digital_won":13,"offline_won":102,"digital_leads":13,"offline_leads":102},{"month":"2026-01","digital_revenue":0,"offline_revenue":39304.58,"digital_won":0,"offline_won":6,"digital_leads":0,"offline_leads":174},{"month":"2025-12","digital_revenue":0,"offline_revenue":655430.3300000001,"digital_won":0,"offline_won":5,"digital_leads":0,"offline_leads":5},{"month":"2025-11","digital_revenue":0,"offline_revenue":66689.93,"digital_won":0,"offline_won":12,"digital_leads":0,"offline_leads":14},{"month":"2025-10","digital_revenue":0,"offline_revenue":71524.68,"digital_won":0,"offline_won":7,"digital_leads":0,"offline_leads":7},{"month":"2025-09","digital_revenue":0,"offline_revenue":32407.64,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":4},{"month":"2025-08","digital_revenue":0,"offline_revenue":73782.3,"digital_won":0,"offline_won":3,"digital_leads":0,"offline_leads":3},{"month":"2025-07","digital_revenue":0,"offline_revenue":46952.76,"digital_won":0,"offline_won":4,"digital_leads":0,"offline_leads":4},{"month":"2025-06","digital_revenue":0,"offline_revenue":129454.43000000001,"digital_won":0,"offline_won":10,"digital_leads":0,"offline_leads":12},{"month":"2025-05","digital_revenue":0,"offline_revenue":189053.72000000003,"digital_won":0,"offline_won":17,"digital_leads":0,"offline_leads":18}],"qualified12":[{"month":"2025-02","digital_total":25,"offline_total":1,"digital_qualified":10,"offline_qualified":0},{"month":"2025-03","digital_total":27,"offline_total":11,"digital_qualified":12,"offline_qualified":9},{"month":"2025-04","digital_total":31,"offline_total":7,"digital_qualified":18,"offline_qualified":7},{"month":"2025-05","digital_total":34,"offline_total":13,"digital_qualified":10,"offline_qualified":9},{"month":"2025-06","digital_total":36,"offline_total":6,"digital_qualified":15,"offline_qualified":5},{"month":"2025-07","digital_total":25,"offline_total":13,"digital_qualified":8,"offline_qualified":11},{"month":"2025-08","digital_total":13,"offline_total":10,"digital_qualified":5,"offline_qualified":6},{"month":"2025-09","digital_total":14,"offline_total":14,"digital_qualified":10,"offline_qualified":8},{"month":"2025-10","digital_total":13,"offline_total":7,"digital_qualified":12,"offline_qualified":7},{"month":"2025-11","digital_total":16,"offline_total":9,"digital_qualified":12,"offline_qualified":7},{"month":"2025-12","digital_total":16,"offline_total":10,"digital_qualified":12,"offline_qualified":9},{"month":"2026-01","digital_total":24,"offline_total":17,"digital_qualified":18,"offline_qualified":15}],"qualifiedTable":[{"month":"2026-01","digital_total":24,"offline_total":17,"digital_qualified":18,"offline_qualified":15},{"month":"2025-12","digital_total":16,"offline_total":10,"digital_qualified":12,"offline_qualified":9},{"month":"2025-11","digital_total":16,"offline_total":9,"digital_qualified":12,"offline_qualified":7},{"month":"2025-10","digital_total":13,"offline_total":7,"digital_qualified":12,"offline_qualified":7},{"month":"2025-09","digital_total":14,"offline_total":14,"digital_qualified":10,"offline_qualified":8},{"month":"2025-08","digital_total":13,"offline_total":10,"digital_qualified":5,"offline_qualified":6},{"month":"2025-07","digital_total":25,"offline_total":13,"digital_qualified":8,"offline_qualified":11},{"month":"2025-06","digital_total":36,"offline_total":6,"digital_qualified":15,"offline_qualified":5},{"month":"2025-05","digital_total":34,"offline_total":13,"digital_qualified":10,"offline_qualified":9},{"month":"2025-04","digital_total":31,"offline_total":7,"digital_qualified":18,"offline_qualified":7},{"month":"2025-03","digital_total":27,"offline_total":11,"digital_qualified":12,"offline_qualified":9},{"month":"2025-02","digital_total":25,"offline_total":1,"digital_qualified":10,"offline_qualified":0},{"month":"2025-01","digital_total":29,"offline_total":12,"digital_qualified":8,"offline_qualified":6}]};</script>
 </head>
 <body>
 
@@ -138,6 +156,8 @@
       <div class="sub">Vetted leads in the current year</div>
     </div>
   </div>
+
+  <div id="goal-container"></div>
 
   <div class="caption">
     <strong>Digital</strong> includes Google Ads, organic search, paid social, website forms, and CallRail-tracked calls.
@@ -218,6 +238,7 @@
     document.getElementById('period-label').textContent = 'Last updated: ' + (data.lastUpdated || '');
 
     renderKPIs(data.summary || {});
+    renderGoalBar(data.summary || {});
     renderChart(data.monthly12 || []);
     renderTable(data.monthlyTable || []);
     renderQualifiedTable(data.qualifiedTable || []);
@@ -246,6 +267,62 @@
     document.getElementById('kpi-avg').textContent       = fmtCurrency(s.avgDealSize, false);
     document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
     document.getElementById('kpi-qualified').textContent = (s.qualifiedLeadsYtd != null) ? fmtInt(s.qualifiedLeadsYtd) : '--';
+  }
+
+  var PENDING_WEIGHT = 0.75;
+
+  function renderGoalBar(s) {
+    var container = document.getElementById('goal-container');
+    var goal = s.revenueGoal;
+    var won = s.wonRevenueYtd || s.totalRevenueYtd || 0;
+    var pending = (s.pendingRevenueYtd || 0) * PENDING_WEIGHT;
+    var year = new Date().getFullYear();
+
+    if (!goal || goal <= 0) {
+      container.innerHTML =
+        '<div class="goal-progress">' +
+          '<div class="goal-header"><div class="goal-title">Revenue Goal Progress — ' + year + '</div></div>' +
+          '<div class="goal-empty">Revenue goal not yet set for ' + year + '.</div>' +
+        '</div>';
+      return;
+    }
+
+    var denom = Math.max(goal, won + pending);
+    var wonPct = denom > 0 ? (won / denom) * 100 : 0;
+    var pendingPct = denom > 0 ? (pending / denom) * 100 : 0;
+    var goalPct = denom > 0 ? (goal / denom) * 100 : 100;
+    var wonOfGoal = (won / goal) * 100;
+    var wpOfGoal = ((won + pending) / goal) * 100;
+    var pendingAtEnd = (wonPct + pendingPct) >= 99.5 ? ' at-end' : '';
+
+    
+    var pendingStats = pending > 0
+      ? '<div class="goal-stat"><strong>' + wpOfGoal.toFixed(1) + '%</strong> incl. weighted pipeline</div>'
+      : '';
+    var pendingLegend = pending > 0
+      ? '<div class="goal-legend-item"><span class="goal-legend-swatch pending"></span> Pending (75% weighted) ' + fmtCurrency(pending, true) + '</div>'
+      : '';
+
+    container.innerHTML =
+      '<div class="goal-progress">' +
+        '<div class="goal-header">' +
+          '<div class="goal-title">Revenue Goal Progress — ' + year + '</div>' +
+          '<div class="goal-stats">' +
+            '<div class="goal-stat"><strong>' + wonOfGoal.toFixed(1) + '%</strong> of goal closed</div>' +
+            pendingStats +
+            '<div class="goal-stat">Goal <strong>' + fmtCurrency(goal, true) + '</strong></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="goal-bar-track">' +
+          '<div class="goal-bar-fill-won" style="width:' + wonPct + '%"></div>' +
+          '<div class="goal-bar-fill-pending' + pendingAtEnd + '" style="left:' + wonPct + '%;width:' + pendingPct + '%"></div>' +
+          '<div class="goal-marker" style="left:' + goalPct + '%"></div>' +
+        '</div>' +
+        '<div class="goal-legend">' +
+          '<div class="goal-legend-item"><span class="goal-legend-swatch won"></span> Won ' + fmtCurrency(won, true) + '</div>' +
+          pendingLegend +
+        '</div>' +
+      '</div>';
   }
 
   function renderChart(monthly) {
