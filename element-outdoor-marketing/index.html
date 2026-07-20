@@ -212,6 +212,10 @@
 
 <script>
   
+  
+  var PENDING_WEIGHT = 0.75;
+
+  
   if (window.__DASH_DATA__) {
     renderDashboard(window.__DASH_DATA__);
   } else if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -268,8 +272,6 @@
     document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
     document.getElementById('kpi-qualified').textContent = (s.qualifiedLeadsYtd != null) ? fmtInt(s.qualifiedLeadsYtd) : '--';
   }
-
-  var PENDING_WEIGHT = 0.75;
 
   function renderGoalBar(s) {
     var container = document.getElementById('goal-container');
