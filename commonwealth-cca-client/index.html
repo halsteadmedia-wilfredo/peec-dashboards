@@ -19,7 +19,8 @@
   .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
   .section-header .period { margin-left: auto; font-size: 13px; color: #718096; background: #f7fafc; padding: 5px 12px; border-radius: 6px; }
 
-  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
   .kpi-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; position: relative; }
   .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
   .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
@@ -78,7 +79,7 @@
   .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
   .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
 </style>
-<script>window.__DASH_DATA__ = {"clientName":"Commonwealth Curb Appeal (Client View)","lastUpdated":"2026-07-20","notes":[{"label":"","text":"**Approved** = client accepted the estimate → won revenue. **Sent** = estimate delivered, awaiting client decision (in-pipeline). **Draft** = estimate created but not yet sent. **Denied** = client declined. **Void** = cancelled.","accent":""},{"label":"Data note:","text":"Attribution comes from CallRail form captures (source populated by our Zapier integration going live). Historical leads without source show as **Unknown**. The Unknown % on the dashboard reflects data completeness — decreases as new leads flow through the tagged pipeline.","accent":"warn"},{"label":"Refresh cadence","text":"Dashboard data refreshes daily at 6 AM ET from JobNimbus. Manual refresh available on request.","accent":"muted"}],"summary":{"wonRevenueYtd":1764005,"pendingRevenueYtd":3424700,"revenueGoal":2500000,"estimatesYtd":414,"leadsYtd":289,"digitalSharePct":26},"estMonthly12":[{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-08"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-09"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-10"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-11"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-12"},{"digital_estimates":10,"digital_won":0,"digital_pending":18647.1,"offline_estimates":13,"offline_won":4878.72,"offline_pending":294530.64,"unknown_estimates":83,"unknown_won":23138.91,"unknown_pending":174795.97,"month":"2026-01"},{"digital_estimates":18,"digital_won":11753.92,"digital_pending":156911.35,"offline_estimates":13,"offline_won":13584.27,"offline_pending":161260.69999999998,"unknown_estimates":15,"unknown_won":3526.45,"unknown_pending":45871.12,"month":"2026-02"},{"digital_estimates":36,"digital_won":146896.5,"digital_pending":256717.15,"offline_estimates":15,"offline_won":95406.51,"offline_pending":21461.38,"unknown_estimates":16,"unknown_won":5000,"unknown_pending":23053.489999999998,"month":"2026-03"},{"digital_estimates":29,"digital_won":11276.5,"digital_pending":603397.98,"offline_estimates":32,"offline_won":26450.23,"offline_pending":355430.68,"unknown_estimates":9,"unknown_won":300912.05999999994,"unknown_pending":104610.66,"month":"2026-04"},{"digital_estimates":18,"digital_won":63126.98,"digital_pending":175693.55,"offline_estimates":21,"offline_won":424697.49,"offline_pending":64020.259999999995,"unknown_estimates":5,"unknown_won":22500,"unknown_pending":35784.49,"month":"2026-05"},{"digital_estimates":13,"digital_won":113298.06,"digital_pending":291234.36,"offline_estimates":25,"offline_won":475435.99999999994,"offline_pending":325860.49,"unknown_estimates":8,"unknown_won":2474.4,"unknown_pending":100886.79,"month":"2026-06"},{"digital_estimates":20,"digital_won":19648.18,"digital_pending":92594.40000000001,"offline_estimates":10,"offline_won":0,"offline_pending":121737.81,"unknown_estimates":5,"unknown_won":0,"unknown_pending":200,"month":"2026-07"}],"estTable":[{"digital_estimates":20,"digital_won":19648.18,"digital_pending":92594.40000000001,"offline_estimates":10,"offline_won":0,"offline_pending":121737.81,"unknown_estimates":5,"unknown_won":0,"unknown_pending":200,"month":"2026-07"},{"digital_estimates":13,"digital_won":113298.06,"digital_pending":291234.36,"offline_estimates":25,"offline_won":475435.99999999994,"offline_pending":325860.49,"unknown_estimates":8,"unknown_won":2474.4,"unknown_pending":100886.79,"month":"2026-06"},{"digital_estimates":18,"digital_won":63126.98,"digital_pending":175693.55,"offline_estimates":21,"offline_won":424697.49,"offline_pending":64020.259999999995,"unknown_estimates":5,"unknown_won":22500,"unknown_pending":35784.49,"month":"2026-05"},{"digital_estimates":29,"digital_won":11276.5,"digital_pending":603397.98,"offline_estimates":32,"offline_won":26450.23,"offline_pending":355430.68,"unknown_estimates":9,"unknown_won":300912.05999999994,"unknown_pending":104610.66,"month":"2026-04"},{"digital_estimates":36,"digital_won":146896.5,"digital_pending":256717.15,"offline_estimates":15,"offline_won":95406.51,"offline_pending":21461.38,"unknown_estimates":16,"unknown_won":5000,"unknown_pending":23053.489999999998,"month":"2026-03"},{"digital_estimates":18,"digital_won":11753.92,"digital_pending":156911.35,"offline_estimates":13,"offline_won":13584.27,"offline_pending":161260.69999999998,"unknown_estimates":15,"unknown_won":3526.45,"unknown_pending":45871.12,"month":"2026-02"},{"digital_estimates":10,"digital_won":0,"digital_pending":18647.1,"offline_estimates":13,"offline_won":4878.72,"offline_pending":294530.64,"unknown_estimates":83,"unknown_won":23138.91,"unknown_pending":174795.97,"month":"2026-01"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-12"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-11"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-10"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-09"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-08"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-07"}],"leadsTable":[{"digital_leads":9,"offline_leads":4,"unknown_leads":9,"month":"2026-07"},{"digital_leads":18,"offline_leads":8,"unknown_leads":20,"month":"2026-06"},{"digital_leads":19,"offline_leads":7,"unknown_leads":20,"month":"2026-05"},{"digital_leads":21,"offline_leads":16,"unknown_leads":14,"month":"2026-04"},{"digital_leads":32,"offline_leads":15,"unknown_leads":16,"month":"2026-03"},{"digital_leads":12,"offline_leads":4,"unknown_leads":15,"month":"2026-02"},{"digital_leads":8,"offline_leads":6,"unknown_leads":16,"month":"2026-01"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-12"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-11"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-10"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-09"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-08"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-07"}]};</script>
+<script>window.__DASH_DATA__ = {"clientName":"Commonwealth Curb Appeal (Client View)","lastUpdated":"2026-07-21","notes":[{"label":"","text":"**Approved** = client accepted the estimate → won revenue. **Sent** = estimate delivered, awaiting client decision (in-pipeline). **Draft** = estimate created but not yet sent. **Denied** = client declined. **Void** = cancelled.","accent":""},{"label":"Data note:","text":"Attribution comes from CallRail form captures (source populated by our Zapier integration going live). Historical leads without source show as **Unknown**. The Unknown % on the dashboard reflects data completeness — decreases as new leads flow through the tagged pipeline.","accent":"warn"},{"label":"Refresh cadence","text":"Dashboard data refreshes daily at 6 AM ET from JobNimbus. Manual refresh available on request.","accent":"muted"}],"summary":{"wonRevenueYtd":1764005,"pendingRevenueYtd":3424700,"revenueGoal":2500000,"estimatesYtd":418,"leadsYtd":290,"digitalSharePct":26},"estMonthly12":[{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-08"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-09"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-10"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-11"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-12"},{"digital_estimates":10,"digital_won":0,"digital_pending":18647.1,"offline_estimates":13,"offline_won":4878.72,"offline_pending":294530.64,"unknown_estimates":83,"unknown_won":23138.91,"unknown_pending":174795.97,"month":"2026-01"},{"digital_estimates":18,"digital_won":11753.92,"digital_pending":156911.35,"offline_estimates":13,"offline_won":13584.27,"offline_pending":161260.69999999998,"unknown_estimates":15,"unknown_won":3526.45,"unknown_pending":45871.12,"month":"2026-02"},{"digital_estimates":36,"digital_won":146896.5,"digital_pending":256717.15,"offline_estimates":15,"offline_won":95406.51,"offline_pending":21461.38,"unknown_estimates":16,"unknown_won":5000,"unknown_pending":23053.489999999998,"month":"2026-03"},{"digital_estimates":29,"digital_won":11276.5,"digital_pending":603397.98,"offline_estimates":32,"offline_won":26450.23,"offline_pending":355430.68,"unknown_estimates":9,"unknown_won":300912.05999999994,"unknown_pending":104610.66,"month":"2026-04"},{"digital_estimates":18,"digital_won":63126.98,"digital_pending":175693.55,"offline_estimates":21,"offline_won":424697.49,"offline_pending":64020.259999999995,"unknown_estimates":5,"unknown_won":22500,"unknown_pending":35784.49,"month":"2026-05"},{"digital_estimates":13,"digital_won":113298.06,"digital_pending":291234.36,"offline_estimates":25,"offline_won":475435.99999999994,"offline_pending":325860.49,"unknown_estimates":8,"unknown_won":2474.4,"unknown_pending":100886.79,"month":"2026-06"},{"digital_estimates":23,"digital_won":19648.18,"digital_pending":92594.40000000001,"offline_estimates":10,"offline_won":0,"offline_pending":121737.81,"unknown_estimates":6,"unknown_won":0,"unknown_pending":200,"month":"2026-07"}],"estTable":[{"digital_estimates":23,"digital_won":19648.18,"digital_pending":92594.40000000001,"offline_estimates":10,"offline_won":0,"offline_pending":121737.81,"unknown_estimates":6,"unknown_won":0,"unknown_pending":200,"month":"2026-07"},{"digital_estimates":13,"digital_won":113298.06,"digital_pending":291234.36,"offline_estimates":25,"offline_won":475435.99999999994,"offline_pending":325860.49,"unknown_estimates":8,"unknown_won":2474.4,"unknown_pending":100886.79,"month":"2026-06"},{"digital_estimates":18,"digital_won":63126.98,"digital_pending":175693.55,"offline_estimates":21,"offline_won":424697.49,"offline_pending":64020.259999999995,"unknown_estimates":5,"unknown_won":22500,"unknown_pending":35784.49,"month":"2026-05"},{"digital_estimates":29,"digital_won":11276.5,"digital_pending":603397.98,"offline_estimates":32,"offline_won":26450.23,"offline_pending":355430.68,"unknown_estimates":9,"unknown_won":300912.05999999994,"unknown_pending":104610.66,"month":"2026-04"},{"digital_estimates":36,"digital_won":146896.5,"digital_pending":256717.15,"offline_estimates":15,"offline_won":95406.51,"offline_pending":21461.38,"unknown_estimates":16,"unknown_won":5000,"unknown_pending":23053.489999999998,"month":"2026-03"},{"digital_estimates":18,"digital_won":11753.92,"digital_pending":156911.35,"offline_estimates":13,"offline_won":13584.27,"offline_pending":161260.69999999998,"unknown_estimates":15,"unknown_won":3526.45,"unknown_pending":45871.12,"month":"2026-02"},{"digital_estimates":10,"digital_won":0,"digital_pending":18647.1,"offline_estimates":13,"offline_won":4878.72,"offline_pending":294530.64,"unknown_estimates":83,"unknown_won":23138.91,"unknown_pending":174795.97,"month":"2026-01"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-12"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-11"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-10"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-09"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-08"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-07"}],"leadsTable":[{"digital_leads":9,"offline_leads":5,"unknown_leads":9,"month":"2026-07"},{"digital_leads":18,"offline_leads":8,"unknown_leads":20,"month":"2026-06"},{"digital_leads":19,"offline_leads":7,"unknown_leads":20,"month":"2026-05"},{"digital_leads":21,"offline_leads":16,"unknown_leads":14,"month":"2026-04"},{"digital_leads":32,"offline_leads":15,"unknown_leads":16,"month":"2026-03"},{"digital_leads":12,"offline_leads":4,"unknown_leads":15,"month":"2026-02"},{"digital_leads":8,"offline_leads":6,"unknown_leads":16,"month":"2026-01"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-12"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-11"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-10"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-09"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-08"},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-07"}]};</script>
 </head>
 <body>
 
@@ -120,6 +121,11 @@
       <div class="value" id="kpi-digital">--</div>
       <div class="sub">Digital % of attributed won $</div>
     </div>
+    <div class="kpi-card" id="kpi-card-qualified" data-tip="Contacts that have ever moved to the 'Working' status YTD — sales team has actively engaged them. Leading indicator of estimate volume.">
+      <div class="label">Qualified Leads YTD</div>
+      <div class="value" id="kpi-qualified">--</div>
+      <div class="sub">Contacts that hit Working status</div>
+    </div>
   </div>
 
   <div id="goal-container"></div>
@@ -152,7 +158,7 @@
     <h3>Leads by Source — Monthly</h3>
     <table class="cat-table">
       <thead>
-        <tr><th>Month</th><th>Digital</th><th>Offline</th><th>Unknown</th><th>Total Leads</th></tr>
+        <tr><th>Month</th><th>Digital</th><th>Offline</th><th>Unknown</th><th>Total Leads</th><th id="th-qualified">Qualified</th></tr>
       </thead>
       <tbody id="leads-body"></tbody>
     </table>
@@ -229,6 +235,20 @@
     document.getElementById('kpi-estimates').textContent = fmtInt(s.estimatesYtd);
     document.getElementById('kpi-leads').textContent     = fmtInt(s.leadsYtd);
     document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
+
+    
+    
+    
+    var qCard = document.getElementById('kpi-card-qualified');
+    var kpiRow = document.querySelector('.kpi-row');
+    if (s.qualifiedLeadsYtd == null) {
+      qCard.style.display = 'none';
+      kpiRow.classList.add('cols-5');
+    } else {
+      qCard.style.display = '';
+      kpiRow.classList.remove('cols-5');
+      document.getElementById('kpi-qualified').textContent = fmtInt(s.qualifiedLeadsYtd);
+    }
   }
 
   function renderGoalBar(s) {
@@ -359,18 +379,26 @@
 
   function renderLeadsTable(rows) {
     var tbody = document.getElementById('leads-body');
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">No leads data yet.</td></tr>'; return; }
-    var tD = 0, tO = 0, tU = 0;
+    var th = document.getElementById('th-qualified');
+    
+    var anyQual = rows.some(function (r) { return r && r.qualified_total != null; });
+    if (!anyQual && th) th.style.display = 'none';
+    var colspan = anyQual ? 6 : 5;
+
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="' + colspan + '" class="empty-msg">No leads data yet.</td></tr>'; return; }
+    var tD = 0, tO = 0, tU = 0, tQ = 0;
     rows.forEach(function(r) {
       var d = r.digital_leads || 0, o = r.offline_leads || 0, u = r.unknown_leads || 0;
-      tD += d; tO += o; tU += u;
+      var q = r.qualified_total || 0;
+      tD += d; tO += o; tU += u; tQ += q;
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td>' + fmtMonthShort(r.month) + '</td>' +
         '<td>' + fmtInt(d) + '</td>' +
         '<td>' + fmtInt(o) + '</td>' +
         '<td>' + fmtInt(u) + '</td>' +
-        '<td>' + fmtInt(d + o + u) + '</td>';
+        '<td>' + fmtInt(d + o + u) + '</td>' +
+        (anyQual ? ('<td>' + fmtInt(q) + '</td>') : '');
       tbody.appendChild(tr);
     });
     var tr = document.createElement('tr');
@@ -380,7 +408,8 @@
       '<td>' + fmtInt(tD) + '</td>' +
       '<td>' + fmtInt(tO) + '</td>' +
       '<td>' + fmtInt(tU) + '</td>' +
-      '<td>' + fmtInt(tD + tO + tU) + '</td>';
+      '<td>' + fmtInt(tD + tO + tU) + '</td>' +
+      (anyQual ? ('<td>' + fmtInt(tQ) + '</td>') : '');
     tbody.appendChild(tr);
   }
 </script>
