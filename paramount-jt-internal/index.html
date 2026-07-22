@@ -109,8 +109,9 @@
       opts.push('<option value="' + m + '">' + monthLabel(m) + '</option>');
     });
     sel.innerHTML = opts.join('');
-
+    sel.onchange = rerender;
     rerender();
+
   }
 
   function rerender() {
