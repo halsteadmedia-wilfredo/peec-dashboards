@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "peec-dashboards",
+  "compatibility_date": "2026-07-22",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "1st-impressions"
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}
