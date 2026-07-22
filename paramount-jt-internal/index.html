@@ -91,7 +91,7 @@
   function num(n) { return (Number(n) || 0).toLocaleString(); }
   function cell(v, isMoney) { return v ? (isMoney ? money(v) : num(v)) : '<span style="color:#cbd0d6">—</span>'; }
 
-  var DATA = null;   
+  var DATA;   
 
   function render(data) {
     if (!data || data.error) { document.getElementById('loading').innerHTML = '<span class="err">No data</span>'; return; }
