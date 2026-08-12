@@ -158,10 +158,10 @@
   </div>
 
   <div class="kpi-row">
-    <div class="kpi-card" data-tip="Percentage of AI prompts where the brand was mentioned, averaged across all checks in the period.">
-      <div class="label">Overall Visibility</div>
+    <div class="kpi-card" data-tip="Percentage of AI prompts where the brand was mentioned on the most recent day tracked — a current snapshot, not a period average. Matches the end-point of Peec's Visibility trend chart.">
+      <div class="label">Current Visibility</div>
       <div class="value" id="kpi-visibility">--</div>
-      <div class="sub">% of prompts mentioning the brand across all AI platforms</div>
+      <div class="sub">% of prompts mentioning the brand — latest day</div>
     </div>
     <div class="kpi-card" data-tip="Average ranking position when the brand IS mentioned. Lower is better — #1 means listed first.">
       <div class="label">Avg. Position</div>
@@ -191,17 +191,6 @@
     </div>
   </div>
 
-  <div class="chart-row">
-    <div class="card">
-      <h3>Visibility Trend</h3>
-      <div class="chart-container" id="trend-container"></div>
-    </div>
-    <div class="card">
-      <h3>Top Brands Mentioned</h3>
-      <ul class="comp-list" id="comp-list"></ul>
-    </div>
-  </div>
-
   <div class="card" style="margin-bottom: 24px;">
     <h3>Prompt Performance</h3>
     <table class="cat-table">
@@ -218,10 +207,24 @@
     </table>
   </div>
 
+  <div class="chart-row">
+    <div class="card">
+      <h3>Visibility Trend</h3>
+      <div class="chart-container" id="trend-container"></div>
+    </div>
+    <div class="card">
+      <h3>Top Brands Mentioned</h3>
+      <ul class="comp-list" id="comp-list"></ul>
+    </div>
+  </div>
+
   <div class="powered-by">Data auto-refreshed weekly &nbsp;&middot;&nbsp; Halstead AI Visibility Tracker</div>
 </div>
 
 <script>
+  
+  
+  
   if (window.__PEEC_DATA__) {
     renderDashboard(window.__PEEC_DATA__);
   } else {
