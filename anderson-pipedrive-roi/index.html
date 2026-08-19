@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROI Dashboard</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --text: #1a202c;
+    --muted: #718096;
+    --subtle: #a0aec0;
+     
+    --digital:   #2289aa;
+    --offline:   #808080;
+    --referral:  #4a90a4;
+    --renewal:   #666666;
+    --direct:    #b3b3b3;
+    --unknown:   #cccccc;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); }
+
+  .loading { text-align: center; padding: 80px 20px; color: var(--muted); font-size: 16px; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--digital); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .section-header {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .section-header h2 { font-size: 20px; font-weight: 700; }
+  .section-header .client-name { font-size: 14px; color: var(--muted); }
+  .section-header .period { margin-left: auto; font-size: 12px; color: var(--muted); background: #f7fafc; padding: 4px 10px; border-radius: 4px; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 28px; }
+  @media (max-width: 1024px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px)  { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .kpi-card {
+    background: var(--card-bg); border-radius: 6px; padding: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04); border: 1px solid var(--border);
+  }
+  .kpi-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; font-weight: 600; }
+  .kpi-card .value { font-size: 26px; font-weight: 800; line-height: 1.1; }
+  .kpi-card .sub { font-size: 11px; color: var(--subtle); margin-top: 4px; }
+
+  .charts { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 28px; }
+  @media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--card-bg); border-radius: 6px; padding: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04); border: 1px solid var(--border);
+  }
+  .chart-card h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 240px; padding-top: 20px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+  .bar-stack { width: 80%; max-width: 40px; display: flex; flex-direction: column-reverse; border-radius: 3px 3px 0 0; overflow: hidden; }
+  .bar-seg { width: 100%; min-height: 0; }
+  .bar-label { font-size: 10px; color: var(--muted); white-space: nowrap; }
+  .bar-value { font-size: 10px; font-weight: 600; margin-top: 2px; }
+
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+  .donut-legend .row { display: flex; align-items: center; gap: 8px; }
+  .donut-legend .swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .donut-legend .name { flex: 1; color: var(--text); }
+  .donut-legend .pct { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .table-card {
+    background: var(--card-bg); border-radius: 6px; padding: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04); border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .table-card h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  tr.total-row { font-weight: 700; background: #fafbfc; }
+
+  .footer { font-size: 11px; color: var(--subtle); text-align: center; padding: 16px 0 0; border-top: 1px solid var(--border); margin-top: 12px; }
+  .err { background: #fff5f5; color: #c53030; border: 1px solid #fed7d7; padding: 14px; border-radius: 4px; margin: 20px 0; font-size: 13px; }
+</style>
+<script>window.__DASH_DATA__ = {"client":"Anderson Pipedrive ROI","clientKey":"anderson","generated_at":"2026-08-19T21:25:08.805Z","kpis":{"ytd_won_revenue":1879310.54,"ytd_won_count":32,"ytd_deals_count":420,"ytd_open_pipeline":18974160.996,"avg_deal_size":58728.454375,"win_rate_pct":50.79365079365079,"all_time_won_revenue":4078677.95,"all_time_won_count":66},"monthly":[{"month":"2025-04","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":0,"unknown_open_pipeline_value":1127766,"unknown_deals_count":5,"won_revenue":0,"open_pipeline_value":1127766,"deals_count":5},{"month":"2025-05","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":59956,"unknown_open_pipeline_value":342547,"unknown_deals_count":4,"won_revenue":59956,"open_pipeline_value":342547,"deals_count":4},{"month":"2025-06","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":591024.14,"unknown_open_pipeline_value":583030.87,"unknown_deals_count":23,"won_revenue":591024.14,"open_pipeline_value":583030.87,"deals_count":23},{"month":"2025-07","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":493559.27,"unknown_open_pipeline_value":2858724.2699999996,"unknown_deals_count":20,"won_revenue":493559.27,"open_pipeline_value":2858724.2699999996,"deals_count":20},{"month":"2025-08","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":96050,"unknown_open_pipeline_value":5190340.609999999,"unknown_deals_count":46,"won_revenue":96050,"open_pipeline_value":5190340.609999999,"deals_count":46},{"month":"2025-09","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":933323,"unknown_open_pipeline_value":2327588.37,"unknown_deals_count":24,"won_revenue":933323,"open_pipeline_value":2327588.37,"deals_count":24},{"month":"2025-10","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":23455,"unknown_open_pipeline_value":745259.63,"unknown_deals_count":21,"won_revenue":23455,"open_pipeline_value":745259.63,"deals_count":21},{"month":"2025-11","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":0,"unknown_open_pipeline_value":1621892.75,"unknown_deals_count":20,"won_revenue":0,"open_pipeline_value":1621892.75,"deals_count":20},{"month":"2025-12","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":2000,"unknown_open_pipeline_value":449003,"unknown_deals_count":19,"won_revenue":2000,"open_pipeline_value":449003,"deals_count":19},{"month":"2026-01","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":197266,"unknown_open_pipeline_value":4166838.39,"unknown_deals_count":41,"won_revenue":197266,"open_pipeline_value":4166838.39,"deals_count":41},{"month":"2026-02","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":46718.54,"unknown_open_pipeline_value":3412752.3200000003,"unknown_deals_count":59,"won_revenue":46718.54,"open_pipeline_value":3412752.3200000003,"deals_count":59},{"month":"2026-03","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":65185,"unknown_open_pipeline_value":2693416.66,"unknown_deals_count":49,"won_revenue":65185,"open_pipeline_value":2693416.66,"deals_count":49},{"month":"2026-04","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":57000,"unknown_open_pipeline_value":3148840.2899999996,"unknown_deals_count":62,"won_revenue":57000,"open_pipeline_value":3148840.2899999996,"deals_count":62},{"month":"2026-05","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":51877,"unknown_open_pipeline_value":1520497.036,"unknown_deals_count":56,"won_revenue":51877,"open_pipeline_value":1520497.036,"deals_count":56},{"month":"2026-06","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":1461264,"unknown_open_pipeline_value":1559516.92,"unknown_deals_count":66,"won_revenue":1461264,"open_pipeline_value":1559516.92,"deals_count":66},{"month":"2026-07","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":0,"unknown_open_pipeline_value":1309226.63,"unknown_deals_count":44,"won_revenue":0,"open_pipeline_value":1309226.63,"deals_count":44},{"month":"2026-08","digital_won_revenue":0,"digital_open_pipeline_value":0,"digital_deals_count":0,"offline_won_revenue":0,"offline_open_pipeline_value":0,"offline_deals_count":0,"referral_won_revenue":0,"referral_open_pipeline_value":0,"referral_deals_count":0,"renewal_won_revenue":0,"renewal_open_pipeline_value":0,"renewal_deals_count":0,"direct_won_revenue":0,"direct_open_pipeline_value":0,"direct_deals_count":0,"unknown_won_revenue":0,"unknown_open_pipeline_value":1163072.75,"unknown_deals_count":43,"won_revenue":0,"open_pipeline_value":1163072.75,"deals_count":43}],"by_bucket_ytd":{"digital":{"won_revenue":0,"deals_count":0,"open_pipeline_value":0},"offline":{"won_revenue":0,"deals_count":0,"open_pipeline_value":0},"referral":{"won_revenue":0,"deals_count":0,"open_pipeline_value":0},"renewal":{"won_revenue":0,"deals_count":0,"open_pipeline_value":0},"direct":{"won_revenue":0,"deals_count":0,"open_pipeline_value":0},"unknown":{"won_revenue":1879310.54,"deals_count":420,"open_pipeline_value":18974160.996}}};</script>
+</head>
+<body>
+
+<div id="root"><div class="loading"><div class="spinner"></div>Loading…</div></div>
+
+<script>
+  
+  if (window.__DASH_DATA__) {
+    render(window.__DASH_DATA__);
+  } else {
+    renderError('No data payload found. This page was published without data.');
+  }
+
+  var BUCKETS = ['digital', 'offline', 'referral', 'renewal', 'direct', 'unknown'];
+  var BUCKET_COLOR = {
+    digital:  'var(--digital)',
+    offline:  'var(--offline)',
+    referral: 'var(--referral)',
+    renewal:  'var(--renewal)',
+    direct:   'var(--direct)',
+    unknown:  'var(--unknown)'
+  };
+  var BUCKET_LABEL = {
+    digital: 'Digital',  offline: 'Offline',    referral: 'Referral',
+    renewal: 'Renewal',  direct:  'Direct',     unknown:  'Unknown'
+  };
+
+  function render(data) {
+    if (!data || data.error) { renderError(data && data.error || 'No data'); return; }
+
+    var monthly = (data.monthly || []).slice(-12);   
+    var k = data.kpis || {};
+    var yearNow = new Date().getFullYear();
+
+    var html = ''
+      + '<div class="dashboard">'
+      + '  <div class="section-header">'
+      + '    <h2>ROI Dashboard</h2>'
+      + '    <span class="client-name">' + esc(data.client) + '</span>'
+      + '    <span class="period">YTD ' + yearNow + '</span>'
+      + '  </div>'
+      + renderKPIs(k, yearNow)
+      + '  <div class="charts">'
+      + '    <div class="chart-card"><h3>Won Revenue by Month · Last 12 Months</h3>' + renderStackedBars(monthly) + '</div>'
+      + '    <div class="chart-card"><h3>YTD Attribution Mix</h3>' + renderDonut(data.by_bucket_ytd || {}, k.ytd_won_revenue || 0) + '</div>'
+      + '  </div>'
+      + '  <div class="table-card"><h3>Monthly Breakdown</h3>' + renderTable(monthly) + '</div>'
+      + '  <div class="footer">Data refreshed ' + fmtStamp(data.generated_at) + ' · Source: Pipedrive · Bucket classifier: CallRail source-of-truth (custom Deal source enum kept as QA reference)</div>'
+      + '</div>';
+    document.getElementById('root').innerHTML = html;
+  }
+
+  function renderKPIs(k, year) {
+    var cards = [
+      { label: 'Won Revenue YTD',   value: fmtCurrency(k.ytd_won_revenue), sub: k.ytd_won_count + ' deals won' },
+      { label: 'Open Pipeline',     value: fmtCurrency(k.ytd_open_pipeline), sub: 'sum of open deal value' },
+      { label: 'Avg Deal Size',     value: fmtCurrency(k.avg_deal_size), sub: 'won revenue ÷ won count' },
+      { label: 'Win Rate',          value: (Math.round(k.win_rate_pct * 10) / 10) + '%', sub: 'won ÷ (won + lost)' },
+      { label: 'Total Deals YTD',   value: fmtInt(k.ytd_deals_count), sub: 'all statuses' },
+      { label: 'All-Time Won',      value: fmtCurrency(k.all_time_won_revenue), sub: k.all_time_won_count + ' deals lifetime' }
+    ];
+    return '<div class="kpi-row">' + cards.map(function(c) {
+      return '<div class="kpi-card"><div class="label">' + c.label + '</div><div class="value">' + c.value + '</div><div class="sub">' + c.sub + '</div></div>';
+    }).join('') + '</div>';
+  }
+
+  function renderStackedBars(months) {
+    if (!months.length) return '<div class="loading" style="padding:40px 0;">No monthly data yet.</div>';
+    var maxVal = 0;
+    months.forEach(function(m) { if (m.won_revenue > maxVal) maxVal = m.won_revenue; });
+    if (maxVal === 0) maxVal = 1;
+
+    var cols = months.map(function(m) {
+      var segs = BUCKETS.map(function(b) {
+        var v = m[b + '_won_revenue'] || 0;
+        if (v <= 0) return '';
+        var pct = (v / maxVal) * 100;
+        return '<div class="bar-seg" style="height:' + pct + '%; background:' + BUCKET_COLOR[b] + ';" title="' + BUCKET_LABEL[b] + ': ' + fmtCurrency(v) + '"></div>';
+      }).join('');
+      return ''
+        + '<div class="bar-col">'
+        + '  <div class="bar-value">' + fmtCurrencyShort(m.won_revenue) + '</div>'
+        + '  <div class="bar-stack" style="height: 200px;">' + segs + '</div>'
+        + '  <div class="bar-label">' + fmtMonthShort(m.month) + '</div>'
+        + '</div>';
+    }).join('');
+    return '<div class="bar-chart">' + cols + '</div>';
+  }
+
+  function renderDonut(byBucket, total) {
+    if (total <= 0) return '<div class="loading" style="padding:40px 0;">No YTD revenue yet.</div>';
+    var size = 140, r = 55, cx = size / 2, cy = size / 2;
+    var circumference = 2 * Math.PI * r;
+    var offset = 0;
+    var segs = '';
+    var legend = '';
+    BUCKETS.forEach(function(b) {
+      var v = (byBucket[b] || {}).won_revenue || 0;
+      var pct = v / total;
+      if (pct <= 0) return;
+      var dash = pct * circumference;
+      segs += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="transparent" stroke="' + BUCKET_COLOR[b] + '" stroke-width="18" stroke-dasharray="' + dash + ' ' + (circumference - dash) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"></circle>';
+      offset += dash;
+      legend += '<div class="row"><span class="swatch" style="background:' + BUCKET_COLOR[b] + ';"></span><span class="name">' + BUCKET_LABEL[b] + '</span><span class="pct">' + Math.round(pct * 100) + '% · ' + fmtCurrencyShort(v) + '</span></div>';
+    });
+    return ''
+      + '<div class="donut-wrap">'
+      + '  <svg class="donut-svg" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' + segs + '</svg>'
+      + '  <div class="donut-legend">' + legend + '</div>'
+      + '</div>';
+  }
+
+  function renderTable(months) {
+    if (!months.length) return '';
+    var thead = '<thead><tr><th>Month</th>' + BUCKETS.map(function(b) { return '<th>' + BUCKET_LABEL[b] + '</th>'; }).join('') + '<th>Total Won</th><th>Open Pipe</th></tr></thead>';
+    var totals = { open: 0, won: 0 };
+    var bucketTotals = {}; BUCKETS.forEach(function(b) { bucketTotals[b] = 0; });
+    var rows = months.slice().reverse().map(function(m) {
+      totals.won += m.won_revenue; totals.open += m.open_pipeline_value;
+      BUCKETS.forEach(function(b) { bucketTotals[b] += m[b + '_won_revenue'] || 0; });
+      return '<tr><td>' + fmtMonthShort(m.month) + '</td>'
+        + BUCKETS.map(function(b) { return '<td>' + fmtCurrencyShort(m[b + '_won_revenue'] || 0) + '</td>'; }).join('')
+        + '<td>' + fmtCurrencyShort(m.won_revenue) + '</td>'
+        + '<td>' + fmtCurrencyShort(m.open_pipeline_value) + '</td></tr>';
+    }).join('');
+    var totalRow = '<tr class="total-row"><td>Total</td>'
+      + BUCKETS.map(function(b) { return '<td>' + fmtCurrencyShort(bucketTotals[b]) + '</td>'; }).join('')
+      + '<td>' + fmtCurrencyShort(totals.won) + '</td>'
+      + '<td>' + fmtCurrencyShort(totals.open) + '</td></tr>';
+    return '<table>' + thead + '<tbody>' + rows + totalRow + '</tbody></table>';
+  }
+
+  function renderError(msg) {
+    document.getElementById('root').innerHTML = '<div class="dashboard"><div class="err">' + esc(msg) + '</div></div>';
+  }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function fmtInt(n) { return Number(n || 0).toLocaleString(); }
+  function fmtCurrency(n) { return '$' + Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
+  function fmtCurrencyShort(n) {
+    n = Number(n || 0);
+    if (n === 0) return '$0';
+    if (Math.abs(n) >= 1e6) return '$' + (n / 1e6).toFixed(1) + 'M';
+    if (Math.abs(n) >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'k';
+    return '$' + Math.round(n);
+  }
+  function fmtMonthShort(iso) {
+    if (!iso) return '';
+    var y = iso.slice(0, 4), m = parseInt(iso.slice(5, 7), 10);
+    var names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return names[m - 1] + " '" + y.slice(2);
+  }
+  function fmtStamp(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+</script>
+
+</body>
+</html>
