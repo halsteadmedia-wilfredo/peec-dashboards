@@ -1,16 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-<base target="_top">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>window.__DASH_DATA__ = {"clientName":"Crimson Landscaping (Marketing)","lastUpdated":"2026-08-31","summary":{"totalLeadsYtd":114,"qualifiedLeadsYtd":30,"qualifiedRatePct":26.3,"digitalSharePct":40},"monthly12":[{"month":"2025-09","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-02","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-03","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-04","digital_total":2,"offline_total":1,"digital_qualified":0,"offline_qualified":0},{"month":"2026-05","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-06","digital_total":22,"offline_total":12,"digital_qualified":0,"offline_qualified":0},{"month":"2026-07","digital_total":15,"offline_total":9,"digital_qualified":0,"offline_qualified":0},{"month":"2026-08","digital_total":41,"offline_total":1,"digital_qualified":2,"offline_qualified":3}],"monthlyTable":[{"month":"2026-08","digital_total":41,"offline_total":1,"digital_qualified":2,"offline_qualified":3},{"month":"2026-07","digital_total":15,"offline_total":9,"digital_qualified":0,"offline_qualified":0},{"month":"2026-06","digital_total":22,"offline_total":12,"digital_qualified":0,"offline_qualified":0},{"month":"2026-05","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-04","digital_total":2,"offline_total":1,"digital_qualified":0,"offline_qualified":0},{"month":"2026-03","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-02","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2025-09","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0}],"notes":[{"label":"KPI MAPPING","text":"The \"Qualified Leads YTD\" card shows Won Deals — items that reached Active 2026 (any group 1-6). \"Qualified Rate\" is the Conversion Rate (Won ÷ Total Leads). \"Digital Share\" is the % of Won Deals attributed to a digital source. Template labels stay fixed for now.","accent":"warn"},{"label":"DIGITAL SOURCES","text":"Google (Ads + Organic + Ads Assets + My Business), Facebook, Website, Website pool, Direct, Unbouce, ChatGPT, CallRail URL captures","accent":""},{"label":"OFFLINE SOURCES","text":"Referral, Truck, Yard Sign, Legacy","accent":""},{"label":"SCOPE","text":"Won Deals = any item in Active 2026 groups 1-6 (excludes \"Needs to be Disposed\" and \"Cold 2026\"). Total Leads = every Leads 2026 item regardless of status. Unknown-source items are counted in both KPIs but hidden from the by-source chart (25 Won Deals + 12 Total Leads currently in Unknown bucket).","accent":"warn"},{"label":"DATA SOURCE","text":"Monday.com API via Apps Script cron (every 15 min). No amount/revenue column on current boards — dashboard shows counts only. If the client adds an \"Estimate Amount\" column to Monday, revenue metrics can be enabled.","accent":"muted"}]};</script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
-
-  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
-  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #4a6cf7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
   .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
@@ -86,67 +77,57 @@
   .cat-table .total-row td { border-top: 2px solid #e2e8f0; border-bottom: none; }
 
   .caption {
-    font-size: 12px; color: #718096; line-height: 1.6;
-    padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 24px;
-    border-left: 3px solid #4a6cf7;
+    font-size: 12px; color: #4a5568; line-height: 1.6;
+    padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 10px;
+    border-left: 3px solid #38a169;
   }
-  .caption strong { color: #2d3748; }
+  .caption strong { color: #2d3748; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; margin-right: 6px; }
+  .caption.accent-warn  { background: #fffaf0; border-left-color: #ed8936; }
+  .caption.accent-muted { background: #f7fafc; border-left-color: #a0aec0; }
 
   .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
-  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
   .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
 </style>
-<script>window.__DASH_DATA__ = {"clientName":"Crimson Landscaping (Marketing)","lastUpdated":"2026-08-31","summary":{"totalLeadsYtd":114,"qualifiedLeadsYtd":30,"qualifiedRatePct":26.3,"digitalSharePct":40},"monthly12":[{"month":"2025-09","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-02","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-03","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-04","digital_total":2,"offline_total":1,"digital_qualified":0,"offline_qualified":0},{"month":"2026-05","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-06","digital_total":22,"offline_total":12,"digital_qualified":0,"offline_qualified":0},{"month":"2026-07","digital_total":15,"offline_total":9,"digital_qualified":0,"offline_qualified":0},{"month":"2026-08","digital_total":41,"offline_total":1,"digital_qualified":2,"offline_qualified":3}],"monthlyTable":[{"month":"2026-08","digital_total":41,"offline_total":1,"digital_qualified":2,"offline_qualified":3},{"month":"2026-07","digital_total":15,"offline_total":9,"digital_qualified":0,"offline_qualified":0},{"month":"2026-06","digital_total":22,"offline_total":12,"digital_qualified":0,"offline_qualified":0},{"month":"2026-05","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-04","digital_total":2,"offline_total":1,"digital_qualified":0,"offline_qualified":0},{"month":"2026-03","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2026-02","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0},{"month":"2025-09","digital_total":0,"offline_total":0,"digital_qualified":0,"offline_qualified":0}],"notes":[{"label":"KPI MAPPING","text":"The \"Qualified Leads YTD\" card shows Won Deals — items that reached Active 2026 (any group 1-6). \"Qualified Rate\" is the Conversion Rate (Won ÷ Total Leads). \"Digital Share\" is the % of Won Deals attributed to a digital source. Template labels stay fixed for now.","accent":"warn"},{"label":"DIGITAL SOURCES","text":"Google (Ads + Organic + Ads Assets + My Business), Facebook, Website, Website pool, Direct, Unbouce, ChatGPT, CallRail URL captures","accent":""},{"label":"OFFLINE SOURCES","text":"Referral, Truck, Yard Sign, Legacy","accent":""},{"label":"SCOPE","text":"Won Deals = any item in Active 2026 groups 1-6 (excludes \"Needs to be Disposed\" and \"Cold 2026\"). Total Leads = every Leads 2026 item regardless of status. Unknown-source items are counted in both KPIs but hidden from the by-source chart (25 Won Deals + 12 Total Leads currently in Unknown bucket).","accent":"warn"},{"label":"DATA SOURCE","text":"Monday.com API via Apps Script cron (every 15 min). No amount/revenue column on current boards — dashboard shows counts only. If the client adds an \"Estimate Amount\" column to Monday, revenue metrics can be enabled.","accent":"muted"}]};</script>
-</head>
-<body>
 
-<div id="loading" class="loading">
-  <div class="spinner"></div>
-  <div>Loading lead performance data...</div>
-</div>
-
-<div id="dashboard" class="dashboard" style="display:none;">
+<div id="dashboard" class="dashboard">
   <div class="section-header">
     <h2>Lead Performance Tracker</h2>
-    <span class="client-name" id="client-name">—</span>
+    <span class="client-name" id="client-name"></span>
     <span class="period" id="period-label"></span>
   </div>
 
   <div class="kpi-row">
-    <div class="kpi-card" data-tip="Count of all form submissions year-to-date, regardless of qualification or source.">
+    <div class="kpi-card" data-tip="Every item on the Leads 2026 Monday board, regardless of status. Includes calls, forms, and manual entries.">
       <div class="label">Total Leads YTD</div>
       <div class="value" id="kpi-total">--</div>
-      <div class="sub">All form submissions this year</div>
+      <div class="sub">All leads captured this year</div>
     </div>
-    <div class="kpi-card" data-tip="Count of leads marked Qualified by the sales team year-to-date.">
-      <div class="label">Qualified Leads YTD</div>
+    <div class="kpi-card" data-tip="Items that reached the Active 2026 Monday board (groups 1-6: Qualified Leads through Complete Pending Payment). Excludes 'Needs to be Disposed' and 'Cold 2026' groups.">
+      <div class="label">Won Deals YTD</div>
       <div class="value" id="kpi-qualified">--</div>
-      <div class="sub">Vetted as real opportunities</div>
+      <div class="sub">Reached Active board (Sold)</div>
     </div>
-    <div class="kpi-card" data-tip="Percentage of YTD leads marked Qualified. Calculated as Qualified ÷ Total.">
-      <div class="label">Qualified Rate</div>
+    <div class="kpi-card" data-tip="Won Deals ÷ Total Leads. Represents the share of leads that convert into active projects.">
+      <div class="label">Conversion Rate</div>
       <div class="value" id="kpi-rate">--</div>
-      <div class="sub">Qualified ÷ Total leads</div>
+      <div class="sub">Won ÷ Total Leads</div>
     </div>
-    <div class="kpi-card" data-tip="Share of YTD leads from digital marketing channels (Google Ads, organic search, paid social, website forms, CallRail-tracked calls). The rest comes from offline sources.">
+    <div class="kpi-card" data-tip="Of Won Deals with a captured source, the percentage attributed to a digital channel (Google, Facebook, website, CallRail URLs). Unknown-source Won Deals excluded from this ratio.">
       <div class="label">Digital Share</div>
       <div class="value" id="kpi-digital">--</div>
-      <div class="sub">% of leads from digital marketing</div>
+      <div class="sub">% of Won Deals from digital</div>
     </div>
   </div>
 
-  <div class="caption">
-    <strong>Digital</strong> includes Google Ads, organic search, paid social, website forms, and CallRail-tracked calls.
-    <strong>Offline</strong> includes referrals, home shows, existing clients, and other non-digital sources.
-  </div>
+  <div id="notes-panel"></div>
 
   <div class="card">
     <h3>Leads by Marketing Bucket — Last 12 Months</h3>
     <div class="chart-container" id="chart-container"></div>
     <div class="legend">
-      <div class="legend-item"><span class="legend-swatch swatch-digital"></span> Digital</div>
-      <div class="legend-item"><span class="legend-swatch swatch-offline"></span> Offline</div>
-      <div class="legend-item"><span class="legend-swatch swatch-qualified"></span> Qualified (total)</div>
+      <div class="legend-item"><span class="legend-swatch swatch-digital"></span> Digital Leads</div>
+      <div class="legend-item"><span class="legend-swatch swatch-offline"></span> Offline Leads</div>
+      <div class="legend-item"><span class="legend-swatch swatch-qualified"></span> Won Deals (attributed)</div>
     </div>
   </div>
 
@@ -159,8 +140,8 @@
           <th>Digital Leads</th>
           <th>Offline Leads</th>
           <th>Total Leads</th>
-          <th>Qualified</th>
-          <th>Qualified %</th>
+          <th>Won Deals</th>
+          <th>Conv %</th>
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
@@ -171,37 +152,18 @@
 </div>
 
 <script>
-  
-  if (window.__DASH_DATA__) {
-    renderDashboard(window.__DASH_DATA__);
-  } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler(renderDashboard)
-      .withFailureHandler(showError)
-      .getDashboardData();
-  } else {
-    document.getElementById('loading').innerHTML =
-      '<div class="error-msg">Dashboard data missing — publisher inject failed.</div>';
-  }
+  var __DATA__ = window.__DASH_DATA__ || {};
 
-  function showError(err) {
-    document.getElementById('loading').innerHTML =
-      '<div class="error-msg">Failed to load data: ' + (err && err.message ? err.message : err) + '</div>';
-  }
+  document.getElementById('client-name').textContent = '— ' + (__DATA__.clientName || '');
+  document.getElementById('period-label').textContent = 'Last updated: ' + (__DATA__.lastUpdated || '');
 
-  function renderDashboard(data) {
-    if (!data || data.error) { showError({ message: (data && data.error) || 'No data' }); return; }
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
+  renderKPIs(__DATA__.summary || {});
+  renderNotes(__DATA__.notes || []);
+  renderChart(__DATA__.monthly12 || []);
+  renderTable(__DATA__.monthlyTable || []);
 
-    document.getElementById('client-name').textContent = '— ' + (data.clientName || '');
-    document.getElementById('period-label').textContent = 'Last updated: ' + (data.lastUpdated || '');
-
-    renderKPIs(data.summary || {});
-    renderChart(data.monthly12 || []);
-    renderTable(data.monthlyTable || []);
-  }
-
+  function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function mdBold(s) { return String(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); }
   function fmtInt(n) { return (n == null ? 0 : Math.round(n)).toLocaleString(); }
   function fmtPct(n) { return (n == null ? 0 : n) + '%'; }
   function fmtMonthShort(m) {
@@ -220,12 +182,20 @@
     document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
   }
 
+  function renderNotes(notes) {
+    var container = document.getElementById('notes-panel');
+    if (!notes || !notes.length) { container.innerHTML = ''; return; }
+    var html = notes.map(function(n){
+      var accent = n.accent === 'warn' ? ' accent-warn' : n.accent === 'muted' ? ' accent-muted' : '';
+      var label = n.label ? '<strong>' + escHtml(n.label) + '</strong>' : '';
+      return '<div class="caption' + accent + '">' + label + mdBold(escHtml(n.text)) + '</div>';
+    }).join('');
+    container.innerHTML = html + '<div style="height:14px"></div>';
+  }
+
   function renderChart(monthly) {
     var container = document.getElementById('chart-container');
-    if (!monthly.length) {
-      container.innerHTML = '<div class="empty-msg">No monthly data yet.</div>';
-      return;
-    }
+    if (!monthly.length) { container.innerHTML = '<div class="empty-msg">No monthly data yet.</div>'; return; }
 
     var W = 1100, H = 320, PAD_L = 50, PAD_R = 24, PAD_T = 16, PAD_B = 50;
     var innerW = W - PAD_L - PAD_R, innerH = H - PAD_T - PAD_B;
@@ -239,7 +209,6 @@
       if (total > maxVal) maxVal = total;
     });
     var yMax = Math.max(maxVal * 1.15, 5);
-
     var magnitude = Math.pow(10, Math.floor(Math.log(yMax) / Math.LN10));
     yMax = Math.ceil(yMax / magnitude) * magnitude;
 
@@ -251,27 +220,18 @@
       gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + fmtInt(v) + '</text>';
     }
 
-    var bars = '';
-    var xLabels = '';
+    var bars = '', xLabels = '';
     monthly.forEach(function(m, i) {
       var groupX = PAD_L + i * groupW + groupW / 2;
-      var d = m.digital_total || 0;
-      var o = m.offline_total || 0;
+      var d = m.digital_total || 0, o = m.offline_total || 0;
       var q = (m.digital_qualified || 0) + (m.offline_qualified || 0);
-      var dH = (d / yMax) * innerH;
-      var oH = (o / yMax) * innerH;
-      var qH = (q / yMax) * innerH;
-
-      var dX = groupX - barW * 1.5 - 2;
-      var oX = groupX - barW * 0.5;
-      var qX = groupX + barW * 0.5 + 2;
-      var dY = PAD_T + innerH - dH;
-      var oY = PAD_T + innerH - oH;
-      var qY = PAD_T + innerH - qH;
+      var dH = (d / yMax) * innerH, oH = (o / yMax) * innerH, qH = (q / yMax) * innerH;
+      var dX = groupX - barW * 1.5 - 2, oX = groupX - barW * 0.5, qX = groupX + barW * 0.5 + 2;
+      var dY = PAD_T + innerH - dH, oY = PAD_T + innerH - oH, qY = PAD_T + innerH - qH;
 
       if (d > 0) bars += '<rect x="' + dX + '" y="' + dY + '" width="' + barW + '" height="' + dH + '" fill="#38a169" rx="2"><title>' + m.month + ' Digital: ' + d + '</title></rect>';
       if (o > 0) bars += '<rect x="' + oX + '" y="' + oY + '" width="' + barW + '" height="' + oH + '" fill="#4a6cf7" rx="2"><title>' + m.month + ' Offline: ' + o + '</title></rect>';
-      if (q > 0) bars += '<rect x="' + qX + '" y="' + qY + '" width="' + barW + '" height="' + qH + '" fill="#ed8936" rx="2"><title>' + m.month + ' Qualified: ' + q + '</title></rect>';
+      if (q > 0) bars += '<rect x="' + qX + '" y="' + qY + '" width="' + barW + '" height="' + qH + '" fill="#ed8936" rx="2"><title>' + m.month + ' Won (attributed): ' + q + '</title></rect>';
 
       xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="#4a5568">' + fmtMonthShort(m.month) + '</text>';
       var total = d + o;
@@ -281,18 +241,12 @@
       }
     });
 
-    container.innerHTML =
-      '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' +
-        gridLines + bars + xLabels +
-      '</svg>';
+    container.innerHTML = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' + gridLines + bars + xLabels + '</svg>';
   }
 
   function renderTable(rows) {
     var tbody = document.getElementById('table-body');
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No monthly data yet.</td></tr>';
-      return;
-    }
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No monthly data yet.</td></tr>'; return; }
 
     var tD = 0, tO = 0, tQ = 0;
     rows.forEach(function(r) {
@@ -326,6 +280,3 @@
     tbody.appendChild(totalTr);
   }
 </script>
-
-</body>
-</html>
