@@ -103,11 +103,11 @@
   .cat-table .total-row td { border-top: 2px solid #e2e8f0; border-bottom: none; }
 
   .caption {
-    font-size: 12px; color: #718096; line-height: 1.6;
-    padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 24px;
-    border-left: 3px solid #4a6cf7;
+    font-size: 12px; color: #4a5568; line-height: 1.6;
+    padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 10px;
+    border-left: 3px solid #38a169;
   }
-  .caption strong { color: #2d3748; }
+  .caption strong { color: #2d3748; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; margin-right: 6px; }
   .caption.accent-warn  { background: #fffaf0; border-left-color: #ed8936; }
   .caption.accent-muted { background: #f7fafc; border-left-color: #a0aec0; }
 
@@ -247,9 +247,16 @@
 
     renderKPIs(data.summary || {});
     renderGoalBar(data.summary || {});
+    renderNotes(data.notes || []);
     renderChart(data.monthly12 || []);
     renderTable(data.monthlyTable || []);
     renderQualifiedTable(data.qualifiedTable || []);
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
   }
 
   function fmtCurrency(n, compact) {
@@ -275,6 +282,17 @@
     document.getElementById('kpi-avg').textContent       = fmtCurrency(s.avgDealSize, false);
     document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
     document.getElementById('kpi-qualified').textContent = (s.qualifiedLeadsYtd != null) ? fmtInt(s.qualifiedLeadsYtd) : '--';
+  }
+
+  function renderNotes(notes) {
+    var container = document.getElementById('notes-panel');
+    if (!notes || !notes.length) { container.innerHTML = ''; return; }
+    var html = notes.map(function(n){
+      var accent = n.accent === 'warn' ? ' accent-warn' : n.accent === 'muted' ? ' accent-muted' : '';
+      var label = n.label ? '<strong>' + escHtml(n.label) + '</strong>' : '';
+      return '<div class="caption' + accent + '">' + label + escHtml(n.text) + '</div>';
+    }).join('');
+    container.innerHTML = html + '<div style="height:14px"></div>';
   }
 
   function renderGoalBar(s) {
@@ -473,23 +491,6 @@
       '<td>' + pctTotal + '%</td>';
     tbody.appendChild(totalTr);
   }
-  function renderNotes(notes) {
-    var container = document.getElementById('notes-panel');
-    if (!notes || !notes.length) { container.innerHTML = ''; return; }
-    var html = notes.map(function(n){
-      var accent = n.accent === 'warn' ? ' accent-warn' : n.accent === 'muted' ? ' accent-muted' : '';
-      var label = n.label ? '<strong>' + escHtml(n.label) + '</strong> ' : '';
-      return '<div class="caption' + accent + '">' + label + escHtml(n.text) + '</div>';
-    }).join('');
-    container.innerHTML = html + '<div style="height:14px"></div>';
-  }
-
-  function escHtml(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-    });
-  }
-
 </script>
 
 </body>
