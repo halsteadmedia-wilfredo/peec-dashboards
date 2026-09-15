@@ -4,142 +4,215 @@
 <base target="_top">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Montserrat:wght@800;900&amp;display=swap">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
+   
+  :root {
+    --black:    #000000;
+    --surface:  #0a0a0a;
+    --border:   #1a1a1a;
+    --border-2: #2a2a2a;
+    --white:    #FFFFFF;
+    --dim:      rgba(255,255,255,0.65);
+    --muted:    rgba(255,255,255,0.42);
+    --faint:    rgba(255,255,255,0.22);
 
-  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
-  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #4a6cf7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+    --blue:     #2289AB;
+    --blue-dim: rgba(34,137,171,0.30);
+
+    --good:     #4ade80;
+    --warn:     #fbbf24;
+    --bad:      #f87171;
+
+    --font-body: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--black); color: var(--white); -webkit-font-smoothing: antialiased; }
+
+  .loading { text-align: center; padding: 80px 20px; color: var(--dim); font-size: 14px; letter-spacing: 0.02em; }
+  .loading .spinner { display: inline-block; width: 32px; height: 32px; border: 2px solid var(--border-2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
   .section-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
   }
-  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
-  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
+  .section-header h2 {
+    font-family: var(--font-display);
+    font-size: 15px; font-weight: 800; color: var(--white);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .section-header .client-name { font-size: 13px; color: var(--dim); font-weight: 400; }
   .section-header .period {
-    margin-left: auto; font-size: 13px; color: #718096;
-    background: #f7fafc; padding: 5px 12px; border-radius: 6px;
+    margin-left: auto; font-size: 11px; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.10em;
+    padding: 5px 10px; border: 1px solid var(--border-2);
   }
 
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
   .kpi-card {
-    background: #fff; border-radius: 10px; padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    background: var(--surface); padding: 20px;
+    border: 1px solid var(--border);
     position: relative;
+    transition: border-color 0.15s ease, transform 0.15s ease;
   }
-  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
-  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
+  .kpi-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+  .kpi-card .label {
+    font-size: 10px; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin-bottom: 12px; font-weight: 500;
+  }
+  .kpi-card .value {
+    font-family: var(--font-display);
+    font-size: 32px; font-weight: 900; color: var(--white);
+    line-height: 1; letter-spacing: -0.01em;
+  }
+  .kpi-card .sub { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
   .kpi-card[data-tip] { cursor: help; }
   .kpi-card[data-tip]::after {
     content: attr(data-tip);
     position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
-    background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400;
-    line-height: 1.5; padding: 10px 14px; border-radius: 8px;
+    background: var(--white); color: var(--black);
+    font-size: 12px; font-weight: 400; font-family: var(--font-body);
+    line-height: 1.5; padding: 10px 14px;
     width: max-content; max-width: 260px; text-transform: none; letter-spacing: 0;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
     z-index: 100;
   }
   .kpi-card[data-tip]::before {
     content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
-    border: 6px solid transparent; border-top-color: #1a202c;
+    border: 6px solid transparent; border-top-color: var(--white);
     pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
     z-index: 100;
   }
   .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
   .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
 
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-  .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 24px; }
   .card {
-    background: #fff; border-radius: 10px; padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    background: var(--surface); padding: 20px;
+    border: 1px solid var(--border);
+    transition: border-color 0.15s ease;
   }
-  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
+  .card:hover { border-color: var(--border-2); }
+  .card h3 {
+    font-family: var(--font-body);
+    font-size: 11px; font-weight: 500; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin-bottom: 20px;
+  }
 
-  .bar-row { margin-bottom: 13px; }
-  .bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 13px; }
-  .bar-label .name { font-weight: 500; }
-  .bar-label .meta { color: #718096; font-size: 12px; }
-  .bar-track { background: #edf2f7; border-radius: 4px; height: 10px; }
-  .bar-fill { height: 10px; border-radius: 4px; min-width: 2px; }
-  .bar-chatgpt-scraper          { background: #38a169; }
-  .bar-gpt-4o                   { background: #38a169; }
-  .bar-gpt-4o-search            { background: #38a169; }
-  .bar-gemini-scraper           { background: #4a6cf7; }
-  .bar-google-ai-overview-scraper { background: #ed8936; }
-  .bar-perplexity-scraper       { background: #9f7aea; }
-  .bar-claude-sonnet-4          { background: #f56565; }
-  .bar-claude-3-5-haiku         { background: #f56565; }
-  .bar-default                  { background: #718096; }
+   
+  .bar-row { margin-bottom: 14px; }
+  .bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12px; }
+  .bar-label .name { font-weight: 500; color: var(--white); }
+  .bar-label .meta { color: var(--dim); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .bar-track { background: var(--border); height: 6px; }
+  .bar-fill  { height: 6px; min-width: 2px; transition: width 0.3s ease; }
+  .bar-chatgpt-scraper            { background: var(--blue); }
+  .bar-gpt-4o                     { background: var(--blue); }
+  .bar-gpt-4o-search              { background: var(--blue); }
+  .bar-gemini-scraper             { background: rgba(255,255,255,0.75); }
+  .bar-google-ai-overview-scraper { background: rgba(255,255,255,0.60); }
+  .bar-perplexity-scraper         { background: rgba(255,255,255,0.45); }
+  .bar-claude-sonnet-4            { background: rgba(255,255,255,0.30); }
+  .bar-claude-3-5-haiku           { background: rgba(255,255,255,0.30); }
+  .bar-default                    { background: rgba(255,255,255,0.20); }
 
-  .model-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; margin-right: 3px; }
-  .model-chatgpt-scraper          { background: #f0fdf4; color: #166534; }
-  .model-gpt-4o                   { background: #f0fdf4; color: #166534; }
-  .model-gpt-4o-search            { background: #f0fdf4; color: #166534; }
-  .model-gemini-scraper           { background: #eff6ff; color: #1e40af; }
-  .model-google-ai-overview-scraper { background: #fff7ed; color: #9a3412; }
-  .model-perplexity-scraper       { background: #faf5ff; color: #6b21a8; }
-  .model-claude-sonnet-4          { background: #fef2f2; color: #991b1b; }
-  .model-claude-3-5-haiku         { background: #fef2f2; color: #991b1b; }
-  .model-default                  { background: #f7fafc; color: #4a5568; }
+   
+  .model-badge {
+    display: inline-block; padding: 2px 8px; font-size: 10px; font-weight: 500;
+    margin-right: 4px; letter-spacing: 0.04em; text-transform: uppercase;
+    border: 1px solid var(--border-2);
+  }
+  .model-chatgpt-scraper            { color: var(--blue); border-color: var(--blue); }
+  .model-gpt-4o                     { color: var(--blue); border-color: var(--blue); }
+  .model-gpt-4o-search              { color: var(--blue); border-color: var(--blue); }
+  .model-gemini-scraper             { color: rgba(255,255,255,0.90); border-color: rgba(255,255,255,0.40); }
+  .model-google-ai-overview-scraper { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.30); }
+  .model-perplexity-scraper         { color: rgba(255,255,255,0.60); border-color: rgba(255,255,255,0.24); }
+  .model-claude-sonnet-4            { color: rgba(255,255,255,0.48); border-color: rgba(255,255,255,0.18); }
+  .model-claude-3-5-haiku           { color: rgba(255,255,255,0.48); border-color: rgba(255,255,255,0.18); }
+  .model-default                    { color: var(--dim); border-color: var(--border-2); }
 
    
   .daily-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
   .daily-cell {
-    text-align: center; padding: 8px 4px; background: #f7fafc;
-    border-radius: 6px; font-size: 11px;
+    text-align: center; padding: 10px 4px; background: var(--surface);
+    border: 1px solid var(--border); font-size: 10px;
   }
-  .daily-cell .day { color: #718096; }
-  .daily-cell .rate { font-weight: 700; font-size: 14px; margin-top: 2px; }
-  .daily-cell .rate.low  { color: #991b1b; }
-  .daily-cell .rate.mid  { color: #744210; }
-  .daily-cell .rate.high { color: #166534; }
+  .daily-cell .day {
+    color: var(--dim); text-transform: uppercase;
+    letter-spacing: 0.08em; font-size: 9px;
+  }
+  .daily-cell .rate {
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 14px; margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .daily-cell .rate.low  { color: var(--muted); }
+  .daily-cell .rate.mid  { color: var(--white); }
+  .daily-cell .rate.high { color: var(--blue); }
 
    
-  .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .cat-table th {
-    text-align: left; padding: 10px 12px; color: #718096; font-weight: 500;
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
-    border-bottom: 2px solid #e2e8f0; background: #fafbfc;
+    text-align: left; padding: 10px 12px; color: var(--dim); font-weight: 500;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
   }
-  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
-  .cat-table tr:hover { background: #f7fafc; }
-  .rate-high { color: #22543d; font-weight: 700; }
-  .rate-mid  { color: #744210; font-weight: 600; }
-  .rate-zero { color: #a0aec0; font-weight: 500; }
+  .cat-table td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--white); }
+  .cat-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .cat-table tr:last-child td { border-bottom: none; }
+  .rate-high { color: var(--white); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .rate-mid  { color: var(--dim);   font-weight: 500; font-variant-numeric: tabular-nums; }
+  .rate-zero { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
   .position-badge {
-    display: inline-block; background: #f0f4ff; color: #4a6cf7;
-    padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;
+    display: inline-block; background: transparent; color: var(--blue);
+    border: 1px solid var(--blue);
+    padding: 1px 8px; font-weight: 500; font-size: 11px; letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
   }
-  .position-empty { color: #cbd5e0; }
+  .position-empty { color: var(--muted); }
 
   .chart-container { position: relative; height: 220px; overflow: hidden; }
   .chart-svg { width: 100%; height: 100%; }
 
+   
   .comp-list { list-style: none; }
   .comp-list li {
     display: flex; align-items: center; gap: 10px;
-    padding: 9px 0; border-bottom: 1px solid #f0f4f8; font-size: 13px;
+    padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px;
   }
   .comp-list li:last-child { border: none; }
-  .comp-rank { width: 18px; color: #a0aec0; font-size: 11px; font-weight: 600; text-align: right; flex-shrink: 0; }
-  .comp-name { flex: 1; font-weight: 500; }
-  .comp-name.you { color: #38a169; }
-  .you-tag { background: #f0fdf4; color: #166534; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: 600; margin-left: 5px; }
-  .comp-bar-track { width: 70px; background: #edf2f7; border-radius: 3px; height: 6px; flex-shrink: 0; }
-  .comp-bar-fill { height: 6px; background: #cbd5e0; border-radius: 3px; }
-  .comp-bar-fill.you { background: #38a169; }
-  .comp-count { color: #718096; font-size: 12px; flex-shrink: 0; width: 56px; text-align: right; }
+  .comp-rank { width: 22px; color: var(--muted); font-size: 10px; font-weight: 600; text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+  .comp-name { flex: 1; font-weight: 500; color: var(--white); }
+  .comp-name.you { color: var(--blue); font-weight: 600; }
+  .you-tag {
+    background: transparent; color: var(--blue); border: 1px solid var(--blue);
+    padding: 1px 6px; font-size: 9px; font-weight: 600; margin-left: 6px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+  }
+  .comp-bar-track { width: 70px; background: var(--border); height: 4px; flex-shrink: 0; }
+  .comp-bar-fill { height: 4px; background: rgba(255,255,255,0.35); }
+  .comp-bar-fill.you { background: var(--blue); }
+  .comp-count { color: var(--dim); font-size: 11px; flex-shrink: 0; width: 56px; text-align: right; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
 
-  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
-  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
-  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
+  .powered-by {
+    text-align: center; padding: 20px; color: var(--muted); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.14em; margin-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .error-msg { text-align: center; padding: 40px; color: var(--bad); font-size: 13px; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: var(--muted); font-size: 12px; }
 </style>
 <script>window.__PEEC_DATA__ = {"clientName":"Premier Outdoor Group [Premier Gunite Pools]","summary":{"visibility":70.31,"position":2,"sentiment":63,"prompts":25,"mentionRate":70,"period":"2026-08-31 ~ 2026-09-14"},"brands":[{"rank":1,"brand":"Premier Outdoor Group [Premier Gunite Pools]","type":"You","visibility":"69.9%","position":2,"sentiment":63},{"rank":2,"brand":"SSG Pools","type":"Competitor","visibility":"15.26%","position":4.4,"sentiment":59.3},{"rank":3,"brand":"Premier Pools & Spas","type":"Competitor","visibility":"2.35%","position":3.2,"sentiment":60.7},{"rank":4,"brand":"Creative Edge Pools","type":"Competitor","visibility":"0.53%","position":7.8,"sentiment":58.4},{"rank":5,"brand":"New England Pools","type":"Competitor","visibility":"0.11%","position":6,"sentiment":68}],"daily":[{"date":"2026-08-31","mentionRate":"56%","mentions":39,"totalChecks":64,"avgVisibility":"60.94%","avgPosition":2.2},{"date":"2026-09-01","mentionRate":"60%","mentions":42,"totalChecks":62,"avgVisibility":"67.74%","avgPosition":2.2},{"date":"2026-09-02","mentionRate":"67%","mentions":47,"totalChecks":70,"avgVisibility":"67.14%","avgPosition":2.4},{"date":"2026-09-03","mentionRate":"59%","mentions":41,"totalChecks":58,"avgVisibility":"70.69%","avgPosition":2.6},{"date":"2026-09-04","mentionRate":"57%","mentions":40,"totalChecks":60,"avgVisibility":"66.67%","avgPosition":1.7},{"date":"2026-09-05","mentionRate":"59%","mentions":41,"totalChecks":66,"avgVisibility":"62.12%","avgPosition":1.7},{"date":"2026-09-06","mentionRate":"67%","mentions":47,"totalChecks":65,"avgVisibility":"72.31%","avgPosition":2.3},{"date":"2026-09-07","mentionRate":"53%","mentions":37,"totalChecks":56,"avgVisibility":"66.07%","avgPosition":2},{"date":"2026-09-08","mentionRate":"73%","mentions":51,"totalChecks":68,"avgVisibility":"75%","avgPosition":1.6},{"date":"2026-09-09","mentionRate":"66%","mentions":46,"totalChecks":65,"avgVisibility":"70.77%","avgPosition":1.8},{"date":"2026-09-10","mentionRate":"63%","mentions":44,"totalChecks":59,"avgVisibility":"74.58%","avgPosition":1.7},{"date":"2026-09-11","mentionRate":"70%","mentions":49,"totalChecks":66,"avgVisibility":"74.24%","avgPosition":1.9},{"date":"2026-09-12","mentionRate":"64%","mentions":45,"totalChecks":59,"avgVisibility":"76.27%","avgPosition":1.9},{"date":"2026-09-13","mentionRate":"59%","mentions":41,"totalChecks":55,"avgVisibility":"74.55%","avgPosition":1.9},{"date":"2026-09-14","mentionRate":"64%","mentions":45,"totalChecks":64,"avgVisibility":"70.31%","avgPosition":1.7}],"prompts":[{"prompt":"What companies handle inground pool installation in Portsmouth, RI?","visibility":"100%","position":1.3,"sentiment":59.5,"mentionRate":"100%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"What pool companies in Portsmouth, RI offer a full backyard master plan?","visibility":"100%","position":1.1,"sentiment":61.6,"mentionRate":"100%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who builds gunite pools in Newport, RI?","visibility":"100%","position":2.1,"sentiment":61.8,"mentionRate":"100%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who builds custom gunite pools in Portsmouth, RI?","visibility":"97.5%","position":1.3,"sentiment":60.9,"mentionRate":"98%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What poolscape designers work in Portsmouth, RI?","visibility":"97.22%","position":1.3,"sentiment":65.3,"mentionRate":"97%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who designs and builds outdoor kitchens in Portsmouth, RI?","visibility":"97.06%","position":1.4,"sentiment":63.8,"mentionRate":"97%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What poolscape designers are near Nashua, NH?","visibility":"94.74%","position":1.5,"sentiment":63.1,"mentionRate":"95%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who builds custom gunite pools near Nashua, NH?","visibility":"94.74%","position":1.6,"sentiment":62.1,"mentionRate":"95%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"What outdoor living contractors work in Portsmouth, RI?","visibility":"94.74%","position":1.8,"sentiment":64.1,"mentionRate":"95%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"Who does pool renovation and restoration in Portsmouth, RI?","visibility":"94.44%","position":1.3,"sentiment":62.8,"mentionRate":"94%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who installs paver patios and pool decks in Portsmouth, RI?","visibility":"89.19%","position":1.2,"sentiment":61.8,"mentionRate":"89%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"What companies do pool renovation in Newport, RI?","visibility":"81.08%","position":2.4,"sentiment":62.1,"mentionRate":"81%","models":"ChatGPT, Google AI Overview, Gemini"},{"prompt":"What companies do inground pool installation near Nashua, NH?","visibility":"77.78%","position":2.1,"sentiment":60.4,"mentionRate":"78%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"What design-build pool companies work near Nashua, NH?","visibility":"76.32%","position":1.5,"sentiment":63.1,"mentionRate":"76%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who designs outdoor kitchens in Newport, RI?","visibility":"65.79%","position":3.9,"sentiment":65.3,"mentionRate":"66%","models":"Google AI Overview, Gemini, ChatGPT"},{"prompt":"Who installs paver patios and pool decks near Nashua, NH?","visibility":"64.86%","position":3.4,"sentiment":61,"mentionRate":"65%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What patio and pool deck contractors work in Newport, RI?","visibility":"58.97%","position":2.8,"sentiment":61.3,"mentionRate":"59%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who handles pool renovation near Nashua, NH?","visibility":"58.33%","position":2.8,"sentiment":64.6,"mentionRate":"58%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"What companies install fire pits and fire features in Portsmouth, RI?","visibility":"58.33%","position":1.6,"sentiment":70,"mentionRate":"58%","models":"ChatGPT, Google AI Overview, Gemini"},{"prompt":"Who builds outdoor kitchens near Nashua, NH?","visibility":"48.39%","position":3.6,"sentiment":67.3,"mentionRate":"48%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who does landscape design in Portsmouth, RI?","visibility":"44.74%","position":3.8,"sentiment":66.6,"mentionRate":"45%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"What outdoor living contractors serve the Nashua, NH area?","visibility":"26.32%","position":3.5,"sentiment":59,"mentionRate":"26%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who does outdoor living design in Newport, RI?","visibility":"25%","position":5,"sentiment":72.5,"mentionRate":"25%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who does landscape design near Nashua, NH?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"What companies install fire features near Nashua, NH?","visibility":"0%","position":0,"sentiment":0,"mentionRate":"0%","models":"Google AI Overview, Gemini, ChatGPT"}],"models":[{"id":"chatgpt-scraper","name":"ChatGPT","mentionRate":79,"visibility":78.67,"position":2.2,"mentions":295,"totalChecks":375},{"id":"google-ai-overview-scraper","name":"Google AI Overview","mentionRate":70,"visibility":70.05,"position":1.6,"mentions":131,"totalChecks":187},{"id":"gemini-scraper","name":"Gemini","mentionRate":61,"visibility":61.07,"position":1.9,"mentions":229,"totalChecks":375}]};</script>
 </head>
@@ -273,7 +346,7 @@
 
     var sent = s.sentiment;
     document.getElementById('kpi-sentiment').innerHTML = sent > 0
-      ? sent + '<span style="font-size:14px;color:#a0aec0;font-weight:500;"> /100</span>'
+      ? sent + '<span style="font-size:14px;color:rgba(255,255,255,0.42);font-weight:500;font-family:\'Poppins\',sans-serif;letter-spacing:0.02em;"> / 100</span>'
       : '—';
 
     
@@ -398,24 +471,24 @@
     var xLabels = '';
     points.forEach(function(p, i) {
       if (i % labelEvery === 0 || i === n - 1) {
-        xLabels += '<text x="' + p.x.toFixed(0) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="#a0aec0">' + formatDayLabel(p.date) + '</text>';
+        xLabels += '<text x="' + p.x.toFixed(0) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.42)" font-family="Poppins, sans-serif" letter-spacing="0.04em">' + formatDayLabel(p.date) + '</text>';
       }
     });
 
     var gridLines = '';
     gridYs.forEach(function(y, i) {
-      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 3 ? '#cbd5e0' : '#edf2f7') + '" stroke-width="1"/>';
-      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + gridLabels[i] + '</text>';
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 3 ? '#2a2a2a' : '#1a1a1a') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="rgba(255,255,255,0.42)" font-family="Poppins, sans-serif" font-variant-numeric="tabular-nums">' + gridLabels[i] + '</text>';
     });
 
     var dots = points.map(function(p) {
-      return '<circle cx="' + p.x.toFixed(0) + '" cy="' + p.y.toFixed(0) + '" r="3" fill="#38a169"><title>' + p.date + ': ' + p.v + '%</title></circle>';
+      return '<circle cx="' + p.x.toFixed(0) + '" cy="' + p.y.toFixed(0) + '" r="3" fill="#2289AB"><title>' + p.date + ': ' + p.v + '%</title></circle>';
     }).join('');
 
     container.innerHTML =
       '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
         gridLines +
-        '<polyline fill="none" stroke="#38a169" stroke-width="2.5" points="' + polyline + '" />' +
+        '<polyline fill="none" stroke="#2289AB" stroke-width="2" points="' + polyline + '" />' +
         dots +
         xLabels +
       '</svg>';
