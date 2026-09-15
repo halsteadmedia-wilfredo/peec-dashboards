@@ -4,142 +4,215 @@
 <base target="_top">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Montserrat:wght@800;900&amp;display=swap">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
+   
+  :root {
+    --black:    #000000;
+    --surface:  #0a0a0a;
+    --border:   #1a1a1a;
+    --border-2: #2a2a2a;
+    --white:    #FFFFFF;
+    --dim:      rgba(255,255,255,0.65);
+    --muted:    rgba(255,255,255,0.42);
+    --faint:    rgba(255,255,255,0.22);
 
-  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
-  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #4a6cf7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+    --blue:     #2289AB;
+    --blue-dim: rgba(34,137,171,0.30);
+
+    --good:     #4ade80;
+    --warn:     #fbbf24;
+    --bad:      #f87171;
+
+    --font-body: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--black); color: var(--white); -webkit-font-smoothing: antialiased; }
+
+  .loading { text-align: center; padding: 80px 20px; color: var(--dim); font-size: 14px; letter-spacing: 0.02em; }
+  .loading .spinner { display: inline-block; width: 32px; height: 32px; border: 2px solid var(--border-2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
   .section-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
   }
-  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
-  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
+  .section-header h2 {
+    font-family: var(--font-display);
+    font-size: 15px; font-weight: 800; color: var(--white);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .section-header .client-name { font-size: 13px; color: var(--dim); font-weight: 400; }
   .section-header .period {
-    margin-left: auto; font-size: 13px; color: #718096;
-    background: #f7fafc; padding: 5px 12px; border-radius: 6px;
+    margin-left: auto; font-size: 11px; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.10em;
+    padding: 5px 10px; border: 1px solid var(--border-2);
   }
 
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
   .kpi-card {
-    background: #fff; border-radius: 10px; padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    background: var(--surface); padding: 20px;
+    border: 1px solid var(--border);
     position: relative;
+    transition: border-color 0.15s ease, transform 0.15s ease;
   }
-  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
-  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
+  .kpi-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+  .kpi-card .label {
+    font-size: 10px; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin-bottom: 12px; font-weight: 500;
+  }
+  .kpi-card .value {
+    font-family: var(--font-display);
+    font-size: 32px; font-weight: 900; color: var(--white);
+    line-height: 1; letter-spacing: -0.01em;
+  }
+  .kpi-card .sub { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
   .kpi-card[data-tip] { cursor: help; }
   .kpi-card[data-tip]::after {
     content: attr(data-tip);
     position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
-    background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400;
-    line-height: 1.5; padding: 10px 14px; border-radius: 8px;
+    background: var(--white); color: var(--black);
+    font-size: 12px; font-weight: 400; font-family: var(--font-body);
+    line-height: 1.5; padding: 10px 14px;
     width: max-content; max-width: 260px; text-transform: none; letter-spacing: 0;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
     z-index: 100;
   }
   .kpi-card[data-tip]::before {
     content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
-    border: 6px solid transparent; border-top-color: #1a202c;
+    border: 6px solid transparent; border-top-color: var(--white);
     pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
     z-index: 100;
   }
   .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
   .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
 
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-  .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 24px; }
   .card {
-    background: #fff; border-radius: 10px; padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    background: var(--surface); padding: 20px;
+    border: 1px solid var(--border);
+    transition: border-color 0.15s ease;
   }
-  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
+  .card:hover { border-color: var(--border-2); }
+  .card h3 {
+    font-family: var(--font-body);
+    font-size: 11px; font-weight: 500; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin-bottom: 20px;
+  }
 
-  .bar-row { margin-bottom: 13px; }
-  .bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 13px; }
-  .bar-label .name { font-weight: 500; }
-  .bar-label .meta { color: #718096; font-size: 12px; }
-  .bar-track { background: #edf2f7; border-radius: 4px; height: 10px; }
-  .bar-fill { height: 10px; border-radius: 4px; min-width: 2px; }
-  .bar-chatgpt-scraper          { background: #38a169; }
-  .bar-gpt-4o                   { background: #38a169; }
-  .bar-gpt-4o-search            { background: #38a169; }
-  .bar-gemini-scraper           { background: #4a6cf7; }
-  .bar-google-ai-overview-scraper { background: #ed8936; }
-  .bar-perplexity-scraper       { background: #9f7aea; }
-  .bar-claude-sonnet-4          { background: #f56565; }
-  .bar-claude-3-5-haiku         { background: #f56565; }
-  .bar-default                  { background: #718096; }
+   
+  .bar-row { margin-bottom: 14px; }
+  .bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12px; }
+  .bar-label .name { font-weight: 500; color: var(--white); }
+  .bar-label .meta { color: var(--dim); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .bar-track { background: var(--border); height: 6px; }
+  .bar-fill  { height: 6px; min-width: 2px; transition: width 0.3s ease; }
+  .bar-chatgpt-scraper            { background: var(--blue); }
+  .bar-gpt-4o                     { background: var(--blue); }
+  .bar-gpt-4o-search              { background: var(--blue); }
+  .bar-gemini-scraper             { background: rgba(255,255,255,0.75); }
+  .bar-google-ai-overview-scraper { background: rgba(255,255,255,0.60); }
+  .bar-perplexity-scraper         { background: rgba(255,255,255,0.45); }
+  .bar-claude-sonnet-4            { background: rgba(255,255,255,0.30); }
+  .bar-claude-3-5-haiku           { background: rgba(255,255,255,0.30); }
+  .bar-default                    { background: rgba(255,255,255,0.20); }
 
-  .model-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; margin-right: 3px; }
-  .model-chatgpt-scraper          { background: #f0fdf4; color: #166534; }
-  .model-gpt-4o                   { background: #f0fdf4; color: #166534; }
-  .model-gpt-4o-search            { background: #f0fdf4; color: #166534; }
-  .model-gemini-scraper           { background: #eff6ff; color: #1e40af; }
-  .model-google-ai-overview-scraper { background: #fff7ed; color: #9a3412; }
-  .model-perplexity-scraper       { background: #faf5ff; color: #6b21a8; }
-  .model-claude-sonnet-4          { background: #fef2f2; color: #991b1b; }
-  .model-claude-3-5-haiku         { background: #fef2f2; color: #991b1b; }
-  .model-default                  { background: #f7fafc; color: #4a5568; }
+   
+  .model-badge {
+    display: inline-block; padding: 2px 8px; font-size: 10px; font-weight: 500;
+    margin-right: 4px; letter-spacing: 0.04em; text-transform: uppercase;
+    border: 1px solid var(--border-2);
+  }
+  .model-chatgpt-scraper            { color: var(--blue); border-color: var(--blue); }
+  .model-gpt-4o                     { color: var(--blue); border-color: var(--blue); }
+  .model-gpt-4o-search              { color: var(--blue); border-color: var(--blue); }
+  .model-gemini-scraper             { color: rgba(255,255,255,0.90); border-color: rgba(255,255,255,0.40); }
+  .model-google-ai-overview-scraper { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.30); }
+  .model-perplexity-scraper         { color: rgba(255,255,255,0.60); border-color: rgba(255,255,255,0.24); }
+  .model-claude-sonnet-4            { color: rgba(255,255,255,0.48); border-color: rgba(255,255,255,0.18); }
+  .model-claude-3-5-haiku           { color: rgba(255,255,255,0.48); border-color: rgba(255,255,255,0.18); }
+  .model-default                    { color: var(--dim); border-color: var(--border-2); }
 
    
   .daily-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
   .daily-cell {
-    text-align: center; padding: 8px 4px; background: #f7fafc;
-    border-radius: 6px; font-size: 11px;
+    text-align: center; padding: 10px 4px; background: var(--surface);
+    border: 1px solid var(--border); font-size: 10px;
   }
-  .daily-cell .day { color: #718096; }
-  .daily-cell .rate { font-weight: 700; font-size: 14px; margin-top: 2px; }
-  .daily-cell .rate.low  { color: #991b1b; }
-  .daily-cell .rate.mid  { color: #744210; }
-  .daily-cell .rate.high { color: #166534; }
+  .daily-cell .day {
+    color: var(--dim); text-transform: uppercase;
+    letter-spacing: 0.08em; font-size: 9px;
+  }
+  .daily-cell .rate {
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 14px; margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .daily-cell .rate.low  { color: var(--muted); }
+  .daily-cell .rate.mid  { color: var(--white); }
+  .daily-cell .rate.high { color: var(--blue); }
 
    
-  .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .cat-table th {
-    text-align: left; padding: 10px 12px; color: #718096; font-weight: 500;
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
-    border-bottom: 2px solid #e2e8f0; background: #fafbfc;
+    text-align: left; padding: 10px 12px; color: var(--dim); font-weight: 500;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
   }
-  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
-  .cat-table tr:hover { background: #f7fafc; }
-  .rate-high { color: #22543d; font-weight: 700; }
-  .rate-mid  { color: #744210; font-weight: 600; }
-  .rate-zero { color: #a0aec0; font-weight: 500; }
+  .cat-table td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--white); }
+  .cat-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .cat-table tr:last-child td { border-bottom: none; }
+  .rate-high { color: var(--white); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .rate-mid  { color: var(--dim);   font-weight: 500; font-variant-numeric: tabular-nums; }
+  .rate-zero { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
   .position-badge {
-    display: inline-block; background: #f0f4ff; color: #4a6cf7;
-    padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;
+    display: inline-block; background: transparent; color: var(--blue);
+    border: 1px solid var(--blue);
+    padding: 1px 8px; font-weight: 500; font-size: 11px; letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
   }
-  .position-empty { color: #cbd5e0; }
+  .position-empty { color: var(--muted); }
 
   .chart-container { position: relative; height: 220px; overflow: hidden; }
   .chart-svg { width: 100%; height: 100%; }
 
+   
   .comp-list { list-style: none; }
   .comp-list li {
     display: flex; align-items: center; gap: 10px;
-    padding: 9px 0; border-bottom: 1px solid #f0f4f8; font-size: 13px;
+    padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px;
   }
   .comp-list li:last-child { border: none; }
-  .comp-rank { width: 18px; color: #a0aec0; font-size: 11px; font-weight: 600; text-align: right; flex-shrink: 0; }
-  .comp-name { flex: 1; font-weight: 500; }
-  .comp-name.you { color: #38a169; }
-  .you-tag { background: #f0fdf4; color: #166534; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: 600; margin-left: 5px; }
-  .comp-bar-track { width: 70px; background: #edf2f7; border-radius: 3px; height: 6px; flex-shrink: 0; }
-  .comp-bar-fill { height: 6px; background: #cbd5e0; border-radius: 3px; }
-  .comp-bar-fill.you { background: #38a169; }
-  .comp-count { color: #718096; font-size: 12px; flex-shrink: 0; width: 56px; text-align: right; }
+  .comp-rank { width: 22px; color: var(--muted); font-size: 10px; font-weight: 600; text-align: right; flex-shrink: 0; font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+  .comp-name { flex: 1; font-weight: 500; color: var(--white); }
+  .comp-name.you { color: var(--blue); font-weight: 600; }
+  .you-tag {
+    background: transparent; color: var(--blue); border: 1px solid var(--blue);
+    padding: 1px 6px; font-size: 9px; font-weight: 600; margin-left: 6px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+  }
+  .comp-bar-track { width: 70px; background: var(--border); height: 4px; flex-shrink: 0; }
+  .comp-bar-fill { height: 4px; background: rgba(255,255,255,0.35); }
+  .comp-bar-fill.you { background: var(--blue); }
+  .comp-count { color: var(--dim); font-size: 11px; flex-shrink: 0; width: 56px; text-align: right; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
 
-  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
-  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
-  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
+  .powered-by {
+    text-align: center; padding: 20px; color: var(--muted); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.14em; margin-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .error-msg { text-align: center; padding: 40px; color: var(--bad); font-size: 13px; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: var(--muted); font-size: 12px; }
 </style>
 <script>window.__PEEC_DATA__ = {"clientName":"Artistic Landscaping","summary":{"visibility":43.94,"position":2.7,"sentiment":58.9,"prompts":25,"mentionRate":41,"period":"2026-08-31 ~ 2026-09-14"},"brands":[{"rank":1,"brand":"Artistic Landscaping ","type":"You","visibility":"40.56%","position":2.7,"sentiment":58.9},{"rank":2,"brand":"Ruppert Landscape","type":"Competitor","visibility":"32.82%","position":2.2,"sentiment":61.1},{"rank":3,"brand":"Complete Landscaping Service","type":"Competitor","visibility":"28.28%","position":2.9,"sentiment":58.8},{"rank":4,"brand":"Level Green Landscaping","type":"Competitor","visibility":"21.57%","position":2.4,"sentiment":62.8},{"rank":5,"brand":"Professional Grounds","type":"Competitor","visibility":"6.6%","position":3,"sentiment":61.6},{"rank":6,"brand":"Eastern Grounds Landscaping","type":"Competitor","visibility":"3.41%","position":4.5,"sentiment":61},{"rank":7,"brand":"TrueView Landscaping","type":"Competitor","visibility":"3.1%","position":2.1,"sentiment":62.4},{"rank":8,"brand":"Heritage Landscape Services","type":"Competitor","visibility":"1.03%","position":5.7,"sentiment":56.7},{"rank":9,"brand":"Peter's Landscape","type":"Competitor","visibility":"0.41%","position":4.1,"sentiment":53.3},{"rank":10,"brand":"Gold Leaf Group","type":"Competitor","visibility":"0.31%","position":4.7,"sentiment":71.3},{"rank":11,"brand":"Nature's Friends Landscaping","type":"Competitor","visibility":"0%","position":0,"sentiment":0}],"daily":[{"date":"2026-08-31","mentionRate":"30%","mentions":21,"totalChecks":62,"avgVisibility":"33.87%","avgPosition":2.8},{"date":"2026-09-01","mentionRate":"40%","mentions":28,"totalChecks":62,"avgVisibility":"45.16%","avgPosition":3.4},{"date":"2026-09-02","mentionRate":"39%","mentions":27,"totalChecks":68,"avgVisibility":"39.71%","avgPosition":2.6},{"date":"2026-09-03","mentionRate":"36%","mentions":25,"totalChecks":61,"avgVisibility":"40.98%","avgPosition":2.6},{"date":"2026-09-04","mentionRate":"34%","mentions":24,"totalChecks":60,"avgVisibility":"40%","avgPosition":2.7},{"date":"2026-09-05","mentionRate":"36%","mentions":25,"totalChecks":63,"avgVisibility":"39.68%","avgPosition":3},{"date":"2026-09-06","mentionRate":"37%","mentions":26,"totalChecks":66,"avgVisibility":"39.39%","avgPosition":2.3},{"date":"2026-09-07","mentionRate":"30%","mentions":21,"totalChecks":67,"avgVisibility":"31.34%","avgPosition":2.4},{"date":"2026-09-08","mentionRate":"36%","mentions":25,"totalChecks":68,"avgVisibility":"36.76%","avgPosition":2.4},{"date":"2026-09-09","mentionRate":"41%","mentions":29,"totalChecks":64,"avgVisibility":"45.31%","avgPosition":2.6},{"date":"2026-09-10","mentionRate":"41%","mentions":29,"totalChecks":61,"avgVisibility":"47.54%","avgPosition":3},{"date":"2026-09-11","mentionRate":"41%","mentions":29,"totalChecks":70,"avgVisibility":"41.43%","avgPosition":2.6},{"date":"2026-09-12","mentionRate":"49%","mentions":34,"totalChecks":67,"avgVisibility":"50.75%","avgPosition":2.4},{"date":"2026-09-13","mentionRate":"30%","mentions":21,"totalChecks":64,"avgVisibility":"32.81%","avgPosition":2.7},{"date":"2026-09-14","mentionRate":"41%","mentions":29,"totalChecks":66,"avgVisibility":"43.94%","avgPosition":2.5}],"prompts":[{"prompt":"What is the best commercial landscape design and build company in Prince George's County, MD?","visibility":"90%","position":2.2,"sentiment":59.1,"mentionRate":"90%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who is the best grounds maintenance company for property managers in Prince George's County, MD?","visibility":"89.19%","position":2.5,"sentiment":57.5,"mentionRate":"89%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who is the best HOA grounds maintenance company in Prince George's County, MD?","visibility":"88.89%","position":2,"sentiment":60.6,"mentionRate":"89%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best commercial lawn maintenance company in Prince George's County, MD?","visibility":"86.84%","position":2,"sentiment":59.5,"mentionRate":"87%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who are the best commercial landscapers near Prince Georges County, MD?","visibility":"85%","position":3.1,"sentiment":57.7,"mentionRate":"85%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who is the best commercial landscaping company in Prince George's County, MD?","visibility":"81.08%","position":2.7,"sentiment":58.8,"mentionRate":"81%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best commercial hardscape renovation company in Prince Georges County, MD?","visibility":"72.22%","position":2.9,"sentiment":59.4,"mentionRate":"72%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"Who is the best HOA grounds maintenance company in Howard County, MD?","visibility":"45.95%","position":2.7,"sentiment":59.5,"mentionRate":"46%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who is the best grounds maintenance company for property managers in Charles County, MD?","visibility":"40%","position":1.9,"sentiment":59.6,"mentionRate":"40%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best landscape maintenance company for commercial properties in Charles County, MD?","visibility":"40%","position":2.6,"sentiment":55.5,"mentionRate":"40%","models":"Gemini, Google AI Overview, ChatGPT"},{"prompt":"What is the best commercial landscape design and build company in Anne Arundel County, MD?","visibility":"39.02%","position":3.5,"sentiment":59.1,"mentionRate":"39%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best commercial lawn care company in St. Mary's County, MD?","visibility":"35.9%","position":3.4,"sentiment":57,"mentionRate":"36%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best landscape design company for commercial properties in Arlington County, VA?","visibility":"33.33%","position":2.9,"sentiment":57.3,"mentionRate":"33%","models":"ChatGPT, Google AI Overview, Gemini"},{"prompt":"Who is the best commercial lawn care program company in Calvert County, MD?","visibility":"31.71%","position":2.6,"sentiment":64.8,"mentionRate":"32%","models":"Gemini, Google AI Overview, ChatGPT"},{"prompt":"What is the best commercial Christmas lighting company in Prince George's County, MD?","visibility":"28.89%","position":2.2,"sentiment":56.7,"mentionRate":"29%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"Who is the best commercial landscaping and snow removal company in Fairfax County, VA?","visibility":"25.64%","position":2.7,"sentiment":59,"mentionRate":"26%","models":"Google AI Overview, ChatGPT, Gemini"},{"prompt":"Who is the best grounds maintenance company for property managers in Carroll County, MD?","visibility":"18.42%","position":2,"sentiment":60.1,"mentionRate":"18%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who is the best commercial landscaping contractor near Anne Arundel County, MD?","visibility":"15.79%","position":3.8,"sentiment":55.3,"mentionRate":"16%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best seasonal Christmas lighting company for commercial properties in Howard County, MD?","visibility":"13.89%","position":4,"sentiment":63,"mentionRate":"14%","models":"ChatGPT, Gemini, Google AI Overview"},{"prompt":"What is the best commercial lawn mowing company in Howard County, MD?","visibility":"13.51%","position":1.9,"sentiment":60.5,"mentionRate":"14%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who are the top commercial landscape contractors near Fairfax County, VA?","visibility":"12.5%","position":4.8,"sentiment":56.4,"mentionRate":"13%","models":"ChatGPT, Google AI Overview, Gemini"},{"prompt":"Who are the best commercial landscape contractors near Carroll County, MD?","visibility":"10%","position":1.3,"sentiment":50.3,"mentionRate":"10%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best HOA landscaping company in Montgomery County, MD?","visibility":"8.57%","position":4,"sentiment":57.7,"mentionRate":"9%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"Who is the best HOA landscaping contractor in Fairfax County, VA?","visibility":"7.89%","position":5.7,"sentiment":73.3,"mentionRate":"8%","models":"Gemini, ChatGPT, Google AI Overview"},{"prompt":"What is the best commercial hardscape repair company in Montgomery County, MD?","visibility":"2.78%","position":4,"sentiment":61,"mentionRate":"3%","models":"Google AI Overview, Gemini, ChatGPT"}],"models":[{"id":"google-ai-overview-scraper","name":"Google AI Overview","mentionRate":63,"visibility":63.47,"position":2.4,"mentions":139,"totalChecks":219},{"id":"gemini-scraper","name":"Gemini","mentionRate":39,"visibility":38.67,"position":2.4,"mentions":145,"totalChecks":375},{"id":"chatgpt-scraper","name":"ChatGPT","mentionRate":29,"visibility":29.07,"position":3.4,"mentions":109,"totalChecks":375}]};</script>
 </head>
@@ -273,7 +346,7 @@
 
     var sent = s.sentiment;
     document.getElementById('kpi-sentiment').innerHTML = sent > 0
-      ? sent + '<span style="font-size:14px;color:#a0aec0;font-weight:500;"> /100</span>'
+      ? sent + '<span style="font-size:14px;color:rgba(255,255,255,0.42);font-weight:500;font-family:\'Poppins\',sans-serif;letter-spacing:0.02em;"> / 100</span>'
       : '—';
 
     
@@ -398,24 +471,24 @@
     var xLabels = '';
     points.forEach(function(p, i) {
       if (i % labelEvery === 0 || i === n - 1) {
-        xLabels += '<text x="' + p.x.toFixed(0) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="#a0aec0">' + formatDayLabel(p.date) + '</text>';
+        xLabels += '<text x="' + p.x.toFixed(0) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.42)" font-family="Poppins, sans-serif" letter-spacing="0.04em">' + formatDayLabel(p.date) + '</text>';
       }
     });
 
     var gridLines = '';
     gridYs.forEach(function(y, i) {
-      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 3 ? '#cbd5e0' : '#edf2f7') + '" stroke-width="1"/>';
-      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + gridLabels[i] + '</text>';
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 3 ? '#2a2a2a' : '#1a1a1a') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="rgba(255,255,255,0.42)" font-family="Poppins, sans-serif" font-variant-numeric="tabular-nums">' + gridLabels[i] + '</text>';
     });
 
     var dots = points.map(function(p) {
-      return '<circle cx="' + p.x.toFixed(0) + '" cy="' + p.y.toFixed(0) + '" r="3" fill="#38a169"><title>' + p.date + ': ' + p.v + '%</title></circle>';
+      return '<circle cx="' + p.x.toFixed(0) + '" cy="' + p.y.toFixed(0) + '" r="3" fill="#2289AB"><title>' + p.date + ': ' + p.v + '%</title></circle>';
     }).join('');
 
     container.innerHTML =
       '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
         gridLines +
-        '<polyline fill="none" stroke="#38a169" stroke-width="2.5" points="' + polyline + '" />' +
+        '<polyline fill="none" stroke="#2289AB" stroke-width="2" points="' + polyline + '" />' +
         dots +
         xLabels +
       '</svg>';
