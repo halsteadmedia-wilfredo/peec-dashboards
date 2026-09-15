@@ -4,196 +4,80 @@
 <base target="_top">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Montserrat:wght@800;900&amp;display=swap">
 <style>
-   
-  :root {
-    --black:    #000000;
-    --surface:  #0a0a0a;
-    --border:   #1a1a1a;
-    --border-2: #2a2a2a;
-    --white:    #FFFFFF;
-    --dim:      rgba(255,255,255,0.65);
-    --muted:    rgba(255,255,255,0.42);
-    --faint:    rgba(255,255,255,0.22);
-
-    --blue:     #2289AB;
-    --blue-dim: rgba(34,137,171,0.30);
-
-    --good:     #4ade80;
-    --warn:     #fbbf24;
-    --bad:      #f87171;
-
-    --font-body: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-display: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: var(--font-body); background: var(--black); color: var(--white); -webkit-font-smoothing: antialiased; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
 
-  .loading { text-align: center; padding: 80px 20px; color: var(--dim); font-size: 14px; letter-spacing: 0.02em; }
-  .loading .spinner { display: inline-block; width: 32px; height: 32px; border: 2px solid var(--border-2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #38a169; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
-  .section-header {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
-  }
-  .section-header h2 {
-    font-family: var(--font-display);
-    font-size: 15px; font-weight: 800; color: var(--white);
-    text-transform: uppercase; letter-spacing: 0.08em;
-  }
-  .section-header .client-name { font-size: 13px; color: var(--dim); font-weight: 400; }
-  .section-header .period {
-    margin-left: auto; font-size: 11px; color: var(--dim);
-    text-transform: uppercase; letter-spacing: 0.10em;
-    padding: 5px 10px; border: 1px solid var(--border-2);
-  }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; }
+  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
+  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
+  .section-header .period { margin-left: auto; font-size: 13px; color: #718096; background: #f7fafc; padding: 5px 12px; border-radius: 6px; }
 
-  .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
   .kpi-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
-  .kpi-card {
-    background: var(--surface); padding: 20px;
-    border: 1px solid var(--border);
-    position: relative;
-    transition: border-color 0.15s ease, transform 0.15s ease;
-  }
-  .kpi-card:hover { border-color: var(--blue); transform: translateY(-2px); }
-  .kpi-card .label {
-    font-size: 10px; color: var(--dim);
-    text-transform: uppercase; letter-spacing: 0.14em;
-    margin-bottom: 12px; font-weight: 500;
-  }
-  .kpi-card .value {
-    font-family: var(--font-display);
-    font-size: 32px; font-weight: 900; color: var(--white);
-    line-height: 1; letter-spacing: -0.01em;
-  }
-  .kpi-card .sub { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  .kpi-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; position: relative; }
+  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
+  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
 
   .kpi-card[data-tip] { cursor: help; }
-  .kpi-card[data-tip]::after {
-    content: attr(data-tip);
-    position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
-    background: var(--white); color: var(--black);
-    font-size: 12px; font-weight: 400; font-family: var(--font-body);
-    line-height: 1.5; padding: 10px 14px;
-    width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0;
-    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
-    z-index: 100;
-  }
-  .kpi-card[data-tip]::before {
-    content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
-    border: 6px solid transparent; border-top-color: var(--white);
-    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
-    z-index: 100;
-  }
+  .kpi-card[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400; line-height: 1.5; padding: 10px 14px; border-radius: 8px; width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.15); pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
+  .kpi-card[data-tip]::before { content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1a202c; pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
   .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
   .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
 
-  .card {
-    background: var(--surface); padding: 20px;
-    border: 1px solid var(--border);
-    margin-bottom: 24px;
-    transition: border-color 0.15s ease;
-  }
-  .card:hover { border-color: var(--border-2); }
-  .card h3 {
-    font-family: var(--font-body);
-    font-size: 11px; font-weight: 500; color: var(--dim);
-    text-transform: uppercase; letter-spacing: 0.14em;
-    margin-bottom: 20px;
-  }
+  .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; }
+  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
 
   .chart-container { position: relative; height: 320px; overflow: hidden; }
   .chart-svg { width: 100%; height: 100%; }
 
-   
-  .legend { display: flex; gap: 16px; margin-top: 14px; font-size: 10px; color: var(--dim); align-items: center; justify-content: flex-end; text-transform: uppercase; letter-spacing: 0.14em; }
+  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #4a5568; align-items: center; justify-content: flex-end; }
   .legend-item { display: flex; align-items: center; gap: 6px; }
-  .legend-swatch { width: 10px; height: 10px; }
-  .swatch-digital { background: var(--blue); }
-  .swatch-offline { background: rgba(255,255,255,0.75); }
-  .swatch-unknown { background: rgba(255,255,255,0.45); }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+  .swatch-digital { background: #38a169; }
+  .swatch-offline { background: #4a6cf7; }
+  .swatch-unknown { background: #a0aec0; }
 
-   
-  .goal-progress {
-    background: var(--surface); padding: 20px 24px;
-    border: 1px solid var(--border);
-    margin-bottom: 24px;
-  }
+  .goal-progress { background: #fff; border-radius: 10px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; }
   .goal-progress .goal-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-  .goal-progress .goal-title {
-    font-family: var(--font-body);
-    font-size: 11px; font-weight: 500; color: var(--dim);
-    text-transform: uppercase; letter-spacing: 0.14em;
-  }
-  .goal-progress .goal-stats { margin-left: auto; font-size: 11px; color: var(--dim); display: flex; gap: 20px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
-  .goal-progress .goal-stat strong { color: var(--white); font-weight: 600; }
-  .goal-bar-track { position: relative; height: 26px; background: var(--border); overflow: visible; }
-  .goal-bar-fill-won { position: absolute; top: 0; bottom: 0; left: 0; background: var(--blue); transition: width 0.4s ease; }
-  .goal-bar-fill-pending { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,0.42); transition: left 0.4s ease, width 0.4s ease; }
-  .goal-bar-fill-pending.at-end { }
-  .goal-marker { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--white); z-index: 3; }
-  .goal-marker::after {
-    content: 'GOAL'; position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
-    font-family: var(--font-body); font-size: 9px; font-weight: 600; color: var(--white);
-    letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
-  }
-  .goal-legend { display: flex; gap: 20px; margin-top: 14px; font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.14em; }
+  .goal-progress .goal-title { font-size: 14px; font-weight: 600; color: #4a5568; }
+  .goal-progress .goal-stats { margin-left: auto; font-size: 12px; color: #718096; display: flex; gap: 20px; flex-wrap: wrap; }
+  .goal-progress .goal-stat strong { color: #2d3748; font-weight: 700; }
+  .goal-bar-track { position: relative; height: 26px; background: #edf2f7; border-radius: 6px; overflow: visible; }
+  .goal-bar-fill-won { position: absolute; top: 0; bottom: 0; left: 0; background: #38a169; border-radius: 6px 0 0 6px; transition: width 0.4s ease; }
+  .goal-bar-fill-pending { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 6px, #d69e2e 6px, #d69e2e 12px); transition: left 0.4s ease, width 0.4s ease; }
+  .goal-bar-fill-pending.at-end { border-radius: 0 6px 6px 0; }
+  .goal-marker { position: absolute; top: -6px; bottom: -6px; width: 2px; background: #1a202c; z-index: 3; }
+  .goal-marker::after { content: 'GOAL'; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: #1a202c; letter-spacing: 0.5px; white-space: nowrap; }
+  .goal-legend { display: flex; gap: 20px; margin-top: 14px; font-size: 11px; color: #4a5568; }
   .goal-legend-item { display: flex; align-items: center; gap: 6px; }
-  .goal-legend-swatch { width: 10px; height: 10px; flex-shrink: 0; }
-  .goal-legend-swatch.won { background: var(--blue); }
-  .goal-legend-swatch.pending { background: rgba(255,255,255,0.42); }
-  .goal-empty {
-    padding: 14px 18px; background: transparent; color: var(--muted); font-size: 11px;
-    text-align: center; border: 1px dashed var(--border-2);
-    text-transform: uppercase; letter-spacing: 0.10em;
-  }
+  .goal-legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  .goal-legend-swatch.won { background: #38a169; }
+  .goal-legend-swatch.pending { background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 4px, #d69e2e 4px, #d69e2e 8px); }
+  .goal-empty { padding: 14px 18px; background: #f7fafc; border-radius: 6px; color: #718096; font-size: 12px; text-align: center; border: 1px dashed #cbd5e0; }
 
-  .cat-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .cat-table th {
-    text-align: right; padding: 10px 12px; color: var(--dim); font-weight: 500;
-    font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em;
-    border-bottom: 1px solid var(--border);
-    background: transparent;
-  }
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cat-table th { text-align: right; padding: 10px 12px; color: #718096; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; background: #fafbfc; }
   .cat-table th:first-child { text-align: left; }
-  .cat-table td {
-    padding: 12px; border-bottom: 1px solid var(--border);
-    vertical-align: middle; text-align: right; color: var(--white);
-    font-variant-numeric: tabular-nums;
-  }
-  .cat-table td:first-child { text-align: left; font-weight: 500; font-variant-numeric: normal; }
-  .cat-table tr:hover td { background: rgba(255,255,255,0.02); }
-  .cat-table tr:last-child td { border-bottom: none; }
-  .cat-table .total-row td {
-    border-top: 1px solid var(--border-2); border-bottom: none;
-    font-weight: 600; color: var(--white); background: rgba(255,255,255,0.02);
-  }
+  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; text-align: right; }
+  .cat-table td:first-child { text-align: left; font-weight: 500; }
+  .cat-table tr:hover { background: #f7fafc; }
+  .cat-table .total-row { background: #f7fafc; font-weight: 600; }
+  .cat-table .total-row td { border-top: 2px solid #e2e8f0; border-bottom: none; }
 
-   
-  .caption {
-    font-size: 12px; color: var(--dim); line-height: 1.6;
-    padding: 12px 16px; background: var(--surface);
-    margin-bottom: 24px;
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--blue);
-  }
-  .caption strong { color: var(--white); font-weight: 600; }
+  .caption { font-size: 12px; color: #718096; line-height: 1.6; padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 24px; border-left: 3px solid #38a169; }
+  .caption strong { color: #2d3748; }
 
-  .powered-by {
-    text-align: center; padding: 20px; color: var(--muted); font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.14em; margin-top: 20px;
-    border-top: 1px solid var(--border);
-  }
-  .error-msg { text-align: center; padding: 40px; color: var(--bad); font-size: 13px; }
-  .empty-msg { text-align: center; padding: 30px 20px; color: var(--muted); font-size: 12px; }
+  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
+  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
 </style>
 <script>window.__DASH_DATA__ = {"clientName":"Commonwealth Curb Appeal (Client View)","lastUpdated":"2026-09-15","notes":[{"label":"","text":"**Approved** = client accepted the estimate → won revenue. **Sent** = estimate delivered, awaiting client decision (in-pipeline). **Draft** = estimate created but not yet sent. **Denied** = client declined. **Void** = cancelled.","accent":""},{"label":"Data note:","text":"Attribution comes from CallRail form captures (source populated by our Zapier integration going live). Historical leads without source show as **Unknown**. The Unknown % on the dashboard reflects data completeness — decreases as new leads flow through the tagged pipeline.","accent":"warn"},{"label":"Refresh cadence","text":"Dashboard data refreshes daily at 6 AM ET from JobNimbus. Manual refresh available on request.","accent":"muted"}],"summary":{"wonRevenueYtd":2126351,"pendingRevenueYtd":3751955,"revenueGoal":2500000,"estimatesYtd":489,"leadsYtd":393,"qualifiedLeadsYtd":145,"digitalSharePct":41.3},"estMonthly12":[{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-10"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-11"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-12"},{"digital_estimates":10,"digital_won":0,"digital_pending":18647.1,"offline_estimates":13,"offline_won":4878.72,"offline_pending":294530.64,"unknown_estimates":83,"unknown_won":23138.91,"unknown_pending":174795.97,"month":"2026-01"},{"digital_estimates":18,"digital_won":11753.92,"digital_pending":156911.35,"offline_estimates":13,"offline_won":13584.27,"offline_pending":161260.69999999998,"unknown_estimates":15,"unknown_won":3526.45,"unknown_pending":45871.12,"month":"2026-02"},{"digital_estimates":39,"digital_won":151896.5,"digital_pending":264662.62999999995,"offline_estimates":15,"offline_won":95406.51,"offline_pending":21461.38,"unknown_estimates":13,"unknown_won":0,"unknown_pending":15108.009999999998,"month":"2026-03"},{"digital_estimates":31,"digital_won":276812.44,"digital_pending":603397.98,"offline_estimates":32,"offline_won":26450.23,"offline_pending":355430.68,"unknown_estimates":7,"unknown_won":35376.12,"unknown_pending":104610.66,"month":"2026-04"},{"digital_estimates":18,"digital_won":63126.98,"digital_pending":175693.55,"offline_estimates":21,"offline_won":424697.49,"offline_pending":64020.259999999995,"unknown_estimates":5,"unknown_won":22500,"unknown_pending":35784.49,"month":"2026-05"},{"digital_estimates":14,"digital_won":113298.06,"digital_pending":243460.12,"offline_estimates":25,"offline_won":475435.99999999994,"offline_pending":280299.97,"unknown_estimates":7,"unknown_won":2474.4,"unknown_pending":100000.04,"month":"2026-06"},{"digital_estimates":28,"digital_won":124380.92,"digital_pending":80696.18000000001,"offline_estimates":18,"offline_won":126248.23000000001,"offline_pending":113682.86,"unknown_estimates":14,"unknown_won":7163.9800000000005,"unknown_pending":93319.54000000001,"month":"2026-07"},{"digital_estimates":14,"digital_won":81920.78,"digital_pending":105889.04000000001,"offline_estimates":15,"offline_won":13632.23,"offline_pending":235428.3,"unknown_estimates":5,"unknown_won":11732.5,"unknown_pending":0,"month":"2026-08"},{"digital_estimates":8,"digital_won":10431.89,"digital_pending":6992.16,"offline_estimates":4,"offline_won":5283,"offline_pending":0,"unknown_estimates":4,"unknown_won":1200,"unknown_pending":0,"month":"2026-09"}],"estTable":[{"digital_estimates":8,"digital_won":10431.89,"digital_pending":6992.16,"offline_estimates":4,"offline_won":5283,"offline_pending":0,"unknown_estimates":4,"unknown_won":1200,"unknown_pending":0,"month":"2026-09"},{"digital_estimates":14,"digital_won":81920.78,"digital_pending":105889.04000000001,"offline_estimates":15,"offline_won":13632.23,"offline_pending":235428.3,"unknown_estimates":5,"unknown_won":11732.5,"unknown_pending":0,"month":"2026-08"},{"digital_estimates":28,"digital_won":124380.92,"digital_pending":80696.18000000001,"offline_estimates":18,"offline_won":126248.23000000001,"offline_pending":113682.86,"unknown_estimates":14,"unknown_won":7163.9800000000005,"unknown_pending":93319.54000000001,"month":"2026-07"},{"digital_estimates":14,"digital_won":113298.06,"digital_pending":243460.12,"offline_estimates":25,"offline_won":475435.99999999994,"offline_pending":280299.97,"unknown_estimates":7,"unknown_won":2474.4,"unknown_pending":100000.04,"month":"2026-06"},{"digital_estimates":18,"digital_won":63126.98,"digital_pending":175693.55,"offline_estimates":21,"offline_won":424697.49,"offline_pending":64020.259999999995,"unknown_estimates":5,"unknown_won":22500,"unknown_pending":35784.49,"month":"2026-05"},{"digital_estimates":31,"digital_won":276812.44,"digital_pending":603397.98,"offline_estimates":32,"offline_won":26450.23,"offline_pending":355430.68,"unknown_estimates":7,"unknown_won":35376.12,"unknown_pending":104610.66,"month":"2026-04"},{"digital_estimates":39,"digital_won":151896.5,"digital_pending":264662.62999999995,"offline_estimates":15,"offline_won":95406.51,"offline_pending":21461.38,"unknown_estimates":13,"unknown_won":0,"unknown_pending":15108.009999999998,"month":"2026-03"},{"digital_estimates":18,"digital_won":11753.92,"digital_pending":156911.35,"offline_estimates":13,"offline_won":13584.27,"offline_pending":161260.69999999998,"unknown_estimates":15,"unknown_won":3526.45,"unknown_pending":45871.12,"month":"2026-02"},{"digital_estimates":10,"digital_won":0,"digital_pending":18647.1,"offline_estimates":13,"offline_won":4878.72,"offline_pending":294530.64,"unknown_estimates":83,"unknown_won":23138.91,"unknown_pending":174795.97,"month":"2026-01"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-12"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-11"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-10"},{"digital_estimates":0,"digital_won":0,"digital_pending":0,"offline_estimates":0,"offline_won":0,"offline_pending":0,"unknown_estimates":0,"unknown_won":0,"unknown_pending":0,"month":"2025-09"}],"leadsTable":[{"digital_leads":9,"offline_leads":5,"unknown_leads":6,"month":"2026-09","qualified_total":0},{"digital_leads":42,"offline_leads":2,"unknown_leads":12,"month":"2026-08","qualified_total":0},{"digital_leads":24,"offline_leads":10,"unknown_leads":16,"month":"2026-07","qualified_total":0},{"digital_leads":21,"offline_leads":8,"unknown_leads":17,"month":"2026-06","qualified_total":0},{"digital_leads":19,"offline_leads":7,"unknown_leads":20,"month":"2026-05","qualified_total":0},{"digital_leads":22,"offline_leads":16,"unknown_leads":13,"month":"2026-04","qualified_total":0},{"digital_leads":33,"offline_leads":15,"unknown_leads":15,"month":"2026-03","qualified_total":0},{"digital_leads":13,"offline_leads":4,"unknown_leads":14,"month":"2026-02","qualified_total":0},{"digital_leads":8,"offline_leads":6,"unknown_leads":16,"month":"2026-01","qualified_total":0},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-12","qualified_total":0},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-11","qualified_total":0},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-10","qualified_total":0},{"digital_leads":0,"offline_leads":0,"unknown_leads":0,"month":"2025-09","qualified_total":0}]};</script>
 </head>
@@ -320,8 +204,8 @@
     var c = document.getElementById('notes-container');
     if (!notes || !notes.length) { c.innerHTML = ''; return; }
     c.innerHTML = notes.map(function (n) {
-      var accent = n.accent === 'warn' ? 'border-left-color:#fbbf24;background:rgba(251,191,36,0.06);'
-                 : n.accent === 'muted' ? 'border-left-color:rgba(255,255,255,0.42);' : '';
+      var accent = n.accent === 'warn' ? 'border-left-color:#ed8936;background:#fffaf0;'
+                 : n.accent === 'muted' ? 'border-left-color:#a0aec0;' : '';
       var label = n.label ? '<strong>' + escHtml(n.label) + '</strong> ' : '';
       return '<div class="caption" style="' + accent + '">' + label + mdBold(escHtml(n.text)) + '</div>';
     }).join('');
@@ -435,12 +319,12 @@
     for (var i = 0; i <= 4; i++) {
       var v = yMax * (i / 4);
       var y = PAD_T + innerH - (v / yMax) * innerH;
-      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 0 ? '#2a2a2a' : '#1a1a1a') + '" stroke-width="1"/>';
-      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="rgba(255,255,255,0.42)">' + fmtCurrency(v, true) + '</text>';
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 0 ? '#cbd5e0' : '#edf2f7') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + fmtCurrency(v, true) + '</text>';
     }
 
     var bars = '', xLabels = '';
-    var series = [['digital_won', '#2289AB'], ['offline_won', 'rgba(255,255,255,0.75)'], ['unknown_won', 'rgba(255,255,255,0.45)']];
+    var series = [['digital_won', '#38a169'], ['offline_won', '#4a6cf7'], ['unknown_won', '#a0aec0']];
     monthly.forEach(function(m, i) {
       var groupX = PAD_L + i * groupW + groupW / 2;
       var startX = groupX - (barW * 3 + 4) / 2;
@@ -453,7 +337,7 @@
           bars += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + h + '" fill="' + s[1] + '" rx="2"><title>' + m.month + ' ' + s[0].replace('_won','') + ': ' + fmtCurrency(val, false) + '</title></rect>';
         }
       });
-      xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.42)">' + fmtMonthShort(m.month) + '</text>';
+      xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="#4a5568">' + fmtMonthShort(m.month) + '</text>';
     });
 
     container.innerHTML = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' + gridLines + bars + xLabels + '</svg>';
