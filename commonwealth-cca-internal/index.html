@@ -4,36 +4,40 @@
 <base target="_top">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Montserrat:wght@800;900&amp;display=swap">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
+  body { font-family: 'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background: #000000; color: #FFFFFF; }
 
-  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
-  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #38a169; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  .loading { text-align: center; padding: 80px 20px; color: rgba(255,255,255,0.65); font-size: 16px; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #1a1a1a; border-top-color: #2289AB; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
-  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; }
-  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
-  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
-  .section-header .period { margin-left: auto; font-size: 13px; color: #718096; background: #f7fafc; padding: 5px 12px; border-radius: 6px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #1a1a1a; }
+  .section-header h2 { font-size: 18px; font-weight: 800; color: #FFFFFF; font-family: 'Montserrat',sans-serif; text-transform: uppercase; letter-spacing: 0.08em; }
+  .section-header .client-name { font-size: 14px; color: rgba(255,255,255,0.65); font-weight: 400; }
+  .section-header .period { margin-left: auto; font-size: 13px; color: rgba(255,255,255,0.65); background: #0a0a0a; padding: 5px 12px; border-radius: 0; }
 
   .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
-  .kpi-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; position: relative; }
-  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .kpi-card .value { font-size: 26px; font-weight: 700; color: #1a202c; line-height: 1.1; }
-  .kpi-card .value.accent-green { color: #38a169; }
-  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
+  .kpi-card { background: #0a0a0a; border-radius: 0; padding: 20px; box-shadow: none; border: 1px solid #1a1a1a; position: relative; transition: border-color 0.15s ease, transform 0.15s ease; }
+  .kpi-card:hover { border-color: #2289AB; transform: translateY(-2px); }
+  .kpi-card .label { font-size: 12px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 26px; font-weight: 900; color: #FFFFFF; line-height: 1.1; font-family: 'Montserrat',sans-serif; letter-spacing: -0.01em; }
+  .kpi-card .value.accent-green { color: #2289AB; }
+  .kpi-card .sub { font-size: 11px; color: rgba(255,255,255,0.42); margin-top: 4px; line-height: 1.4; }
 
   .kpi-card[data-tip] { cursor: help; }
-  .kpi-card[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400; line-height: 1.5; padding: 10px 14px; border-radius: 8px; width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.15); pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
-  .kpi-card[data-tip]::before { content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1a202c; pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
+  .kpi-card[data-tip]::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #FFFFFF; font-size: 12px; font-weight: 400; line-height: 1.5; padding: 10px 14px; border-radius: 0; width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0; box-shadow: none; pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
+  .kpi-card[data-tip]::before { content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #1a1a1a; pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s; z-index: 100; }
   .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
   .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
 
-  .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; }
-  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
+  .card { background: #0a0a0a; border-radius: 0; padding: 20px; box-shadow: none; border: 1px solid #1a1a1a; margin-bottom: 24px; }
+  .card h3 { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.65); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.14em; }
 
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
   @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
@@ -42,26 +46,26 @@
   .chart-svg { width: 100%; height: 100%; }
 
   .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .cat-table th { text-align: right; padding: 10px 12px; color: #718096; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; background: #fafbfc; }
+  .cat-table th { text-align: right; padding: 10px 12px; color: rgba(255,255,255,0.65); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; border-bottom: 2px solid #1a1a1a; background: transparent; }
   .cat-table th:first-child { text-align: left; }
-  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; text-align: right; }
+  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #1a1a1a; vertical-align: middle; text-align: right; font-variant-numeric: tabular-nums; }
   .cat-table td:first-child { text-align: left; font-weight: 500; }
-  .cat-table tr:hover { background: #f7fafc; }
-  .cat-table .total-row { background: #f7fafc; font-weight: 600; }
-  .cat-table .total-row td { border-top: 2px solid #e2e8f0; border-bottom: none; }
-  .cat-table .source-row td:first-child { color: #1a202c; font-weight: 600; }
-  .cat-table .status-approved { color: #38a169; font-weight: 500; }
-  .cat-table .status-sent { color: #d69e2e; font-weight: 500; }
-  .cat-table .status-denied { color: #e53e3e; font-weight: 500; }
-  .cat-table .status-draft { color: #718096; }
-  .cat-table .status-void { color: #a0aec0; font-style: italic; }
+  .cat-table tr:hover { background: rgba(255,255,255,0.02); }
+  .cat-table .total-row { background: transparent; font-weight: 600; }
+  .cat-table .total-row td { border-top: 2px solid #2a2a2a; border-bottom: none; }
+  .cat-table .source-row td:first-child { color: #FFFFFF; font-weight: 600; }
+  .cat-table .status-approved { color: #4ade80; font-weight: 500; }
+  .cat-table .status-sent { color: #fbbf24; font-weight: 500; }
+  .cat-table .status-denied { color: #f87171; font-weight: 500; }
+  .cat-table .status-draft { color: rgba(255,255,255,0.65); }
+  .cat-table .status-void { color: rgba(255,255,255,0.42); font-style: italic; }
 
-  .caption { font-size: 12px; color: #718096; line-height: 1.6; padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 24px; border-left: 3px solid #38a169; }
-  .caption strong { color: #2d3748; }
+  .caption { font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.6; padding: 12px 16px; background: #0a0a0a; border-radius: 0; margin-bottom: 24px; border-left: 3px solid #2289AB; }
+  .caption strong { color: #FFFFFF; }
 
-  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
-  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
-  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
+  .powered-by { text-align: center; padding: 16px; color: rgba(255,255,255,0.42); font-size: 10px; margin-top: 20px; text-transform: uppercase; letter-spacing: 0.14em; border-top: 1px solid #1a1a1a; padding-top: 16px; }
+  .error-msg { text-align: center; padding: 40px; color: #f87171; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: rgba(255,255,255,0.42); font-size: 13px; }
 </style>
 <script>window.__DASH_DATA__ = {"clientName":"Commonwealth Curb Appeal (Internal View)","lastUpdated":"2026-09-15","notes":[{"label":"","text":"**Approved** = client accepted the estimate → won revenue. **Sent** = estimate delivered, awaiting client decision (in-pipeline). **Draft** = estimate created but not yet sent. **Denied** = client declined. **Void** = cancelled.","accent":""},{"label":"Data note:","text":"Attribution comes from CallRail form captures (source populated by our Zapier integration going live). Historical leads without source show as **Unknown**. The Unknown % on the dashboard reflects data completeness — decreases as new leads flow through the tagged pipeline.","accent":"warn"},{"label":"Refresh cadence","text":"Dashboard data refreshes daily at 6 AM ET from JobNimbus. Manual refresh available on request.","accent":"muted"}],"kpi":{"leadsYtd":393,"estimatesYtd":489,"totalEstimateDollars":17802159,"approvedDollars":2126351,"sentDollars":3751955,"approvalRate":17,"unattributedPct":21},"leadsBySource":[{"source":"Google Organic","leads":142},{"source":"Unknown","leads":82},{"source":"Referral","leads":54},{"source":"Google My Business","leads":26},{"source":"Google Ads","leads":21},{"source":"Direct","leads":20},{"source":"Outdoor Advertising","leads":19},{"source":"Spouse","leads":14},{"source":"Social Media","leads":10},{"source":"Article Or Print Ad","leads":2},{"source":"Facebook Organic","leads":1},{"source":"Website","leads":1},{"source":"Chatgpt","leads":1}],"estimatesBySource":[{"source":"Referral","count":132,"total":4710716.08,"approvedCount":31,"approvedTotal":717731.3800000001,"sentTotal":1123796.4400000002,"deniedCount":20,"deniedTotal":786777.45},{"source":"Outdoor Advertising","count":24,"total":1129362.84,"approvedCount":6,"approvedTotal":467885.30000000005,"sentTotal":402318.35,"deniedCount":4,"deniedTotal":70404.77},{"source":"Google Organic","count":152,"total":5738701.469999998,"approvedCount":25,"approvedTotal":434074.5299999999,"sentTotal":1497105.1500000001,"deniedCount":11,"deniedTotal":350493.7700000001},{"source":"Google Ads","count":12,"total":1008826.02,"approvedCount":2,"approvedTotal":270535.94,"sentTotal":7945.48,"deniedCount":1,"deniedTotal":56136.44},{"source":"Google My Business","count":6,"total":469743.78,"approvedCount":1,"approvedTotal":77458.22,"sentTotal":0,"deniedCount":0,"deniedTotal":0},{"source":"Unknown","count":132,"total":3916159.28,"approvedCount":9,"approvedTotal":52756.45,"sentTotal":381653.12,"deniedCount":1,"deniedTotal":3745.4},{"source":"Website","count":10,"total":422250.92,"approvedCount":1,"approvedTotal":51552.8,"sentTotal":151299.47999999998,"deniedCount":1,"deniedTotal":47774.24},{"source":"Article Or Print Ad","count":5,"total":109505.28999999998,"approvedCount":3,"approvedTotal":37782.46,"sentTotal":35784.49,"deniedCount":0,"deniedTotal":0},{"source":"Direct","count":5,"total":163541.95,"approvedCount":1,"approvedTotal":11732.5,"sentTotal":79536.47,"deniedCount":1,"deniedTotal":8459.65},{"source":"Social Media","count":11,"total":133351.30000000002,"approvedCount":3,"approvedTotal":4840.95,"sentTotal":72515.75,"deniedCount":1,"deniedTotal":886.75}],"estimatesBySourceStatus":[{"source":"Article Or Print Ad","status":"Approved","count":3,"total":37782.46},{"source":"Article Or Print Ad","status":"Draft","count":1,"total":35938.34},{"source":"Article Or Print Ad","status":"Sent","count":1,"total":35784.49},{"source":"Direct","status":"Approved","count":1,"total":11732.5},{"source":"Direct","status":"Denied","count":1,"total":8459.65},{"source":"Direct","status":"Draft","count":2,"total":63813.33},{"source":"Direct","status":"Sent","count":1,"total":79536.47},{"source":"Google Ads","status":"Approved","count":2,"total":270535.94},{"source":"Google Ads","status":"Denied","count":1,"total":56136.44},{"source":"Google Ads","status":"Draft","count":8,"total":674208.16},{"source":"Google Ads","status":"Sent","count":1,"total":7945.48},{"source":"Google My Business","status":"Approved","count":1,"total":77458.22},{"source":"Google My Business","status":"Draft","count":5,"total":392285.55999999994},{"source":"Google Organic","status":"Approved","count":25,"total":434074.5299999999},{"source":"Google Organic","status":"Denied","count":11,"total":350493.7700000001},{"source":"Google Organic","status":"Draft","count":74,"total":3457028.0200000005},{"source":"Google Organic","status":"Sent","count":40,"total":1497105.1500000001},{"source":"Google Organic","status":"Void","count":2,"total":0},{"source":"Outdoor Advertising","status":"Approved","count":6,"total":467885.30000000005},{"source":"Outdoor Advertising","status":"Denied","count":4,"total":70404.77},{"source":"Outdoor Advertising","status":"Draft","count":7,"total":188754.41999999998},{"source":"Outdoor Advertising","status":"Sent","count":7,"total":402318.35},{"source":"Referral","status":"Approved","count":31,"total":717731.3800000001},{"source":"Referral","status":"Denied","count":20,"total":786777.45},{"source":"Referral","status":"Draft","count":47,"total":2082410.8099999996},{"source":"Referral","status":"Sent","count":32,"total":1123796.4400000002},{"source":"Referral","status":"Void","count":2,"total":0},{"source":"Social Media","status":"Approved","count":3,"total":4840.95},{"source":"Social Media","status":"Denied","count":1,"total":886.75},{"source":"Social Media","status":"Draft","count":2,"total":55107.85},{"source":"Social Media","status":"Sent","count":5,"total":72515.75},{"source":"Unknown","status":"Approved","count":9,"total":52756.45},{"source":"Unknown","status":"Denied","count":1,"total":3745.4},{"source":"Unknown","status":"Draft","count":107,"total":3478004.31},{"source":"Unknown","status":"Sent","count":12,"total":381653.12},{"source":"Unknown","status":"Void","count":3,"total":0},{"source":"Website","status":"Approved","count":1,"total":51552.8},{"source":"Website","status":"Denied","count":1,"total":47774.24},{"source":"Website","status":"Draft","count":4,"total":171624.40000000002},{"source":"Website","status":"Sent","count":3,"total":151299.47999999998},{"source":"Website","status":"Void","count":1,"total":0}]};</script>
 </head>
@@ -199,8 +203,8 @@
     var c = document.getElementById('notes-container');
     if (!notes || !notes.length) { c.innerHTML = ''; return; }
     c.innerHTML = notes.map(function (n) {
-      var accent = n.accent === 'warn' ? 'border-left-color:#ed8936;background:#fffaf0;'
-                 : n.accent === 'muted' ? 'border-left-color:#a0aec0;' : '';
+      var accent = n.accent === 'warn' ? 'border-left-color:#fbbf24;background:rgba(251,191,36,0.06);'
+                 : n.accent === 'muted' ? 'border-left-color:rgba(255,255,255,0.22);' : '';
       var label = n.label ? '<strong>' + escHtml(n.label) + '</strong> ' : '';
       return '<div class="caption" style="' + accent + '">' + label + mdBold(escHtml(n.text)) + '</div>';
     }).join('');
@@ -236,9 +240,9 @@
     filtered.forEach(function (r, i) {
       var y = PAD_T + i * (barH + gap);
       var w = (r.approvedTotal / maxVal) * innerW;
-      bars += '<rect x="' + PAD_L + '" y="' + y + '" width="' + w + '" height="' + barH + '" fill="#38a169" rx="3"/>';
-      labels += '<text x="' + (PAD_L - 8) + '" y="' + (y + barH / 2 + 4) + '" text-anchor="end" font-size="11" fill="#4a5568">' + escHtml(r.source) + '</text>';
-      valueLabels += '<text x="' + (PAD_L + w + 6) + '" y="' + (y + barH / 2 + 4) + '" font-size="11" fill="#1a202c" font-weight="600">' + fmtCurrency(r.approvedTotal, true) + '</text>';
+      bars += '<rect x="' + PAD_L + '" y="' + y + '" width="' + w + '" height="' + barH + '" fill="#2289AB" rx="3"/>';
+      labels += '<text x="' + (PAD_L - 8) + '" y="' + (y + barH / 2 + 4) + '" text-anchor="end" font-size="11" fill="rgba(255,255,255,0.65)">' + escHtml(r.source) + '</text>';
+      valueLabels += '<text x="' + (PAD_L + w + 6) + '" y="' + (y + barH / 2 + 4) + '" font-size="11" fill="#FFFFFF" font-weight="600">' + fmtCurrency(r.approvedTotal, true) + '</text>';
     });
 
     container.innerHTML = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' + labels + bars + valueLabels + '</svg>';
@@ -254,7 +258,7 @@
     var html = rows.map(function (r) {
       totalCount += r.count;
       totalDollars += r.total;
-      var sourceCell = (r.source !== lastSource) ? '<td>' + escHtml(r.source) + '</td>' : '<td style="color:#cbd5e0">↳</td>';
+      var sourceCell = (r.source !== lastSource) ? '<td>' + escHtml(r.source) + '</td>' : '<td style="color:rgba(255,255,255,0.42)">↳</td>';
       lastSource = r.source;
       var statusClass = 'status-' + r.status.toLowerCase();
       return '<tr>' + sourceCell +
