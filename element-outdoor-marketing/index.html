@@ -4,51 +4,57 @@
 <base target="_top">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Montserrat:wght@800;900&amp;display=swap">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6f8; color: #2d3748; }
+  body { font-family: 'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background: #000000; color: #FFFFFF; }
 
-  .loading { text-align: center; padding: 80px 20px; color: #718096; font-size: 16px; }
-  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #4a6cf7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  .loading { text-align: center; padding: 80px 20px; color: rgba(255,255,255,0.65); font-size: 16px; }
+  .loading .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #1a1a1a; border-top-color: #2289AB; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
   .section-header {
     display: flex; align-items: center; gap: 10px;
-    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #1a1a1a;
   }
-  .section-header h2 { font-size: 18px; font-weight: 600; color: #1a202c; }
-  .section-header .client-name { font-size: 14px; color: #718096; font-weight: 400; }
+  .section-header h2 { font-size: 18px; font-weight: 800; color: #FFFFFF; font-family: 'Montserrat',sans-serif; text-transform: uppercase; letter-spacing: 0.08em; }
+  .section-header .client-name { font-size: 14px; color: rgba(255,255,255,0.65); font-weight: 400; }
   .section-header .period {
-    margin-left: auto; font-size: 13px; color: #718096;
-    background: #f7fafc; padding: 5px 12px; border-radius: 6px;
+    margin-left: auto; font-size: 13px; color: rgba(255,255,255,0.65);
+    background: transparent; padding: 5px 12px; border-radius: 0;
   }
 
   .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
   .kpi-card {
-    background: #fff; border-radius: 10px; padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    background: #0a0a0a; border-radius: 0; padding: 20px;
+    box-shadow: none; border: 1px solid #1a1a1a;
     position: relative;
+    transition: border-color 0.15s ease, transform 0.15s ease;
   }
-  .kpi-card .label { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .kpi-card .value { font-size: 28px; font-weight: 700; color: #1a202c; line-height: 1.1; }
-  .kpi-card .sub { font-size: 11px; color: #a0aec0; margin-top: 4px; line-height: 1.4; }
+  .kpi-card:hover { border-color: #2289AB; transform: translateY(-2px); }
+  .kpi-card .label { font-size: 12px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 28px; font-weight: 900; color: #FFFFFF; line-height: 1.1; font-family: 'Montserrat',sans-serif; letter-spacing: -0.01em; }
+  .kpi-card .sub { font-size: 11px; color: rgba(255,255,255,0.42); margin-top: 4px; line-height: 1.4; }
 
   .kpi-card[data-tip] { cursor: help; }
   .kpi-card[data-tip]::after {
     content: attr(data-tip);
     position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
-    background: #1a202c; color: #f7fafc; font-size: 12px; font-weight: 400;
-    line-height: 1.5; padding: 10px 14px; border-radius: 8px;
+    background: #0a0a0a; color: #FFFFFF; font-size: 12px; font-weight: 400;
+    line-height: 1.5; padding: 10px 14px; border-radius: 0;
     width: max-content; max-width: 280px; text-transform: none; letter-spacing: 0;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    box-shadow: none;
+    border: 1px solid #2a2a2a;
     pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
     z-index: 100;
   }
   .kpi-card[data-tip]::before {
     content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
-    border: 6px solid transparent; border-top-color: #1a202c;
+    border: 6px solid transparent; border-top-color: #2a2a2a;
     pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
     z-index: 100;
   }
@@ -56,64 +62,64 @@
   .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
 
   .card {
-    background: #fff; border-radius: 10px; padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1;
+    background: #0a0a0a; border-radius: 0; padding: 20px;
+    box-shadow: none; border: 1px solid #1a1a1a;
     margin-bottom: 24px;
   }
-  .card h3 { font-size: 14px; font-weight: 600; color: #4a5568; margin-bottom: 16px; }
+  .card h3 { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.65); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.14em; }
 
-  .goal-progress { background: #fff; border-radius: 10px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e8ecf1; margin-bottom: 24px; }
+  .goal-progress { background: #0a0a0a; border-radius: 0; padding: 20px 24px; box-shadow: none; border: 1px solid #1a1a1a; margin-bottom: 24px; }
   .goal-progress .goal-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-  .goal-progress .goal-title { font-size: 14px; font-weight: 600; color: #4a5568; }
-  .goal-progress .goal-stats { margin-left: auto; font-size: 12px; color: #718096; display: flex; gap: 20px; flex-wrap: wrap; }
-  .goal-progress .goal-stat strong { color: #2d3748; font-weight: 700; }
-  .goal-bar-track { position: relative; height: 26px; background: #edf2f7; border-radius: 6px; overflow: visible; }
-  .goal-bar-fill-won { position: absolute; top: 0; bottom: 0; left: 0; background: #38a169; border-radius: 6px 0 0 6px; transition: width 0.4s ease; }
-  .goal-bar-fill-pending { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 6px, #d69e2e 6px, #d69e2e 12px); transition: left 0.4s ease, width 0.4s ease; }
-  .goal-bar-fill-pending.at-end { border-radius: 0 6px 6px 0; }
-  .goal-marker { position: absolute; top: -6px; bottom: -6px; width: 2px; background: #1a202c; z-index: 3; }
-  .goal-marker::after { content: 'GOAL'; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: #1a202c; letter-spacing: 0.5px; white-space: nowrap; }
-  .goal-legend { display: flex; gap: 20px; margin-top: 14px; font-size: 11px; color: #4a5568; }
+  .goal-progress .goal-title { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.65); }
+  .goal-progress .goal-stats { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.65); display: flex; gap: 20px; flex-wrap: wrap; }
+  .goal-progress .goal-stat strong { color: #FFFFFF; font-weight: 700; }
+  .goal-bar-track { position: relative; height: 26px; background: #1a1a1a; border-radius: 0; overflow: visible; }
+  .goal-bar-fill-won { position: absolute; top: 0; bottom: 0; left: 0; background: #2289AB; border-radius: 0; transition: width 0.4s ease; }
+  .goal-bar-fill-pending { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,0.42); transition: left 0.4s ease, width 0.4s ease; }
+  .goal-bar-fill-pending.at-end { border-radius: 0; }
+  .goal-marker { position: absolute; top: -6px; bottom: -6px; width: 2px; background: #FFFFFF; z-index: 3; }
+  .goal-marker::after { content: 'GOAL'; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: #FFFFFF; letter-spacing: 0.5px; white-space: nowrap; }
+  .goal-legend { display: flex; gap: 20px; margin-top: 14px; font-size: 11px; color: rgba(255,255,255,0.65); }
   .goal-legend-item { display: flex; align-items: center; gap: 6px; }
-  .goal-legend-swatch { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
-  .goal-legend-swatch.won { background: #38a169; }
-  .goal-legend-swatch.pending { background: repeating-linear-gradient(45deg, #ecc94b, #ecc94b 4px, #d69e2e 4px, #d69e2e 8px); }
-  .goal-empty { padding: 14px 18px; background: #f7fafc; border-radius: 6px; color: #718096; font-size: 12px; text-align: center; border: 1px dashed #cbd5e0; }
+  .goal-legend-swatch { width: 12px; height: 12px; border-radius: 0; flex-shrink: 0; }
+  .goal-legend-swatch.won { background: #2289AB; }
+  .goal-legend-swatch.pending { background: rgba(255,255,255,0.42); }
+  .goal-empty { padding: 14px 18px; background: transparent; border-radius: 0; color: rgba(255,255,255,0.65); font-size: 12px; text-align: center; border: 1px dashed #2a2a2a; }
 
   .chart-container { position: relative; height: 320px; overflow: hidden; }
   .chart-svg { width: 100%; height: 100%; }
 
-  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #4a5568; align-items: center; justify-content: flex-end; }
+  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: rgba(255,255,255,0.65); align-items: center; justify-content: flex-end; }
   .legend-item { display: flex; align-items: center; gap: 6px; }
-  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
-  .swatch-digital { background: #38a169; }
-  .swatch-offline { background: #4a6cf7; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 0; }
+  .swatch-digital { background: #2289AB; }
+  .swatch-offline { background: rgba(255,255,255,0.75); }
 
   .cat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .cat-table th {
-    text-align: right; padding: 10px 12px; color: #718096; font-weight: 500;
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
-    border-bottom: 2px solid #e2e8f0; background: #fafbfc;
+    text-align: right; padding: 10px 12px; color: rgba(255,255,255,0.65); font-weight: 500;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em;
+    border-bottom: 1px solid #2a2a2a; background: transparent;
   }
   .cat-table th:first-child { text-align: left; }
-  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; text-align: right; }
+  .cat-table td { padding: 10px 12px; border-bottom: 1px solid #1a1a1a; vertical-align: middle; text-align: right; font-variant-numeric: tabular-nums; }
   .cat-table td:first-child { text-align: left; font-weight: 500; }
-  .cat-table tr:hover { background: #f7fafc; }
-  .cat-table .total-row { background: #f7fafc; font-weight: 600; }
-  .cat-table .total-row td { border-top: 2px solid #e2e8f0; border-bottom: none; }
+  .cat-table tr:hover { background: rgba(255,255,255,0.02); }
+  .cat-table .total-row { background: transparent; font-weight: 600; }
+  .cat-table .total-row td { border-top: 1px solid #2a2a2a; border-bottom: none; }
 
   .caption {
-    font-size: 12px; color: #4a5568; line-height: 1.6;
-    padding: 12px 16px; background: #f7fafc; border-radius: 8px; margin-bottom: 10px;
-    border-left: 3px solid #38a169;
+    font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.6;
+    padding: 12px 16px; background: #0a0a0a; border-radius: 0; margin-bottom: 10px;
+    border-left: 3px solid #2289AB;
   }
-  .caption strong { color: #2d3748; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; margin-right: 6px; }
-  .caption.accent-warn  { background: #fffaf0; border-left-color: #ed8936; }
-  .caption.accent-muted { background: #f7fafc; border-left-color: #a0aec0; }
+  .caption strong { color: #FFFFFF; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; margin-right: 6px; }
+  .caption.accent-warn  { background: rgba(251,191,36,0.06); border-left-color: #fbbf24; }
+  .caption.accent-muted { background: #0a0a0a; border-left-color: rgba(255,255,255,0.22); }
 
-  .powered-by { text-align: center; padding: 16px; color: #a0aec0; font-size: 11px; margin-top: 20px; }
-  .error-msg { text-align: center; padding: 40px; color: #e53e3e; }
-  .empty-msg { text-align: center; padding: 30px 20px; color: #a0aec0; font-size: 13px; }
+  .powered-by { text-align: center; padding: 16px; color: rgba(255,255,255,0.42); font-size: 10px; margin-top: 20px; text-transform: uppercase; letter-spacing: 0.14em; border-top: 1px solid #1a1a1a; padding-top: 16px; }
+  .error-msg { text-align: center; padding: 40px; color: #f87171; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: rgba(255,255,255,0.42); font-size: 13px; }
 </style>
 <script>window.__DASH_DATA__ = {"clientName":"Element Outdoor Living (Marketing)","lastUpdated":"2026-09-15","summary":{"totalRevenueYtd":0,"wonRevenueYtd":0,"wonJobsYtd":0,"avgDealSize":0,"digitalSharePct":0,"qualifiedLeadsYtd":33,"pendingRevenueYtd":0,"pendingJobsYtd":0,"revenueGoal":7300000},"monthly12":[{"month":"2024-07","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":15,"offline_leads":5,"digital_pending_revenue":250000,"offline_pending_revenue":160000,"digital_pending_count":1,"offline_pending_count":2,"pending_revenue":410000,"pending_count":3},{"month":"2024-08","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":8,"offline_leads":3,"digital_pending_revenue":0,"offline_pending_revenue":80000,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":80000,"pending_count":1},{"month":"2024-09","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":1,"digital_leads":7,"offline_leads":13,"digital_pending_revenue":90000,"offline_pending_revenue":170000,"digital_pending_count":2,"offline_pending_count":2,"pending_revenue":260000,"pending_count":4},{"month":"2024-10","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":16,"offline_leads":13,"digital_pending_revenue":0,"offline_pending_revenue":20000,"digital_pending_count":1,"offline_pending_count":4,"pending_revenue":20000,"pending_count":5},{"month":"2024-11","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":4,"offline_leads":3,"digital_pending_revenue":0,"offline_pending_revenue":0,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":0,"pending_count":1},{"month":"2024-12","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":4,"offline_leads":4,"digital_pending_revenue":0,"offline_pending_revenue":23200,"digital_pending_count":1,"offline_pending_count":2,"pending_revenue":23200,"pending_count":3},{"month":"2025-01","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":3,"offline_leads":4,"digital_pending_revenue":0,"offline_pending_revenue":5420,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":5420,"pending_count":1},{"month":"2025-02","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":10,"offline_leads":1,"digital_pending_revenue":7500,"offline_pending_revenue":0,"digital_pending_count":1,"offline_pending_count":0,"pending_revenue":7500,"pending_count":1},{"month":"2025-03","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":4,"offline_leads":0,"digital_pending_revenue":0,"offline_pending_revenue":0,"digital_pending_count":0,"offline_pending_count":0,"pending_revenue":0,"pending_count":0},{"month":"2025-04","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":2,"offline_leads":2,"digital_pending_revenue":0,"offline_pending_revenue":0,"digital_pending_count":1,"offline_pending_count":0,"pending_revenue":0,"pending_count":1},{"month":"2025-08","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":0,"offline_leads":1,"digital_pending_revenue":0,"offline_pending_revenue":0,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":0,"pending_count":1},{"month":"2025-09","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":0,"offline_leads":1,"digital_pending_revenue":0,"offline_pending_revenue":300000,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":300000,"pending_count":1}],"monthlyTable":[{"month":"2025-09","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":0,"offline_leads":1,"digital_pending_revenue":0,"offline_pending_revenue":300000,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":300000,"pending_count":1},{"month":"2025-08","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":0,"offline_leads":1,"digital_pending_revenue":0,"offline_pending_revenue":0,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":0,"pending_count":1},{"month":"2025-04","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":2,"offline_leads":2,"digital_pending_revenue":0,"offline_pending_revenue":0,"digital_pending_count":1,"offline_pending_count":0,"pending_revenue":0,"pending_count":1},{"month":"2025-03","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":4,"offline_leads":0,"digital_pending_revenue":0,"offline_pending_revenue":0,"digital_pending_count":0,"offline_pending_count":0,"pending_revenue":0,"pending_count":0},{"month":"2025-02","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":10,"offline_leads":1,"digital_pending_revenue":7500,"offline_pending_revenue":0,"digital_pending_count":1,"offline_pending_count":0,"pending_revenue":7500,"pending_count":1},{"month":"2025-01","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":3,"offline_leads":4,"digital_pending_revenue":0,"offline_pending_revenue":5420,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":5420,"pending_count":1},{"month":"2024-12","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":4,"offline_leads":4,"digital_pending_revenue":0,"offline_pending_revenue":23200,"digital_pending_count":1,"offline_pending_count":2,"pending_revenue":23200,"pending_count":3},{"month":"2024-11","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":4,"offline_leads":3,"digital_pending_revenue":0,"offline_pending_revenue":0,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":0,"pending_count":1},{"month":"2024-10","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":16,"offline_leads":13,"digital_pending_revenue":0,"offline_pending_revenue":20000,"digital_pending_count":1,"offline_pending_count":4,"pending_revenue":20000,"pending_count":5},{"month":"2024-09","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":1,"digital_leads":7,"offline_leads":13,"digital_pending_revenue":90000,"offline_pending_revenue":170000,"digital_pending_count":2,"offline_pending_count":2,"pending_revenue":260000,"pending_count":4},{"month":"2024-08","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":8,"offline_leads":3,"digital_pending_revenue":0,"offline_pending_revenue":80000,"digital_pending_count":0,"offline_pending_count":1,"pending_revenue":80000,"pending_count":1},{"month":"2024-07","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":15,"offline_leads":5,"digital_pending_revenue":250000,"offline_pending_revenue":160000,"digital_pending_count":1,"offline_pending_count":2,"pending_revenue":410000,"pending_count":3},{"month":"2024-06","digital_revenue":0,"offline_revenue":0,"digital_won":0,"offline_won":0,"digital_leads":11,"offline_leads":7,"digital_pending_revenue":45000,"offline_pending_revenue":0,"digital_pending_count":1,"offline_pending_count":0,"pending_revenue":45000,"pending_count":1}],"qualified12":[{"month":"2025-02","digital_total":25,"offline_total":1,"digital_qualified":10,"offline_qualified":0},{"month":"2025-03","digital_total":27,"offline_total":11,"digital_qualified":12,"offline_qualified":9},{"month":"2025-04","digital_total":31,"offline_total":7,"digital_qualified":18,"offline_qualified":7},{"month":"2025-05","digital_total":34,"offline_total":13,"digital_qualified":10,"offline_qualified":9},{"month":"2025-06","digital_total":36,"offline_total":6,"digital_qualified":15,"offline_qualified":5},{"month":"2025-07","digital_total":25,"offline_total":13,"digital_qualified":8,"offline_qualified":11},{"month":"2025-08","digital_total":13,"offline_total":10,"digital_qualified":5,"offline_qualified":6},{"month":"2025-09","digital_total":14,"offline_total":14,"digital_qualified":10,"offline_qualified":8},{"month":"2025-10","digital_total":13,"offline_total":7,"digital_qualified":12,"offline_qualified":7},{"month":"2025-11","digital_total":16,"offline_total":9,"digital_qualified":12,"offline_qualified":7},{"month":"2025-12","digital_total":16,"offline_total":10,"digital_qualified":12,"offline_qualified":9},{"month":"2026-01","digital_total":24,"offline_total":17,"digital_qualified":18,"offline_qualified":15}],"qualifiedTable":[{"month":"2026-01","digital_total":24,"offline_total":17,"digital_qualified":18,"offline_qualified":15},{"month":"2025-12","digital_total":16,"offline_total":10,"digital_qualified":12,"offline_qualified":9},{"month":"2025-11","digital_total":16,"offline_total":9,"digital_qualified":12,"offline_qualified":7},{"month":"2025-10","digital_total":13,"offline_total":7,"digital_qualified":12,"offline_qualified":7},{"month":"2025-09","digital_total":14,"offline_total":14,"digital_qualified":10,"offline_qualified":8},{"month":"2025-08","digital_total":13,"offline_total":10,"digital_qualified":5,"offline_qualified":6},{"month":"2025-07","digital_total":25,"offline_total":13,"digital_qualified":8,"offline_qualified":11},{"month":"2025-06","digital_total":36,"offline_total":6,"digital_qualified":15,"offline_qualified":5},{"month":"2025-05","digital_total":34,"offline_total":13,"digital_qualified":10,"offline_qualified":9},{"month":"2025-04","digital_total":31,"offline_total":7,"digital_qualified":18,"offline_qualified":7},{"month":"2025-03","digital_total":27,"offline_total":11,"digital_qualified":12,"offline_qualified":9},{"month":"2025-02","digital_total":25,"offline_total":1,"digital_qualified":10,"offline_qualified":0},{"month":"2025-01","digital_total":29,"offline_total":12,"digital_qualified":8,"offline_qualified":6}],"notes":[{"label":"DIGITAL SOURCES","text":"Google Ads, Google Organic, Facebook, Instagram, Website forms, CallRail-tracked calls, and any lead where the source URL points to our own domains.","accent":""},{"label":"OFFLINE SOURCES","text":"Referrals, home shows, existing customers, trade shows, direct mail, and any non-digital source captured manually by the sales team.","accent":""},{"label":"UNKNOWN / OTHER","text":"Leads and jobs without a captured source. Attribution gap — reduces over time as CallRail and CRM source tagging improve.","accent":"muted"}]};</script>
 </head>
@@ -378,8 +384,8 @@
     for (var i = 0; i <= 4; i++) {
       var v = yMax * (i / 4);
       var y = PAD_T + innerH - (v / yMax) * innerH;
-      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 0 ? '#cbd5e0' : '#edf2f7') + '" stroke-width="1"/>';
-      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="#a0aec0">' + fmtCurrency(v, true) + '</text>';
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 0 ? '#2a2a2a' : '#1a1a1a') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="rgba(255,255,255,0.42)">' + fmtCurrency(v, true) + '</text>';
     }
 
     var bars = '';
@@ -397,18 +403,18 @@
       var oY = PAD_T + innerH - oH;
 
       if (dRev > 0) {
-        bars += '<rect x="' + dX + '" y="' + dY + '" width="' + barW + '" height="' + dH + '" fill="#38a169" rx="2"><title>' + m.month + ' Digital: ' + fmtCurrency(dRev, false) + '</title></rect>';
+        bars += '<rect x="' + dX + '" y="' + dY + '" width="' + barW + '" height="' + dH + '" fill="#2289AB" rx="2"><title>' + m.month + ' Digital: ' + fmtCurrency(dRev, false) + '</title></rect>';
       }
       if (oRev > 0) {
-        bars += '<rect x="' + oX + '" y="' + oY + '" width="' + barW + '" height="' + oH + '" fill="#4a6cf7" rx="2"><title>' + m.month + ' Offline: ' + fmtCurrency(oRev, false) + '</title></rect>';
+        bars += '<rect x="' + oX + '" y="' + oY + '" width="' + barW + '" height="' + oH + '" fill="rgba(255,255,255,0.75)" rx="2"><title>' + m.month + ' Offline: ' + fmtCurrency(oRev, false) + '</title></rect>';
       }
 
-      xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="#4a5568">' + fmtMonthShort(m.month) + '</text>';
+      xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.65)">' + fmtMonthShort(m.month) + '</text>';
       
       var total = dRev + oRev;
       if (total > 0) {
         var topY = Math.min(dY, oY) - 6;
-        xLabels += '<text x="' + groupX + '" y="' + topY + '" text-anchor="middle" font-size="9" fill="#718096">' + fmtCurrency(total, true) + '</text>';
+        xLabels += '<text x="' + groupX + '" y="' + topY + '" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.42)">' + fmtCurrency(total, true) + '</text>';
       }
     });
 
