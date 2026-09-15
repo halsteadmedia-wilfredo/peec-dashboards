@@ -1,85 +1,293 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&amp;family=Montserrat:wght@800;900&amp;display=swap">
 <style>
-  body { margin:0; font-family:'Inter',Arial,Helvetica,sans-serif; background:#f4f5f7; color:#1f2a44; }
-  .wrap { max-width:1100px; margin:0 auto; padding:20px; }
-  h1 { font-size:20px; margin:0; }
-  .header-row { display:flex; align-items:center; gap:12px; }
-  .controls { margin-left:auto; display:flex; align-items:center; gap:8px; }
-  .controls label { font-size:12px; color:#6b7280; }
-  select { font-size:13px; padding:6px 10px; border:1px solid #cbd5e0; border-radius:6px; background:#fff; color:#2d3748; }
-  .sub { color:#6b7280; font-size:13px; margin:2px 0 18px; }
-  .kpis { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
-  .kpi { flex:1; min-width:150px; background:#fff; border-radius:6px; padding:16px 18px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
-  .kpi .label { font-size:12px; color:#6b7280; text-transform:uppercase; letter-spacing:1px; }
-  .kpi .val { font-size:26px; font-weight:600; margin-top:6px; }
-  .card { background:#fff; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,.06); overflow:hidden; }
-  .card h3 { margin:0; padding:14px 18px; font-size:14px; border-bottom:1px solid #eef0f3; }
-  table { width:100%; border-collapse:collapse; }
-  th,td { padding:10px 18px; font-size:13px; text-align:right; border-bottom:1px solid #f0f1f4; }
-  th:first-child, td:first-child { text-align:left; }
-  th { color:#6b7280; font-weight:600; background:#fafbfc; }
-  tr:last-child td { border-bottom:none; }
-  tfoot td { font-weight:700; background:#fafbfc; }
-  .muted td { color:#9aa1ac; }
-  #loading { padding:40px; text-align:center; color:#6b7280; }
-  .err { color:#b42318; }
-  .foot { color:#9aa1ac; font-size:11px; text-align:center; margin-top:14px; }
-  .caption { font-size:12px; color:#6b7280; line-height:1.6; padding:12px 16px; background:#f7fafc; border-radius:8px; margin-bottom:14px; border-left:3px solid #4a6cf7; }
-  .caption strong { color:#1f2a44; }
+   
+  :root {
+    --black:    #000000;
+    --surface:  #0a0a0a;
+    --border:   #1a1a1a;
+    --border-2: #2a2a2a;
+    --white:    #FFFFFF;
+    --dim:      rgba(255,255,255,0.65);
+    --muted:    rgba(255,255,255,0.42);
+    --faint:    rgba(255,255,255,0.22);
+
+    --blue:     #2289AB;
+    --blue-dim: rgba(34,137,171,0.30);
+
+    --good:     #4ade80;
+    --warn:     #fbbf24;
+    --bad:      #f87171;
+
+    --font-body: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--black); color: var(--white); -webkit-font-smoothing: antialiased; }
+
+  .loading { text-align: center; padding: 80px 20px; color: var(--dim); font-size: 14px; letter-spacing: 0.02em; }
+  .loading .spinner { display: inline-block; width: 32px; height: 32px; border: 2px solid var(--border-2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dashboard { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  }
+  .section-header h2 {
+    font-family: var(--font-display);
+    font-size: 15px; font-weight: 800; color: var(--white);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .section-header .client-name { font-size: 13px; color: var(--dim); font-weight: 400; }
+  .section-header .period {
+    margin-left: auto; font-size: 11px; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.10em;
+    padding: 5px 10px; border: 1px solid var(--border-2);
+  }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--surface); padding: 20px;
+    border: 1px solid var(--border);
+    position: relative;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .kpi-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+  .kpi-card .label {
+    font-size: 10px; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin-bottom: 12px; font-weight: 500;
+  }
+  .kpi-card .value {
+    font-family: var(--font-display);
+    font-size: 32px; font-weight: 900; color: var(--white);
+    line-height: 1; letter-spacing: -0.01em;
+  }
+  .kpi-card .sub { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+  .kpi-card[data-tip] { cursor: help; }
+  .kpi-card[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    background: var(--white); color: var(--black);
+    font-size: 12px; font-weight: 400; font-family: var(--font-body);
+    line-height: 1.5; padding: 10px 14px;
+    width: max-content; max-width: 260px; text-transform: none; letter-spacing: 0;
+    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
+    z-index: 100;
+  }
+  .kpi-card[data-tip]::before {
+    content: ''; position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: var(--white);
+    pointer-events: none; opacity: 0; transition: opacity 0.2s, bottom 0.2s;
+    z-index: 100;
+  }
+  .kpi-card[data-tip]:hover::after { opacity: 1; bottom: calc(100% + 12px); }
+  .kpi-card[data-tip]:hover::before { opacity: 1; bottom: calc(100% + 0px); }
+
+  .card {
+    background: var(--surface); padding: 20px;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    transition: border-color 0.15s ease;
+  }
+  .card:hover { border-color: var(--border-2); }
+  .card h3 {
+    font-family: var(--font-body);
+    font-size: 11px; font-weight: 500; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin-bottom: 20px;
+  }
+
+  .chart-container { position: relative; height: 320px; overflow: hidden; }
+  .chart-svg { width: 100%; height: 100%; }
+
+  .legend {
+    display: flex; gap: 16px; margin-top: 12px; font-size: 10px;
+    color: var(--dim); align-items: center; justify-content: flex-end;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 10px; height: 10px; }
+  .swatch-digital { background: var(--blue); }
+  .swatch-offline { background: rgba(255,255,255,0.60); }
+  .swatch-unknown { background: rgba(255,255,255,0.30); }
+
+  .cat-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .cat-table th {
+    text-align: right; padding: 10px 12px; color: var(--dim); font-weight: 500;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+  }
+  .cat-table th:first-child { text-align: left; }
+  .cat-table td {
+    padding: 12px; border-bottom: 1px solid var(--border);
+    vertical-align: middle; text-align: right; color: var(--white);
+    font-variant-numeric: tabular-nums;
+  }
+  .cat-table td:first-child { text-align: left; font-weight: 500; font-variant-numeric: normal; }
+  .cat-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .cat-table .total-row td {
+    border-top: 1px solid var(--border-2); border-bottom: none;
+    font-weight: 600; color: var(--white); background: rgba(255,255,255,0.02);
+  }
+
+  .caption {
+    font-size: 12px; color: var(--dim); line-height: 1.6;
+    padding: 12px 16px; background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--blue);
+    margin-bottom: 24px;
+  }
+  .caption strong { color: var(--white); font-weight: 600; }
+
+  .powered-by {
+    text-align: center; padding: 20px; color: var(--muted); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.14em; margin-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .error-msg { text-align: center; padding: 40px; color: var(--bad); font-size: 13px; }
+  .empty-msg { text-align: center; padding: 30px 20px; color: var(--muted); font-size: 12px; }
 </style>
 <script>window.__DASH_DATA__ = {"clientName":"Northern Lights Landscape (Jobber — Internal)","period":"2026 YTD","months":["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09"],"cells":{"Bing Organic|2026-04":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Bing Organic|2026-06":{"leads":0,"openJobs":1,"openInvoices":0,"approved":0,"collected":0},"Bing Organic|2026-07":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Direct|2026-02":{"leads":4,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Direct|2026-03":{"leads":2,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Direct|2026-04":{"leads":12,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Direct|2026-05":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Direct|2026-06":{"leads":2,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Direct|2026-07":{"leads":6,"openJobs":0,"openInvoices":0,"approved":41950,"collected":12585},"Direct|2026-08":{"leads":5,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Direct|2026-09":{"leads":3,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Facebook Ads|2026-07":{"leads":4,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Facebook Ads|2026-08":{"leads":4,"openJobs":2,"openInvoices":0,"approved":0,"collected":0},"Facebook Ads|2026-09":{"leads":3,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Facebook Organic|2026-08":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Ads|2026-01":{"leads":2,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Ads|2026-02":{"leads":5,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Ads|2026-03":{"leads":6,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Ads|2026-04":{"leads":6,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Ads|2026-05":{"leads":10,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Ads|2026-06":{"leads":8,"openJobs":0,"openInvoices":0,"approved":0,"collected":2505.47},"Google Ads|2026-07":{"leads":7,"openJobs":0,"openInvoices":0,"approved":2500,"collected":12521},"Google Ads|2026-08":{"leads":20,"openJobs":5,"openInvoices":0,"approved":5880,"collected":12203.92},"Google Ads|2026-09":{"leads":5,"openJobs":4,"openInvoices":4788,"approved":15960,"collected":3416},"Google My Business|2026-07":{"leads":7,"openJobs":2,"openInvoices":0,"approved":8765,"collected":0},"Google My Business|2026-08":{"leads":16,"openJobs":3,"openInvoices":0,"approved":23342.5,"collected":9932.25},"Google My Business|2026-09":{"leads":3,"openJobs":5,"openInvoices":1849.5,"approved":6165,"collected":1008.75},"Google Organic|2026-01":{"leads":7,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Organic|2026-02":{"leads":4,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Organic|2026-03":{"leads":4,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Organic|2026-04":{"leads":10,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Organic|2026-05":{"leads":11,"openJobs":0,"openInvoices":0,"approved":32505,"collected":0},"Google Organic|2026-06":{"leads":12,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Google Organic|2026-07":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":14871.5},"Google Organic|2026-08":{"leads":5,"openJobs":4,"openInvoices":0,"approved":0,"collected":26134.5},"Google Organic|2026-09":{"leads":1,"openJobs":1,"openInvoices":0,"approved":0,"collected":0},"Instagram Ads|2026-07":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Instagram Organic|2026-07":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"No Value|2026-01":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"No Value|2026-02":{"leads":3,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"No Value|2026-03":{"leads":11,"openJobs":1,"openInvoices":0,"approved":0,"collected":0},"No Value|2026-04":{"leads":3,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"No Value|2026-05":{"leads":11,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"No Value|2026-06":{"leads":7,"openJobs":0,"openInvoices":0,"approved":0,"collected":14670.8},"No Value|2026-07":{"leads":7,"openJobs":1,"openInvoices":0,"approved":0,"collected":6440},"No Value|2026-08":{"leads":7,"openJobs":2,"openInvoices":0,"approved":9450,"collected":4830},"No Value|2026-09":{"leads":1,"openJobs":1,"openInvoices":0,"approved":0,"collected":0},"Northern Lights - Google Ads Assets|2026-04":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Northern Lights - Google Ads Assets|2026-07":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Northern Lights Facebook|2026-07":{"leads":3,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Northern Lights Facebook|2026-08":{"leads":2,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Northern Lights GMB|2026-03":{"leads":7,"openJobs":1,"openInvoices":0,"approved":0,"collected":0},"Northern Lights GMB|2026-04":{"leads":10,"openJobs":1,"openInvoices":0,"approved":0,"collected":0},"Northern Lights GMB|2026-06":{"leads":9,"openJobs":0,"openInvoices":0,"approved":6345,"collected":3006.05},"Northern Lights GMB|2026-07":{"leads":12,"openJobs":0,"openInvoices":0,"approved":0,"collected":6310},"Northern Lights GMB|2026-08":{"leads":35,"openJobs":3,"openInvoices":0,"approved":1065,"collected":3495},"Northern Lights GMB|2026-09":{"leads":9,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Northern Lights|2026-02":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Northern Lights|2026-03":{"leads":4,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"Northern Lights|2026-04":{"leads":14,"openJobs":1,"openInvoices":0,"approved":0,"collected":0},"Northern Lights|2026-05":{"leads":2,"openJobs":0,"openInvoices":0,"approved":34300,"collected":0},"Northern Lights|2026-06":{"leads":5,"openJobs":0,"openInvoices":0,"approved":0,"collected":10947.5},"Northern Lights|2026-07":{"leads":12,"openJobs":0,"openInvoices":0,"approved":29455,"collected":0},"Northern Lights|2026-08":{"leads":0,"openJobs":1,"openInvoices":0,"approved":0,"collected":20149},"Yelp Organic|2026-07":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"www.nllandscapes.com|2026-04":{"leads":1,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"www.nllandscapes.com|2026-05":{"leads":2,"openJobs":0,"openInvoices":0,"approved":0,"collected":0},"www.nllandscapes.com|2026-07":{"leads":2,"openJobs":1,"openInvoices":0,"approved":0,"collected":0},"www.nllandscapes.com|2026-08":{"leads":0,"openJobs":0,"openInvoices":0,"approved":0,"collected":6260}},"notes":[{"label":"","text":"**Digital** = Google Ads, Facebook, Google Business Profile, Organic Search, Site Referral. **Offline** = Repeat Customer, Client Referral & any other source. **Unknown** = leads without a Marketing Source set — the goal is to drive this to zero.","accent":""},{"label":"Data note:","text":"Source comes from the **Marketing Source** custom field on each Jobber client. Form leads are populated automatically by a Zapier → webhook flow (Phase 1). Call leads are populated by CallRail's Jobber marketplace app.","accent":"warn"},{"label":"Pending Revenue","text":"reflects quotes sent to customers and awaiting a decision.","accent":"muted"}]};</script>
 </head>
 <body>
-<div class="wrap">
-  <div id="loading">Loading…</div>
-  <div id="dash" style="display:none">
-    <div class="header-row">
-      <h1>Referral Source Performance <span id="client" style="color:#6b7280;font-weight:400"></span></h1>
-      <div class="controls">
-        <label for="period-select">Period</label>
-        <select id="period-select"></select>
-      </div>
-    </div>
-    <div class="sub" id="period"></div>
-    
-    <div id="notes"></div>
-    <div class="kpis" id="kpis"></div>
-    <div class="card">
-      <h3>By Lead Source</h3>
-      <table>
-        <thead><tr>
-          <th>Source</th><th>Leads</th><th>Open Jobs</th><th>Open Invoices</th><th>Approved Orders</th><th>Collected</th>
-        </tr></thead>
-        <tbody id="rows"></tbody>
-        <tfoot id="tfoot"></tfoot>
-      </table>
-    </div>
-    <div class="foot">JobTread referral-source data · refreshed periodically</div>
-  </div>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <div>Loading marketing performance data...</div>
 </div>
+
+<div id="dashboard" class="dashboard" style="display:none;">
+  <div class="section-header">
+    <h2>Marketing Performance Tracker</h2>
+    <span class="client-name" id="client-name">—</span>
+    <span class="period" id="period-label"></span>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card" data-tip="Total $ value of estimates marked Sold (won) year-to-date, across all sources.">
+      <div class="label">Won Revenue YTD</div>
+      <div class="value" id="kpi-won">--</div>
+      <div class="sub">Sold estimate value this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Total $ value of estimates still Pending (open, not yet won or lost) year-to-date.">
+      <div class="label">Pending Revenue YTD</div>
+      <div class="value" id="kpi-pending">--</div>
+      <div class="sub">Open estimate value this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of estimates created year-to-date, all statuses.">
+      <div class="label">Estimates YTD</div>
+      <div class="value" id="kpi-estimates">--</div>
+      <div class="sub">Estimates created this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of new leads/contacts created year-to-date.">
+      <div class="label">Leads YTD</div>
+      <div class="value" id="kpi-leads">--</div>
+      <div class="sub">New contacts this year</div>
+    </div>
+    <div class="kpi-card" data-tip="Share of attributed won revenue from digital sources (Organic Search, Google Ads, Facebook Ads, Site Referral). Measured against digital&#43;offline only; Unknown-source revenue is excluded from this ratio.">
+      <div class="label">Digital Share</div>
+      <div class="value" id="kpi-digital">--</div>
+      <div class="sub">Digital % of attributed won $</div>
+    </div>
+  </div>
+
+  
+  <div id="notes-container"></div>
+
+  <div class="card">
+    <h3>Won Revenue by Marketing Bucket — Last 12 Months</h3>
+    <div class="chart-container" id="chart-container"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch swatch-digital"></span> Digital</div>
+      <div class="legend-item"><span class="legend-swatch swatch-offline"></span> Offline</div>
+      <div class="legend-item"><span class="legend-swatch swatch-unknown"></span> Unknown</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Monthly Estimates Breakdown</h3>
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Digital Won</th>
+          <th>Offline Won</th>
+          <th>Unknown Won</th>
+          <th>Pending $</th>
+          <th>Estimates</th>
+          <th>Total Won</th>
+        </tr>
+      </thead>
+      <tbody id="est-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Leads by Source — Monthly</h3>
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Digital</th>
+          <th>Offline</th>
+          <th>Unknown</th>
+          <th>Total Leads</th>
+        </tr>
+      </thead>
+      <tbody id="leads-body"></tbody>
+    </table>
+  </div>
+
+  <div class="powered-by">Data from JobTread &nbsp;&middot;&nbsp; Halstead Marketing Performance Tracker</div>
+</div>
+
 <script>
-  
-  
-  if (window.__DASH_DATA__) { render(window.__DASH_DATA__); }
-  else if (window.__JT_DATA__) { render(window.__JT_DATA__); }
-  else if (typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run.withSuccessHandler(render).withFailureHandler(function (e) {
-      document.getElementById('loading').innerHTML = '<span class="err">Failed to load: ' + (e && e.message ? e.message : e) + '</span>';
-    }).getDashboardData();
-  } else {
-    document.getElementById('loading').innerHTML = '<span class="err">Dashboard data missing — publisher inject failed.</span>';
+  google.script.run
+    .withSuccessHandler(renderDashboard)
+    .withFailureHandler(showError)
+    .getDashboardData();
+
+  function showError(err) {
+    document.getElementById('loading').innerHTML =
+      '<div class="error-msg">Failed to load data: ' + (err && err.message ? err.message : err) + '</div>';
   }
 
+  function renderDashboard(data) {
+    if (!data || data.error) { showError({ message: (data && data.error) || 'No data' }); return; }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    document.getElementById('client-name').textContent = '— ' + (data.clientName || '');
+    document.getElementById('period-label').textContent = 'Last updated: ' + (data.lastUpdated || '');
+
+    renderKPIs(data.summary || {});
+    renderNotes(data.notes || []);
+    renderChart(data.estMonthly12 || []);
+    renderEstTable(data.estTable || []);
+    renderLeadsTable(data.leadsTable || []);
+  }
+
+  
+  
   function renderNotes(notes) {
-    var c = document.getElementById('notes');
+    var c = document.getElementById('notes-container');
     if (!notes || !notes.length) { c.innerHTML = ''; return; }
     c.innerHTML = notes.map(function (n) {
-      var accent = n.accent === 'warn' ? 'border-left-color:#ed8936;background:#fffaf0;'
-                 : n.accent === 'muted' ? 'border-left-color:#a0aec0;' : '';
+      var accent = n.accent === 'warn' ? 'border-left-color:#fbbf24;background:rgba(251,191,36,0.08);'
+                 : n.accent === 'muted' ? 'border-left-color:rgba(255,255,255,0.42);' : '';
       var label = n.label ? '<strong>' + escHtml(n.label) + '</strong> ' : '';
       return '<div class="caption" style="' + accent + '">' + label + mdBold(escHtml(n.text)) + '</div>';
     }).join('');
@@ -87,86 +295,142 @@
   function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function mdBold(s) { return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); }
 
-  function money(n) { return '$' + (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }); }
-  function num(n) { return (Number(n) || 0).toLocaleString(); }
-  function cell(v, isMoney) { return v ? (isMoney ? money(v) : num(v)) : '<span style="color:#cbd0d6">—</span>'; }
+  function fmtCurrency(n, compact) {
+    if (n == null) return '$0';
+    if (compact && n >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+    if (compact && n >= 1000) return '$' + (n / 1000).toFixed(0) + 'k';
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function fmtInt(n) { return (n == null ? 0 : Math.round(n)).toLocaleString(); }
+  function fmtPct(n) { return (n == null ? 0 : n) + '%'; }
+  function fmtMonthShort(m) {
+    if (!m) return '';
+    var parts = String(m).split('-');
+    if (parts.length < 2) return m;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[parseInt(parts[1], 10) - 1] + " '" + parts[0].slice(2);
+  }
 
-  var DATA;   
+  function renderKPIs(s) {
+    document.getElementById('kpi-won').textContent       = fmtCurrency(s.wonRevenueYtd, true);
+    document.getElementById('kpi-pending').textContent   = fmtCurrency(s.pendingRevenueYtd, true);
+    document.getElementById('kpi-estimates').textContent = fmtInt(s.estimatesYtd);
+    document.getElementById('kpi-leads').textContent     = fmtInt(s.leadsYtd);
+    document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
+  }
 
-  function render(data) {
-    if (!data || data.error) { document.getElementById('loading').innerHTML = '<span class="err">No data</span>'; return; }
-    DATA = data;
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('dash').style.display = 'block';
-    document.getElementById('client').textContent = '— ' + data.clientName;
-    renderNotes(data.notes || []);
+  
+  function renderChart(monthly) {
+    var container = document.getElementById('chart-container');
+    if (!monthly.length) { container.innerHTML = '<div class="empty-msg">No monthly data yet.</div>'; return; }
 
-    
-    var sel = document.getElementById('period-select');
-    var yr = String(new Date().getFullYear());
-    var opts = ['<option value="YTD">Year to Date (' + yr + ')</option>'];
-    (data.months || []).slice().reverse().forEach(function (m) {
-      opts.push('<option value="' + m + '">' + monthLabel(m) + '</option>');
+    var W = 1100, H = 320, PAD_L = 60, PAD_R = 24, PAD_T = 16, PAD_B = 50;
+    var innerW = W - PAD_L - PAD_R, innerH = H - PAD_T - PAD_B;
+    var n = monthly.length;
+    var groupW = innerW / n;
+    var barW = Math.max(5, Math.min(20, (groupW - 10) / 3));
+
+    var maxVal = 0;
+    monthly.forEach(function(m) {
+      maxVal = Math.max(maxVal, m.digital_won || 0, m.offline_won || 0, m.unknown_won || 0);
     });
-    sel.innerHTML = opts.join('');
-    sel.onchange = rerender;
-    rerender();
+    var yMax = Math.max(maxVal * 1.15, 1000);
+    var magnitude = Math.pow(10, Math.floor(Math.log(yMax) / Math.LN10));
+    yMax = Math.ceil(yMax / magnitude) * magnitude;
 
-  }
+    var gridLines = '';
+    for (var i = 0; i <= 4; i++) {
+      var v = yMax * (i / 4);
+      var y = PAD_T + innerH - (v / yMax) * innerH;
+      gridLines += '<line x1="' + PAD_L + '" y1="' + y + '" x2="' + (W - PAD_R) + '" y2="' + y + '" stroke="' + (i === 0 ? '#2a2a2a' : '#1a1a1a') + '" stroke-width="1"/>';
+      gridLines += '<text x="' + (PAD_L - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="rgba(255,255,255,0.42)">' + fmtCurrency(v, true) + '</text>';
+    }
 
-  function rerender() {
-    if (!DATA) return;
-    var period = document.getElementById('period-select').value;
-    var months = monthsInScope(period);
-    document.getElementById('period').textContent = period === 'YTD' ? ('Year to Date (' + new Date().getFullYear() + ')') : monthLabel(period);
-
-    
-    var perSource = {};
-    (DATA.months || []).forEach(function (_) {});   
-    Object.keys(DATA.cells || {}).forEach(function (key) {
-      var parts = key.split('|'), src = parts[0], m = parts[1];
-      if (months.indexOf(m) < 0) return;
-      var c = DATA.cells[key];
-      if (!perSource[src]) perSource[src] = { source: src, leads: 0, openJobs: 0, openInvoices: 0, approved: 0, collected: 0 };
-      perSource[src].leads += c.leads; perSource[src].openJobs += c.openJobs;
-      perSource[src].openInvoices += c.openInvoices; perSource[src].approved += c.approved; perSource[src].collected += c.collected;
+    var bars = '', xLabels = '';
+    var series = [['digital_won', '#2289AB'], ['offline_won', 'rgba(255,255,255,0.60)'], ['unknown_won', 'rgba(255,255,255,0.30)']];
+    monthly.forEach(function(m, i) {
+      var groupX = PAD_L + i * groupW + groupW / 2;
+      var startX = groupX - (barW * 3 + 4) / 2;
+      series.forEach(function(s, k) {
+        var val = m[s[0]] || 0;
+        var h = (val / yMax) * innerH;
+        var x = startX + k * (barW + 2);
+        var y = PAD_T + innerH - h;
+        if (val > 0) {
+          bars += '<rect x="' + x + '" y="' + y + '" width="' + barW + '" height="' + h + '" fill="' + s[1] + '" rx="2"><title>' + m.month + ' ' + s[0].replace('_won','') + ': ' + fmtCurrency(val, false) + '</title></rect>';
+        }
+      });
+      xLabels += '<text x="' + groupX + '" y="' + (H - 28) + '" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.42)">' + fmtMonthShort(m.month) + '</text>';
     });
 
-    var rows = Object.keys(perSource).map(function (k) { return perSource[k]; })
-      .sort(function (a, b) { return b.collected - a.collected || b.leads - a.leads; })
-      .map(function (r) { return Object.assign({}, r, { source: r.source === 'No Value' ? 'Unattributed' : r.source }); });
-
-    var t = rows.reduce(function (s, r) {
-      s.leads += r.leads; s.openJobs += r.openJobs; s.openInvoices += r.openInvoices;
-      s.approved += r.approved; s.collected += r.collected; return s;
-    }, { leads: 0, openJobs: 0, openInvoices: 0, approved: 0, collected: 0 });
-
-    document.getElementById('kpis').innerHTML = [
-      ['Total Leads', num(t.leads)],
-      ['Open Jobs', num(t.openJobs)],
-      ['Approved Orders', money(t.approved)],
-      ['Collected', money(t.collected)]
-    ].map(function (k) { return '<div class="kpi"><div class="label">' + k[0] + '</div><div class="val">' + k[1] + '</div></div>'; }).join('');
-
-    document.getElementById('rows').innerHTML = rows.map(function (r) {
-      var dim = (r.leads === 0) ? ' class="muted"' : '';
-      return '<tr' + dim + '><td>' + r.source + '</td><td>' + num(r.leads) + '</td><td>' + num(r.openJobs) +
-        '</td><td>' + cell(r.openInvoices, true) + '</td><td>' + cell(r.approved, true) + '</td><td>' + cell(r.collected, true) + '</td></tr>';
-    }).join('') || '<tr><td colspan="6" style="text-align:center;color:#9aa1ac;padding:24px;">No data for this period.</td></tr>';
-
-    document.getElementById('tfoot').innerHTML = '<tr><td>Total</td><td>' + num(t.leads) + '</td><td>' + num(t.openJobs) +
-      '</td><td>' + money(t.openInvoices) + '</td><td>' + money(t.approved) + '</td><td>' + money(t.collected) + '</td></tr>';
+    container.innerHTML = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' + gridLines + bars + xLabels + '</svg>';
   }
 
-  function monthsInScope(period) {
-    if (period !== 'YTD') return [period];
-    var yr = String(new Date().getFullYear()) + '-';
-    return (DATA.months || []).filter(function (m) { return m.indexOf(yr) === 0; });
+  function renderEstTable(rows) {
+    var tbody = document.getElementById('est-body');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-msg">No estimate data yet.</td></tr>'; return; }
+
+    var tDW = 0, tOW = 0, tUW = 0, tP = 0, tE = 0;
+    rows.forEach(function(r) {
+      var dW = r.digital_won || 0, oW = r.offline_won || 0, uW = r.unknown_won || 0;
+      var pend = (r.digital_pending || 0) + (r.offline_pending || 0) + (r.unknown_pending || 0);
+      var est = (r.digital_estimates || 0) + (r.offline_estimates || 0) + (r.unknown_estimates || 0);
+      var totWon = dW + oW + uW;
+      tDW += dW; tOW += oW; tUW += uW; tP += pend; tE += est;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + fmtMonthShort(r.month) + '</td>' +
+        '<td>' + fmtCurrency(dW, false) + '</td>' +
+        '<td>' + fmtCurrency(oW, false) + '</td>' +
+        '<td>' + fmtCurrency(uW, false) + '</td>' +
+        '<td>' + fmtCurrency(pend, false) + '</td>' +
+        '<td>' + fmtInt(est) + '</td>' +
+        '<td>' + fmtCurrency(totWon, false) + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    var tr = document.createElement('tr');
+    tr.className = 'total-row';
+    tr.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtCurrency(tDW, false) + '</td>' +
+      '<td>' + fmtCurrency(tOW, false) + '</td>' +
+      '<td>' + fmtCurrency(tUW, false) + '</td>' +
+      '<td>' + fmtCurrency(tP, false) + '</td>' +
+      '<td>' + fmtInt(tE) + '</td>' +
+      '<td>' + fmtCurrency(tDW + tOW + tUW, false) + '</td>';
+    tbody.appendChild(tr);
   }
-  function monthLabel(m) {
-    var mm = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var p = String(m).split('-'); return mm[parseInt(p[1], 10) - 1] + " '" + p[0].slice(2);
+
+  function renderLeadsTable(rows) {
+    var tbody = document.getElementById('leads-body');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">No leads data yet.</td></tr>'; return; }
+
+    var tD = 0, tO = 0, tU = 0;
+    rows.forEach(function(r) {
+      var d = r.digital_leads || 0, o = r.offline_leads || 0, u = r.unknown_leads || 0;
+      tD += d; tO += o; tU += u;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + fmtMonthShort(r.month) + '</td>' +
+        '<td>' + fmtInt(d) + '</td>' +
+        '<td>' + fmtInt(o) + '</td>' +
+        '<td>' + fmtInt(u) + '</td>' +
+        '<td>' + fmtInt(d + o + u) + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    var tr = document.createElement('tr');
+    tr.className = 'total-row';
+    tr.innerHTML =
+      '<td>Total</td>' +
+      '<td>' + fmtInt(tD) + '</td>' +
+      '<td>' + fmtInt(tO) + '</td>' +
+      '<td>' + fmtInt(tU) + '</td>' +
+      '<td>' + fmtInt(tD + tO + tU) + '</td>';
+    tbody.appendChild(tr);
   }
 </script>
+
 </body>
 </html>
