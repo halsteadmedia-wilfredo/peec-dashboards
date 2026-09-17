@@ -28,7 +28,7 @@
     background: transparent; padding: 5px 12px; border-radius: 0;
   }
 
-  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 14px; margin-bottom: 24px; }
   .kpi-card {
     background: #0a0a0a; border-radius: 0; padding: 20px;
     box-shadow: none; border: 1px solid #1a1a1a;
@@ -163,6 +163,16 @@
       <div class="value" id="kpi-qualified">--</div>
       <div class="sub">Vetted leads in the current year</div>
     </div>
+    <div class="kpi-card" data-tip="Revenue in-flight — Sent estimates &#43; In-Progress designs from the Sales Pipeline board, year-to-date. Not yet Won, but represents forecasted closes.">
+      <div class="label">Pending Revenue YTD</div>
+      <div class="value" id="kpi-pending-revenue">--</div>
+      <div class="sub">Sent + In-Progress pipeline</div>
+    </div>
+    <div class="kpi-card" data-tip="Count of Sent &#43; In-Progress opportunities in the pipeline year-to-date. These are jobs quoted or being designed but not yet Won.">
+      <div class="label">Pending Jobs YTD</div>
+      <div class="value" id="kpi-pending-jobs">--</div>
+      <div class="sub">Opportunities in flight</div>
+    </div>
   </div>
 
   <div id="goal-container"></div>
@@ -288,6 +298,8 @@
     document.getElementById('kpi-avg').textContent       = fmtCurrency(s.avgDealSize, false);
     document.getElementById('kpi-digital').textContent   = fmtPct(s.digitalSharePct);
     document.getElementById('kpi-qualified').textContent = (s.qualifiedLeadsYtd != null) ? fmtInt(s.qualifiedLeadsYtd) : '--';
+    document.getElementById('kpi-pending-revenue').textContent = (s.pendingRevenueYtd != null) ? fmtCurrency(s.pendingRevenueYtd, true) : '--';
+    document.getElementById('kpi-pending-jobs').textContent    = (s.pendingJobsYtd != null) ? fmtInt(s.pendingJobsYtd) : '--';
   }
 
   function renderNotes(notes) {
@@ -325,7 +337,6 @@
     var wpOfGoal = ((won + pending) / goal) * 100;
     var pendingAtEnd = (wonPct + pendingPct) >= 99.5 ? ' at-end' : '';
 
-    
     var pendingStats = pending > 0
       ? '<div class="goal-stat"><strong>' + wpOfGoal.toFixed(1) + '%</strong> incl. weighted pipeline</div>'
       : '';
