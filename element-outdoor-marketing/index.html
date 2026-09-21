@@ -78,7 +78,17 @@
   .goal-progress .goal-stat strong { color: #FFFFFF; font-weight: 700; }
   .goal-bar-track { position: relative; height: 26px; background: #1a1a1a; border-radius: 0; overflow: visible; }
   .goal-bar-fill-won { position: absolute; top: 0; bottom: 0; left: 0; background: #2289AB; border-radius: 0; transition: width 0.4s ease; }
-  .goal-bar-fill-pending { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,0.42); transition: left 0.4s ease, width 0.4s ease; }
+  .goal-bar-fill-pending {
+    position: absolute; top: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      135deg,
+      rgba(251,191,36,0.85),
+      rgba(251,191,36,0.85) 8px,
+      rgba(251,191,36,0.35) 8px,
+      rgba(251,191,36,0.35) 16px
+    );
+    transition: left 0.4s ease, width 0.4s ease;
+  }
   .goal-bar-fill-pending.at-end { border-radius: 0; }
   .goal-marker { position: absolute; top: -6px; bottom: -6px; width: 2px; background: #FFFFFF; z-index: 3; }
   .goal-marker::after { content: 'GOAL'; position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 700; color: #FFFFFF; letter-spacing: 0.5px; white-space: nowrap; }
@@ -86,7 +96,15 @@
   .goal-legend-item { display: flex; align-items: center; gap: 6px; }
   .goal-legend-swatch { width: 12px; height: 12px; border-radius: 0; flex-shrink: 0; }
   .goal-legend-swatch.won { background: #2289AB; }
-  .goal-legend-swatch.pending { background: rgba(255,255,255,0.42); }
+  .goal-legend-swatch.pending {
+    background: repeating-linear-gradient(
+      135deg,
+      rgba(251,191,36,0.85),
+      rgba(251,191,36,0.85) 3px,
+      rgba(251,191,36,0.35) 3px,
+      rgba(251,191,36,0.35) 6px
+    );
+  }
   .goal-empty { padding: 14px 18px; background: transparent; border-radius: 0; color: rgba(255,255,255,0.65); font-size: 12px; text-align: center; border: 1px dashed #2a2a2a; }
 
   .chart-container { position: relative; height: 320px; overflow: hidden; }
