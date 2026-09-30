@@ -29,9 +29,9 @@
   .goal-progress .goal-stats { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.65); display: flex; gap: 20px; flex-wrap: wrap; }
   .goal-progress .goal-stat strong { color: #FFFFFF; font-weight: 700; }
   .goal-bar-track { position: relative; height: 26px; background: #1a1a1a; border-radius: 0; overflow: visible; }
-  .goal-bar-fill-won { position: absolute; top: 0; bottom: 0; left: 0; background: #2289AB; border-radius: 0; transition: width 0.4s ease; }
+  .goal-bar-fill-won { position: absolute; top: 0; left: 0; height: 100%; background: #2289AB; border-radius: 0; transition: width 0.4s ease; z-index: 1; }
   .goal-bar-fill-pending {
-    position: absolute; top: 0; bottom: 0;
+    position: absolute; top: 0; height: 100%;
     background: repeating-linear-gradient(
       135deg,
       rgba(251,191,36,0.85),
@@ -40,6 +40,7 @@
       rgba(251,191,36,0.35) 16px
     );
     transition: left 0.4s ease, width 0.4s ease;
+    z-index: 2;
   }
   .goal-bar-fill-pending.at-end { border-radius: 0; }
   .goal-marker { position: absolute; top: -6px; bottom: -6px; width: 2px; background: #FFFFFF; z-index: 3; }
@@ -233,6 +234,13 @@
 <script>
   var __DATA__ = window.__DASH_DATA__ || {};
 
+  
+  
+  
+  
+  
+  var PENDING_WEIGHT = 0.75;
+
   document.getElementById('client-name').textContent = '— ' + (__DATA__.clientName || '');
   document.getElementById('period-label').textContent = 'Last updated: ' + (__DATA__.lastUpdated || '');
 
@@ -299,10 +307,6 @@
     document.getElementById('design-only-revenue').textContent = fmtMoneyFull(s.designOnlyRevenueYtd || 0);
     document.getElementById('design-only-count').textContent   = fmtInt(s.designOnlyCount || 0);
   }
-
-  
-  
-  var PENDING_WEIGHT = 0.75;
 
   function renderGoalBar(summary, goal) {
     var container = document.getElementById('goal-bar-container');
