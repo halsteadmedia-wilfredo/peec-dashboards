@@ -4,92 +4,101 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fullerton Grounds Maintenance ? Revenue vs Goal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Montserrat:wght@900&display=swap" rel="stylesheet">
   <style>
-    /* AA "Growth at a Glance" dark tile styling */
+    /* Halstead brand system ? black / white / Halstead Blue only.
+       No red/amber/green. No gradients. No shadows. Square radii. */
     :root {
-      --bg: #0a0a0a;
-      --panel: #121212;
-      --border: #1f1f1f;
-      --text: #ffffff;
-      --muted: #8a8a8a;
-      --accent: #3b82f6;        /* blue ? matches AA theme */
-      --bar-bg: #1a1a1a;
-      --bar-red:   #ef4444;      /* < 40% */
-      --bar-amber: #f59e0b;      /* 40-80% */
-      --bar-green: #10b981;      /* >= 80% */
+      --black:    #000000;
+      --white:    #FFFFFF;
+      --blue:     #2289AB;
+      --ink-95:   #0d0d0d;
+      --ink-85:   #1a1a1a;
+      --ink-50:   #666666;
+      --ink-35:   #999999;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 400;
       height: 100%;
       overflow: hidden;
     }
     .tile {
-      padding: 24px 32px;
+      padding: 22px 28px;
       height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       gap: 10px;
+      border: 1px solid var(--ink-85);   /* hairline card border per Halstead system */
     }
     .header {
+      font-family: 'Poppins', sans-serif;
       font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      font-weight: 500;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--ink-35);
     }
     .value {
-      font-size: clamp(36px, 6vw, 56px);
-      font-weight: 700;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
+      font-family: 'Montserrat', 'Poppins', sans-serif;
+      font-weight: 900;
+      font-size: clamp(40px, 6.5vw, 58px);
+      line-height: 1;
+      letter-spacing: -0.015em;
+      color: var(--white);
     }
     .subtitle {
+      font-family: 'Poppins', sans-serif;
       font-size: 13px;
-      color: var(--muted);
-      font-weight: 500;
+      font-weight: 400;
+      color: var(--ink-35);
     }
     .subtitle strong {
-      color: var(--text);
+      color: var(--white);
       font-weight: 600;
     }
     .bar-wrap {
-      margin-top: 6px;
-      height: 10px;
+      margin-top: 4px;
+      height: 6px;
       width: 100%;
-      background: var(--bar-bg);
-      border-radius: 999px;
+      background: var(--ink-85);
       overflow: hidden;
-      position: relative;
     }
     .bar-fill {
       height: 100%;
       width: 0.0%;
-      background: var(--bar-red);
-      border-radius: 999px;
-      transition: width 0.4s ease;
+      background: var(--blue);
     }
     .footer {
-      margin-top: 4px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-family: 'Poppins', sans-serif;
       font-size: 11px;
-      color: var(--muted);
+      font-weight: 400;
+      color: var(--ink-35);
     }
-    .footer .pct { color: var(--text); font-weight: 600; }
+    .footer .pct {
+      color: var(--white);
+      font-weight: 600;
+    }
     .no-data {
-      color: var(--muted);
-      font-style: italic;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 400;
+      font-size: 22px;
+      color: var(--ink-35);
     }
   </style>
 </head>
 <body>
   <div class="tile">
-    <div class="header">Revenue vs Goal YTD ? 2026</div>
+    <div class="header">Revenue vs Goal YTD &middot; 2026</div>
     <div class="value">$0</div>
     <div class="subtitle"><strong>$0</strong> of $35.0M annual goal</div>
     <div class="bar-wrap"><div class="bar-fill"></div></div>
@@ -98,8 +107,8 @@
       <span class="pct">0.0%</span>
     </div>
     <div class="footer">
-      <span>Updated 9 min ago</span>
-      <span>Halstead Marketing</span>
+      <span>Updated 17 min ago</span>
+      <span>Halstead Media</span>
     </div>
   </div>
 </body>
