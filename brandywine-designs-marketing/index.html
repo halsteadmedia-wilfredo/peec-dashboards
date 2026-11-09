@@ -82,7 +82,7 @@
   .error-msg { text-align: center; padding: 40px; color: #f87171; }
   .empty-msg { text-align: center; padding: 30px 20px; color: rgba(255,255,255,0.42); font-size: 13px; }
 </style>
-<script>window.__DASH_DATA__ = {"clientName":"Brandywine Designs (Client Marketing)","lastUpdated":"2026-11-03","notes":[{"label":"","text":"**Digital** = Google / Facebook / Instagram / Bing / Website / Email. **Offline** = Business Location, Word of Mouth, Customer Referral. **Unknown** = Other or no Sales Leads checkbox selected — the goal is to drive this toward zero.","accent":""},{"label":"v1 scope","text":"Lead attribution only. Shows which channels drive volume. Revenue dashboard needs SynkedUp MCP (evaluating with Kelsey) because Zapier does not expose Final Price / Sold Date on Jobs.","accent":"warn"},{"label":"Data source","text":"Lead Updated + Lead Created Zaps in Shareables write to leads_raw. The bridge takes the latest row per customer_id and groups by Sales Leads bucket. Timestamps are Zap-received (SynkedUp doesn't expose a native created_at via Zapier — confirmed by their support 2026-10-26).","accent":"muted"}],"summary":{"wonRevenueYtd":0,"pendingRevenueYtd":0,"revenueGoal":null,"estimatesYtd":0,"leadsYtd":10,"digitalSharePct":0},"estMonthly12":[{"month":"2026-11","digital_estimates":0,"offline_estimates":0,"unknown_estimates":0,"digital_pending":0,"offline_pending":0,"unknown_pending":0,"digital_won":0,"offline_won":0,"unknown_won":0}],"estTable":[{"month":"2026-11","digital_estimates":0,"offline_estimates":0,"unknown_estimates":0,"digital_pending":0,"offline_pending":0,"unknown_pending":0,"digital_won":0,"offline_won":0,"unknown_won":0}],"leadsTable":[{"month":"2026-11","digital_leads":0,"offline_leads":0,"unknown_leads":3},{"month":"2026-10","digital_leads":1,"offline_leads":0,"unknown_leads":6}]};</script>
+<script>window.__DASH_DATA__ = {"clientName":"Brandywine Designs (Client Marketing)","lastUpdated":"2026-11-09","notes":[{"label":"","text":"**Digital** = Google / Facebook / Instagram / Bing / Website / Email. **Offline** = Business Location, Word of Mouth, Customer Referral. **Unknown** = Other or no Sales Leads checkbox selected — the goal is to drive this toward zero.","accent":""},{"label":"v1 scope","text":"Lead attribution only. Shows which channels drive volume. Revenue dashboard needs SynkedUp MCP (evaluating with Kelsey) because Zapier does not expose Final Price / Sold Date on Jobs.","accent":"warn"},{"label":"Data source","text":"Lead Updated + Lead Created Zaps in Shareables write to leads_raw. The bridge takes the latest row per customer_id and groups by Sales Leads bucket. Timestamps are Zap-received (SynkedUp doesn't expose a native created_at via Zapier — confirmed by their support 2026-10-26).","accent":"muted"}],"summary":{"wonRevenueYtd":0,"pendingRevenueYtd":0,"revenueGoal":null,"estimatesYtd":0,"leadsYtd":12,"digitalSharePct":0},"estMonthly12":[{"month":"2026-11","digital_estimates":0,"offline_estimates":0,"unknown_estimates":0,"digital_pending":0,"offline_pending":0,"unknown_pending":0,"digital_won":0,"offline_won":0,"unknown_won":0}],"estTable":[{"month":"2026-11","digital_estimates":0,"offline_estimates":0,"unknown_estimates":0,"digital_pending":0,"offline_pending":0,"unknown_pending":0,"digital_won":0,"offline_won":0,"unknown_won":0}],"leadsTable":[{"month":"2026-11","digital_leads":1,"offline_leads":0,"unknown_leads":4},{"month":"2026-10","digital_leads":1,"offline_leads":0,"unknown_leads":6}]};</script>
 </head>
 <body>
 
@@ -156,7 +156,8 @@
     <h3>Leads by Source — Monthly</h3>
     <table class="cat-table">
       <thead>
-        <tr><th>Month</th><th>Digital</th><th>Offline</th><th>Unknown</th><th>Total Leads</th></tr>
+        <tr><th>Month</th><th>Digital</th><th>Offline</th><th>Unknown</th><th>Total Leads</th><th id="th-estimates">Estimates</th></tr>
+
       </thead>
       <tbody id="leads-body"></tbody>
     </table>
@@ -362,31 +363,44 @@
   }
 
   function renderLeadsTable(rows) {
-    var tbody = document.getElementById('leads-body');
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">No leads data yet.</td></tr>'; return; }
-    var tD = 0, tO = 0, tU = 0;
-    rows.forEach(function(r) {
-      var d = r.digital_leads || 0, o = r.offline_leads || 0, u = r.unknown_leads || 0;
-      tD += d; tO += o; tU += u;
-      var tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td>' + fmtMonthShort(r.month) + '</td>' +
-        '<td>' + fmtInt(d) + '</td>' +
-        '<td>' + fmtInt(o) + '</td>' +
-        '<td>' + fmtInt(u) + '</td>' +
-        '<td>' + fmtInt(d + o + u) + '</td>';
-      tbody.appendChild(tr);
-    });
-    var tr = document.createElement('tr');
-    tr.className = 'total-row';
-    tr.innerHTML =
-      '<td>Total</td>' +
-      '<td>' + fmtInt(tD) + '</td>' +
-      '<td>' + fmtInt(tO) + '</td>' +
-      '<td>' + fmtInt(tU) + '</td>' +
-      '<td>' + fmtInt(tD + tO + tU) + '</td>';
-    tbody.appendChild(tr);
+  var tbody = document.getElementById('leads-body');
+  var th = document.getElementById('th-estimates');
+  
+  var anyEst = rows.some(function (r) { return r && r.estimates_total != null; });
+  if (!anyEst && th) th.style.display = 'none';
+  var colspan = anyEst ? 6 : 5;
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="' + colspan + '" class="empty-msg">No leads data yet.</td></tr>';
+    return;
   }
+  var tD = 0, tO = 0, tU = 0, tE = 0;
+  rows.forEach(function (r) {
+    var d = r.digital_leads || 0, o = r.offline_leads || 0, u = r.unknown_leads || 0;
+    var e = r.estimates_total || 0;
+    tD += d; tO += o; tU += u; tE += e;
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + fmtMonthShort(r.month) + '</td>' +
+      '<td>' + fmtInt(d) + '</td>' +
+      '<td>' + fmtInt(o) + '</td>' +
+      '<td>' + fmtInt(u) + '</td>' +
+      '<td>' + fmtInt(d + o + u) + '</td>' +
+      (anyEst ? ('<td>' + fmtInt(e) + '</td>') : '');
+    tbody.appendChild(tr);
+  });
+  var tr = document.createElement('tr');
+  tr.className = 'total-row';
+  tr.innerHTML =
+    '<td>Total</td>' +
+    '<td>' + fmtInt(tD) + '</td>' +
+    '<td>' + fmtInt(tO) + '</td>' +
+    '<td>' + fmtInt(tU) + '</td>' +
+    '<td>' + fmtInt(tD + tO + tU) + '</td>' +
+    (anyEst ? ('<td>' + fmtInt(tE) + '</td>') : '');
+  tbody.appendChild(tr);
+}
+
 </script>
 
 </body>
