@@ -234,6 +234,7 @@
     var bts = data.bts || null;
     renderKPIs(data.summary || {});
     if (bts) renderBtsKPIs(data.summary || {}, bts);
+    if (data.hideDigitalShare) hideDigitalShare();
     if (bts && bts.divisions && bts.divisions.length) renderBtsGoals(data.summary || {}, bts);
     else renderGoalBar(data.summary || {});
     renderBottleneck(data.bottleneck, bts);
@@ -260,7 +261,8 @@
         '</div>' +
         '<div class="bn-caption">Won work whose Aspire Lead Source is not digital (mostly existing customers) where the customer ' +
           'called or filled a form from a digital campaign within 60 days before the opportunity was opened. ' +
-          'Counting these as digital moves Digital Share from ' + a.digitalShareAspire + '% to ' + a.digitalShareWithCallRail + '%.</div>' +
+          (a.digitalShareAspire != null ? 'Counting these as digital moves Digital Share from ' + a.digitalShareAspire + '% to ' +
+            a.digitalShareWithCallRail + '%.' : '') + '</div>' +
       '</div>' : '';
     c.innerHTML = (assist ? '<div class="bn-row">' : '') +
       '<div class="bottleneck">' +
@@ -275,6 +277,13 @@
   }
 
   
+  
+  function hideDigitalShare() {
+    var card = document.getElementById('kpi-digital').parentNode;
+    card.parentNode.style.gridTemplateColumns = 'repeat(' + (card.parentNode.children.length - 1) + ', 1fr)';
+    card.parentNode.removeChild(card);
+  }
+
   function renderBtsKPIs(s, bts) {
     var ns = 0;
     (bts.wonBySaleType || []).forEach(function (r) { if (r.name === 'New Sale') ns = r.won; });
@@ -284,7 +293,9 @@
     document.getElementById('kpi-won').parentNode.setAttribute('data-tip',
       'All opportunities marked Won in Aspire this year. New Sales are first-time sales; the rest are renewals, rollovers, upsells, mid-year sales and warranty work on existing contracts.');
     var a = bts.attribution || {};
-    document.getElementById('kpi-digital-sub').textContent = a.digitalShareWithCallRail + '% incl. CallRail touches';
+    if (a.digitalShareWithCallRail != null) {
+      document.getElementById('kpi-digital-sub').textContent = a.digitalShareWithCallRail + '% incl. CallRail touches';
+    }
     document.getElementById('kpi-digital').parentNode.setAttribute('data-tip',
       'Share of won revenue whose Aspire Lead Source is digital. The second number also counts won work where the customer came in through a digital CallRail call or form first.');
   }
